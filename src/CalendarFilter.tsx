@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { styled } from '@superset-ui/core';
+import styled from '@emotion/styled';
 import {
   CalendarFilterProps,
   CalendarFilterStylesProps,

@@ -247,15 +247,17 @@ describe('CalendarFilter', () => {
   });
 
   it('shows tooltip on hover over a data day', () => {
-    const { getAllByText } = render(<CalendarFilter {...defaultProps} />);
+    const { getAllByText, getByText } = render(<CalendarFilter {...defaultProps} />);
+    // Find day element with number 15 (Jan 15 has data value 30)
     const dayElements = getAllByText('15');
     const day15 = dayElements[0]?.closest('[role]') || dayElements[0]?.parentElement || dayElements[0];
     if (day15) {
       fireEvent.mouseEnter(day15);
     }
-    // Tooltip should have been set - component renders tooltip container with date
-    const { container } = render(<CalendarFilter {...defaultProps} />);
-    expect(container).toBeTruthy();
+    // Tooltip should show the date, value, max, and percentage
+    expect(getByText('Value:')).toBeTruthy();
+    expect(getByText('Max:')).toBeTruthy();
+    expect(getByText('% of max:')).toBeTruthy();
   });
 
   it('renders with minimal config (no optional features)', () => {

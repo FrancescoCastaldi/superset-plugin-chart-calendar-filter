@@ -21,3 +21,13 @@ declare module '*.png' {
   const value: any;
   export default value;
 }
+
+declare module '@apache-superset/core/translation' {
+  export function t(input: string, ...args: unknown[]): string;
+  export function tn(key: string, ...args: unknown[]): string;
+  export function configure(config?: unknown): void;
+  export function addTranslation(key: string, value: string): void;
+  export function addTranslations(translations: Record<string, string>): void;
+  export function addLocaleData(data: unknown): void;
+  export function resetTranslation(): void;
+}

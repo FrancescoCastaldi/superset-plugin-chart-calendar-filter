@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar Filter Plugin — Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #e8eaed;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+    #root {
+      width: 100%;
+      max-width: 960px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="demo-bundle.js"></script>
+  <script>
+    CalendarFilterDemo.renderDemo('root', 700, 920);
+  </script>
+</body>
+</html>
