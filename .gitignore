@@ -6,3 +6,9 @@ tsconfig.tsbuildinfo
 dist/
 .DS_Store
 *.log
+
+# opencode
+opencode.json
+opencode.jsonc
+.opencode/
+.opencode.json
