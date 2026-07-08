@@ -20,7 +20,14 @@ import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 
 export default function transformProps(chartProps: ChartProps) {
   const { width, height, formData, queriesData } = chartProps;
-  const { colorScheme, showLegend } = formData;
+  const {
+    colorScheme,
+    showLegend,
+    firstDayOfWeek = 0,
+    showWeekNumbers = false,
+    showYearDropdown = true,
+    enableOverview = true,
+  } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
   return {
@@ -29,7 +36,9 @@ export default function transformProps(chartProps: ChartProps) {
     data,
     colorScheme,
     showLegend,
-    // Cross-filter props are injected by Superset framework
-    // and passed through to the component automatically
+    firstDayOfWeek: parseInt(firstDayOfWeek as string, 10),
+    showWeekNumbers: showWeekNumbers === true,
+    showYearDropdown: showYearDropdown !== false,
+    enableOverview: enableOverview !== false,
   };
 }

@@ -70,6 +70,58 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'show_week_numbers',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show Week Numbers'),
+              renderTrigger: true,
+              default: false,
+              description: t('Display ISO week numbers on the left side of each row'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'first_day_of_week',
+            config: {
+              type: 'SelectControl',
+              label: t('First Day of Week'),
+              default: 0,
+              choices: [
+                [0, 'Sunday'],
+                [1, 'Monday'],
+              ],
+              renderTrigger: true,
+              description: t('Which day to start the week on'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'show_year_dropdown',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show Year Dropdown'),
+              renderTrigger: true,
+              default: true,
+              description: t('Show a dropdown to jump to any year'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'enable_overview',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Enable Year Overview'),
+              renderTrigger: true,
+              default: true,
+              description: t('Allow switching between single-month and full-year overview'),
+            },
+          },
+        ],
       ],
     },
   ],

@@ -27,6 +27,10 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
     groupby: ['ds'],
     metric: 'sum__num',
     showLegend: true,
+    firstDayOfWeek: 1,
+    showWeekNumbers: true,
+    showYearDropdown: false,
+    enableOverview: false,
     viz_type: 'calendar_filter',
   };
   const chartProps = new ChartProps({
@@ -48,10 +52,38 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
       height: 600,
       colorScheme: 'supersetColors',
       showLegend: true,
+      firstDayOfWeek: 1,
+      showWeekNumbers: true,
+      showYearDropdown: false,
+      enableOverview: false,
       data: [
         { ds: '2024-01-01', sum__num: 10 },
         { ds: '2024-01-02', sum__num: 20 },
       ],
     });
+  });
+
+  it('should use defaults when formData is partial', () => {
+    const minimalFormData = {
+      datasource: '3__table',
+      granularity_sqla: 'ds',
+      groupby: ['ds'],
+      metric: 'sum__num',
+      viz_type: 'calendar_filter',
+    };
+    const minimalProps = new ChartProps({
+      formData: minimalFormData,
+      width: 400,
+      height: 300,
+      theme: supersetTheme,
+      queriesData: [{
+        data: [{ ds: '2024-01-01', sum__num: 10 }],
+      }],
+    });
+    const result = transformProps(minimalProps);
+    expect(result.firstDayOfWeek).toBe(0);
+    expect(result.showWeekNumbers).toBe(false);
+    expect(result.showYearDropdown).toBe(true);
+    expect(result.enableOverview).toBe(true);
   });
 });

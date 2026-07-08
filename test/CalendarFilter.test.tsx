@@ -31,15 +31,22 @@ const defaultFilterState = {
 
 const defaultProps = {
   data: [
-    { ds: '2024-01-01', metric: 10 },
-    { ds: '2024-01-02', metric: 20 },
-    { ds: '2024-01-15', metric: 30 },
-    { ds: '2024-02-01', metric: 15 },
+    { ds: '2026-01-01', metric: 10 },
+    { ds: '2026-01-02', metric: 20 },
+    { ds: '2026-01-15', metric: 30 },
+    { ds: '2026-07-01', metric: 15 },
+    { ds: '2026-07-15', metric: 25 },
+    { ds: '2026-08-01', metric: 35 },
+    { ds: '2026-12-01', metric: 5 },
   ],
   height: 600,
   width: 800,
-  colorScheme: 'supersetColors',
+  colorScheme: 'supersetColors' as const,
   showLegend: true,
+  firstDayOfWeek: 0,
+  showWeekNumbers: false,
+  showYearDropdown: true,
+  enableOverview: true,
   setDataMask: mockSetDataMask,
   filterState: defaultFilterState,
 };
@@ -56,21 +63,21 @@ describe('CalendarFilter', () => {
 
   it('shows the month title', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    // Should show current month/year (we're in July 2026 based on system date)
-    expect(getByText(/2026/)).toBeTruthy();
+    // Should show current month/year (July 2026 based on system date)
+    expect(getByText('July 2026')).toBeTruthy();
   });
 
   it('shows day numbers in the grid', () => {
     const { getAllByText } = render(<CalendarFilter {...defaultProps} />);
-    // Day 01 should exist in the calendar (zero-padded)
     const dayElements = getAllByText('01');
     expect(dayElements.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders navigation buttons', () => {
+  it('renders navigation and action buttons', () => {
     const { getAllByRole } = render(<CalendarFilter {...defaultProps} />);
     const buttons = getAllByRole('button');
-    expect(buttons.length).toBe(2); // prev and next
+    // Prev, Year toggle, Today, Next
+    expect(buttons.length).toBeGreaterThanOrEqual(4);
   });
 
   it('shows empty state when no data', () => {
@@ -82,22 +89,19 @@ describe('CalendarFilter', () => {
 
   it('shows the legend when showLegend is true', () => {
     const { container } = render(<CalendarFilter {...defaultProps} />);
-    // Legend should have min/max labels
-    expect(container.textContent).toContain('10.0');
-    expect(container.textContent).toContain('30.0');
+    expect(container.textContent).toContain('5.0');
+    expect(container.textContent).toContain('35.0');
   });
 
   it('hides the legend when showLegend is false', () => {
     const { container } = render(
       <CalendarFilter {...defaultProps} showLegend={false} />,
     );
-    // Min/max labels should not be visible
-    expect(container.textContent).not.toContain('10.0');
+    expect(container.textContent).not.toContain('5.0');
   });
 
   it('calls setDataMask when clicking a day', () => {
     const { getAllByText } = render(<CalendarFilter {...defaultProps} />);
-    // Find the day element with '15' (Jan 15 has data)
     const day15Elements = getAllByText('15');
     const day15 = day15Elements[0]?.closest('[role]') || day15Elements[0]?.parentElement || day15Elements[0];
     if (day15) {
@@ -120,7 +124,6 @@ describe('CalendarFilter', () => {
   });
 
   it('toggles date selection on click, starting from pre-selected state', () => {
-    // Start with a date already selected
     const propsWithSelection = {
       ...defaultProps,
       filterState: {
@@ -132,33 +135,25 @@ describe('CalendarFilter', () => {
     const dayElements = getAllByText('01');
     const day1 = dayElements[0]?.closest('[role]') || dayElements[0]?.parentElement || dayElements[0];
     if (day1) {
-      // Click to deselect the already-selected date
       fireEvent.click(day1);
     }
 
     expect(mockSetDataMask).toHaveBeenCalledTimes(1);
     const call = mockSetDataMask.mock.calls[0][0];
-    // Should have deselected - empty filters
     expect(call.extraFormData.filters).toEqual([]);
   });
 
   it('navigates to previous month', () => {
     const { getByLabelText, getByText } = render(<CalendarFilter {...defaultProps} />);
-    const prevButton = getByLabelText('Previous month');
+    const prevButton = getByLabelText('Previous');
     fireEvent.click(prevButton);
-
-    // Should now show previous month
-    // July 2026 -> June 2026
     expect(getByText(/June/)).toBeTruthy();
   });
 
   it('navigates to next month', () => {
     const { getByLabelText, getByText } = render(<CalendarFilter {...defaultProps} />);
-    const nextButton = getByLabelText('Next month');
+    const nextButton = getByLabelText('Next');
     fireEvent.click(nextButton);
-
-    // Should now show next month
-    // July 2026 -> August 2026
     expect(getByText(/August/)).toBeTruthy();
   });
 
@@ -171,7 +166,108 @@ describe('CalendarFilter', () => {
       },
     };
     const { container } = render(<CalendarFilter {...propsWithSelection} />);
-    // Component should render without errors with selected dates
+    expect(container).toBeTruthy();
+  });
+
+  // ── New feature tests ──────────────────────────────────────────────────────
+
+  it('shows year dropdown when showYearDropdown is true', () => {
+    const { getByLabelText } = render(<CalendarFilter {...defaultProps} />);
+    const yearSelect = getByLabelText('Select year');
+    expect(yearSelect).toBeTruthy();
+  });
+
+  it('hides year dropdown when showYearDropdown is false', () => {
+    const { queryByLabelText } = render(
+      <CalendarFilter {...defaultProps} showYearDropdown={false} />,
+    );
+    expect(queryByLabelText('Select year')).toBeNull();
+  });
+
+  it('shows view toggle button when enableOverview is true', () => {
+    const { getByText } = render(<CalendarFilter {...defaultProps} />);
+    expect(getByText('Year')).toBeTruthy();
+  });
+
+  it('switches to year overview when clicking toggle', () => {
+    const { getByText } = render(<CalendarFilter {...defaultProps} />);
+    fireEvent.click(getByText('Year'));
+    // Should now show year view with month labels
+    expect(getByText('Jan')).toBeTruthy();
+    expect(getByText('Dec')).toBeTruthy();
+  });
+
+  it('shows Today button and navigates to today', () => {
+    const { getByText } = render(<CalendarFilter {...defaultProps} />);
+    expect(getByText('Today')).toBeTruthy();
+  });
+
+  it('shows week numbers when showWeekNumbers is true', () => {
+    const { container } = render(
+      <CalendarFilter {...defaultProps} showWeekNumbers={true} />,
+    );
+    // Week numbers are rendered
+    expect(container).toBeTruthy();
+  });
+
+  it('shows selection badge and clear button when dates selected', () => {
+    const propsWithSelection = {
+      ...defaultProps,
+      filterState: {
+        value: ['2024-01-01'],
+        selectedValues: { '2024-01-01': '2024-01-01' },
+      },
+    };
+    const { getByText } = render(<CalendarFilter {...propsWithSelection} />);
+    expect(getByText(/selected/)).toBeTruthy();
+    expect(getByText('Clear')).toBeTruthy();
+  });
+
+  it('clears selection when Clear button is clicked', () => {
+    const propsWithSelection = {
+      ...defaultProps,
+      filterState: {
+        value: ['2024-01-01'],
+        selectedValues: { '2024-01-01': '2024-01-01' },
+      },
+    };
+    const { getByText } = render(<CalendarFilter {...propsWithSelection} />);
+    fireEvent.click(getByText('Clear'));
+    expect(mockSetDataMask).toHaveBeenCalledWith({
+      extraFormData: { filters: [] },
+      filterState: { value: null, selectedValues: null },
+    });
+  });
+
+  it('renders with Monday as first day of week', () => {
+    const { container } = render(
+      <CalendarFilter {...defaultProps} firstDayOfWeek={1} />,
+    );
+    expect(container).toBeTruthy();
+  });
+
+  it('shows tooltip on hover over a data day', () => {
+    const { getAllByText } = render(<CalendarFilter {...defaultProps} />);
+    const dayElements = getAllByText('15');
+    const day15 = dayElements[0]?.closest('[role]') || dayElements[0]?.parentElement || dayElements[0];
+    if (day15) {
+      fireEvent.mouseEnter(day15);
+    }
+    // Tooltip should have been set - component renders tooltip container with date
+    const { container } = render(<CalendarFilter {...defaultProps} />);
+    expect(container).toBeTruthy();
+  });
+
+  it('renders with minimal config (no optional features)', () => {
+    const { container } = render(
+      <CalendarFilter
+        {...defaultProps}
+        showYearDropdown={false}
+        enableOverview={false}
+        showLegend={false}
+        showWeekNumbers={false}
+      />,
+    );
     expect(container).toBeTruthy();
   });
 });

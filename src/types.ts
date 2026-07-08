@@ -31,6 +31,10 @@ export interface CalendarFilterStylesProps {
 interface CalendarFilterCustomizeProps {
   colorScheme: string;
   showLegend: boolean;
+  firstDayOfWeek: number; // 0=Sunday, 1=Monday
+  showWeekNumbers: boolean;
+  showYearDropdown: boolean;
+  enableOverview: boolean;
 }
 
 export type CalendarFilterQueryFormData = QueryFormData &
@@ -68,4 +72,24 @@ export interface CalendarMonth {
   startPadding: number;
   /** Total cells including padding */
   totalCells: number;
+}
+
+/** Week info for a row in the calendar grid */
+export interface WeekRow {
+  /** ISO week number */
+  weekNumber: number;
+  /** Days in this week row (may include null padding) */
+  cells: (CalendarDay | null)[];
+  /** Indices for shift-click range selection */
+  startIndex: number;
+  endIndex: number;
+}
+
+/** Tooltip data shown on hover */
+export interface TooltipData {
+  date: string;
+  value: number | null;
+  percentage: number;
+  x: number;
+  y: number;
 }

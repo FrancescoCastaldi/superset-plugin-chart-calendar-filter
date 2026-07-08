@@ -85,7 +85,7 @@ function createStyledComponent(tag: any) {
       // Filter out styled-specific props that shouldn't be passed to DOM
       const domProps: any = {};
       for (const key of Object.keys(rest)) {
-        if (['theme', 'as', 'forwardedRef', 'isSelected', 'isCurrentMonth', 'baseColor', 'intensity'].includes(key)) continue;
+        if (['theme', 'as', 'forwardedRef', 'isSelected', 'isCurrentMonth', 'baseColor', 'intensity', 'showWeekNumbers', 'firstDayOfWeek', 'showYearDropdown', 'enableOverview'].includes(key)) continue;
         domProps[key] = rest[key];
       }
       // Pass through children only if they are valid React nodes
@@ -131,7 +131,11 @@ function parseStyles(css: string, props: any): Record<string, any> {
   // Handle grid
   if (css.includes('grid-template-columns')) {
     styles.display = 'grid';
-    styles.gridTemplateColumns = 'repeat(7, 1fr)';
+    if (css.includes('30px')) {
+      styles.gridTemplateColumns = '30px repeat(7, 1fr)';
+    } else {
+      styles.gridTemplateColumns = 'repeat(7, 1fr)';
+    }
   }
   
   return styles;
