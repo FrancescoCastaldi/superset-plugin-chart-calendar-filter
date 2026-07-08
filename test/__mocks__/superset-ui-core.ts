@@ -80,7 +80,7 @@ function createStyledComponent(tag: any) {
     const styles = strings.reduce((acc: string, str: string, i: number) => {
       return acc + str + (values[i] !== undefined ? (typeof values[i] === 'function' ? '{...}' : String(values[i])) : '');
     }, '');
-    const StyledComponent = (props: any) => {
+    const StyledComponent = React.forwardRef((props: any, ref: any) => {
       const { children, ...rest } = props;
       // Filter out styled-specific props that shouldn't be passed to DOM
       const domProps: any = {};
@@ -88,10 +88,11 @@ function createStyledComponent(tag: any) {
         if (['theme', 'as', 'forwardedRef', 'isSelected', 'isCurrentMonth', 'baseColor', 'intensity', 'showWeekNumbers', 'firstDayOfWeek', 'showYearDropdown', 'enableOverview'].includes(key)) continue;
         domProps[key] = rest[key];
       }
+      if (ref) domProps.ref = ref;
       // Pass through children only if they are valid React nodes
       const validChildren = children != null && typeof children !== 'boolean' ? children : undefined;
       return React.createElement(tag, { ...domProps, style: { ...(domProps.style || {}), ...parseStyles(styles, props) } }, validChildren);
-    };
+    });
     (StyledComponent as any).withConfig = () => tagged;
     return StyledComponent;
   };
