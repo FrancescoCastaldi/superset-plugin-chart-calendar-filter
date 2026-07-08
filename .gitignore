@@ -1,0 +1,8 @@
+node_modules/
+lib/
+esm/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+dist/
+.DS_Store
+*.log
