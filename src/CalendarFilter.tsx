@@ -46,7 +46,7 @@ const Styles = styled.div<CalendarFilterStylesProps>`
   width: ${({ width }) => width}px;
   display: flex;
   flex-direction: column;
-  font-family: ${({ theme }) => theme.typography.families?.sansSerif || 'sans-serif'};
+  font-family: ${({ theme }) => theme?.typography?.families?.sansSerif || 'sans-serif'};
   overflow: hidden;
   position: relative;
 `;
@@ -55,43 +55,43 @@ const CalendarHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.gridUnit * 2}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.gridUnit}px;
+  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
 `;
 
 const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit}px;
+  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
 `;
 
 const HeaderCenter = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit * 2}px;
+  gap: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
 `;
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit}px;
+  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
 `;
 
 const NavButton = styled.button`
   background: none;
-  border: 1px solid ${({ theme }) => theme.colors.secondary.light2};
-  border-radius: ${({ theme }) => theme.gridUnit}px;
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
   cursor: pointer;
   font-size: 16px;
-  padding: ${({ theme }) => theme.gridUnit}px ${({ theme }) => theme.gridUnit * 2}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
   line-height: 1;
-  color: ${({ theme }) => theme.colors.primary.base};
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
-    background: ${({ theme }) => theme.colors.secondary.light2};
+    background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
   }
 
   &:disabled {
@@ -101,34 +101,34 @@ const NavButton = styled.button`
 `;
 
 const TodayButton = styled.button`
-  background: ${({ theme }) => theme.colors.secondary.light2};
-  border: 1px solid ${({ theme }) => theme.colors.secondary.light2};
-  border-radius: ${({ theme }) => theme.gridUnit}px;
+  background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
   cursor: pointer;
   font-size: 11px;
-  padding: ${({ theme }) => theme.gridUnit}px ${({ theme }) => theme.gridUnit * 1.5}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px ${({ theme }) => (theme?.gridUnit ?? 4) * 1.5}px;
   line-height: 1;
-  color: ${({ theme }) => theme.colors.primary.base};
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
   transition: background 0.15s;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.secondary.light1};
+    background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f0f0f0')};
   }
 `;
 
 const MonthTitle = styled.div`
-  font-size: ${({ theme }) => theme.typography.sizes.l}px;
-  font-weight: ${({ theme }) => theme.typography.weights.bold};
-  color: ${({ theme }) => theme.colors.grayscale?.dark1 || '#333'};
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.l ?? 14)}px;
+  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
+  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
   white-space: nowrap;
 `;
 
 const SelectionBadge = styled.span`
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
-  color: ${({ theme }) => theme.colors.primary.base};
-  background: ${({ theme }) => theme.colors.primary.light2};
-  padding: 0 ${({ theme }) => theme.gridUnit * 1.5}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.s ?? 12)}px;
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
+  background: ${({ theme }) => (theme?.colors?.primary?.light2 ?? '#cce8f0')};
+  padding: 0 ${({ theme }) => (theme?.gridUnit ?? 4) * 1.5}px;
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
   white-space: nowrap;
   line-height: 22px;
 `;
@@ -138,40 +138,40 @@ const ClearButton = styled.button`
   border: none;
   cursor: pointer;
   font-size: 11px;
-  color: ${({ theme }) => theme.colors.error?.base || '#e74c3c'};
+  color: ${({ theme }) => theme?.colors?.error?.base || '#e74c3c'};
   text-decoration: underline;
   padding: 0;
   line-height: 1;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.error?.dark1 || '#c0392b'};
+    color: ${({ theme }) => theme?.colors?.error?.dark1 || '#c0392b'};
   }
 `;
 
 const YearSelect = styled.select`
   font-size: 12px;
-  padding: ${({ theme }) => theme.gridUnit}px;
-  border: 1px solid ${({ theme }) => theme.colors.secondary.light2};
-  border-radius: ${({ theme }) => theme.gridUnit}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
   background: white;
-  color: ${({ theme }) => theme.colors.grayscale?.dark1 || '#333'};
+  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
   cursor: pointer;
 `;
 
 const ViewToggleButton = styled.button`
   background: none;
-  border: 1px solid ${({ theme }) => theme.colors.secondary.light2};
-  border-radius: ${({ theme }) => theme.gridUnit}px;
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
   cursor: pointer;
   font-size: 11px;
-  padding: ${({ theme }) => theme.gridUnit}px ${({ theme }) => theme.gridUnit * 1.5}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px ${({ theme }) => (theme?.gridUnit ?? 4) * 1.5}px;
   line-height: 1;
-  color: ${({ theme }) => theme.colors.primary.base};
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
   transition: background 0.15s;
   white-space: nowrap;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.secondary.light2};
+    background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
   }
 `;
 
@@ -180,17 +180,17 @@ const CalendarGrid = styled.div<{ showWeekNumbers: boolean }>`
   grid-template-columns: ${({ showWeekNumbers }) =>
     showWeekNumbers ? '30px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
   gap: 2px;
-  padding: 0 ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) => theme.gridUnit * 2}px;
+  padding: 0 ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
   flex: 1;
   align-content: start;
 `;
 
 const DayHeader = styled.div`
   text-align: center;
-  font-size: ${({ theme }) => theme.typography.sizes.xs}px;
-  font-weight: ${({ theme }) => theme.typography.weights.bold};
-  color: ${({ theme }) => theme.colors.grayscale?.base || '#666'};
-  padding: ${({ theme }) => theme.gridUnit}px 0;
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
+  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
+  color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px 0;
   text-transform: uppercase;
 `;
 
@@ -199,8 +199,8 @@ const WeekNumberCell = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: ${({ theme }) => theme.colors.grayscale?.light1 || '#bbb'};
-  font-weight: ${({ theme }) => theme.typography.weights.bold};
+  color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
+  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
 `;
 
 interface DayCellProps {
@@ -215,8 +215,8 @@ const DayCell = styled.div<DayCellProps>`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${({ theme }) => theme.gridUnit}px;
-  font-size: ${({ theme }) => theme.typography.sizes.xs}px;
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
   cursor: ${({ isCurrentMonth }) => (isCurrentMonth ? 'pointer' : 'default')};
   opacity: ${({ isCurrentMonth }) => (isCurrentMonth ? 1 : 0.3)};
   transition: all 0.15s ease;
@@ -248,7 +248,7 @@ const DayCell = styled.div<DayCellProps>`
 `;
 
 const DayNumber = styled.span`
-  font-size: ${({ theme }) => theme.typography.sizes.xs}px;
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
   pointer-events: none;
   line-height: 1;
 `;
@@ -266,7 +266,7 @@ const TooltipContainer = styled.div<{ x: number; y: number }>`
   z-index: 1000;
   white-space: nowrap;
   line-height: 1.5;
-  font-family: ${({ theme }) => theme.typography.families?.sansSerif || 'sans-serif'};
+  font-family: ${({ theme }) => theme?.typography?.families?.sansSerif || 'sans-serif'};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 `;
 
@@ -293,20 +293,20 @@ const LegendContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: ${({ theme }) => theme.gridUnit}px;
-  padding: ${({ theme }) => theme.gridUnit * 2}px;
+  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
   flex-shrink: 0;
 `;
 
 const LegendGradient = styled.div`
   width: 120px;
   height: 12px;
-  border-radius: ${({ theme }) => theme.gridUnit}px;
+  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
 `;
 
 const LegendLabel = styled.span`
-  font-size: ${({ theme }) => theme.typography.sizes.xs}px;
-  color: ${({ theme }) => theme.colors.grayscale?.base || '#666'};
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
+  color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
 `;
 
 const EmptyState = styled.div`
@@ -314,8 +314,8 @@ const EmptyState = styled.div`
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: ${({ theme }) => theme.colors.grayscale?.light1 || '#999'};
-  font-size: ${({ theme }) => theme.typography.sizes.m}px;
+  color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#999'};
+  font-size: ${({ theme }) => (theme?.typography?.sizes?.m ?? 12)}px;
 `;
 
 // ─── Year Overview Styles ──────────────────────────────────────────────────────
@@ -323,8 +323,8 @@ const EmptyState = styled.div`
 const YearOverviewGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: ${({ theme }) => theme.gridUnit * 3}px;
-  padding: ${({ theme }) => theme.gridUnit * 2}px;
+  gap: ${({ theme }) => (theme?.gridUnit ?? 4) * 3}px;
+  padding: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
   flex: 1;
   overflow-y: auto;
 `;
@@ -337,9 +337,9 @@ const MiniMonth = styled.div`
 const MiniMonthTitle = styled.div`
   text-align: center;
   font-size: 11px;
-  font-weight: ${({ theme }) => theme.typography.weights.bold};
-  color: ${({ theme }) => theme.colors.grayscale?.dark1 || '#333'};
-  margin-bottom: ${({ theme }) => theme.gridUnit}px;
+  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
+  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
+  margin-bottom: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
 `;
 
 const MiniMonthGrid = styled.div<{ showWeekNumbers: boolean }>`
@@ -353,13 +353,13 @@ const MiniDayHeader = styled.div`
   text-align: center;
   font-size: 7px;
   font-weight: bold;
-  color: ${({ theme }) => theme.colors.grayscale?.base || '#666'};
+  color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
   text-transform: uppercase;
 `;
 
 const MiniWeekNum = styled.div`
   font-size: 7px;
-  color: ${({ theme }) => theme.colors.grayscale?.light1 || '#bbb'};
+  color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
   display: flex;
   align-items: center;
   justify-content: center;

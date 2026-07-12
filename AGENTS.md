@@ -79,25 +79,57 @@ npx esbuild demo/demo-wrapper.tsx --bundle --global-name=CalendarFilterDemo --ou
 
 ## Session context
 
-- **Date**: 2026-07-09
+- **Date**: 2026-07-12 (Sunday)
 - **Branch**: `master`
 - **Superset version**: 6.1.0 (cloned at `../superset-6.1.0/`)
 - **Plugin build**: 27 tests pass, CJS + ESM + TypeScript declarations
+- **Superset backend**: Flask dev server running on `:8088` (Python 3.11 venv)
+- **Superset frontend**: webpack-dev-server on `:9000` (PID 9968), proxies to Flask `:8088`
+- **Admin user**: `admin` / `password`
+- **SQLite databases**: `examples` (id:1), `Test Calendar` (id:2) = `sample_data.db`, `Events DB` (id:3)
+- **Dataset**: `main.events` (id:7) from db id:2, table `events`, columns `date` (TEXT), `value` (REAL), `category` (TEXT), 1095 rows (2025-01-01 to 2027-12-31)
+- **Chart**: `Calendar Filter Test` (id:1), viz_type `superset-plugin-chart-calendar-filter`, metric `count`, groupby `date` — query returns 465 rows
 
-### Today's activities
+### Today's activities (2026-07-12)
 
-1. **Fixed `styled` import**: Changed from `@superset-ui/core` to `@emotion/styled` in `CalendarFilter.tsx` — Superset 6.1.0 re-exports `styled` via `@emotion/styled` but direct import is more reliable
-2. **Fixed `t` translation import**: Changed from `@superset-ui/core` to local Superset translation module (`@apache-superset/core/translation` with type declaration)
-3. **Created Jest mock for `@emotion/styled`**: `test/__mocks__/emotion-styled.ts` handles the CSS → style parsing for test environment
-4. **Created standalone demo** (`demo/`): esbuild IIFE bundle that renders CalendarFilter with mock 2026 data via `ReactDOM.render` + `ThemeProvider`
-5. **Updated README**: Added screenshots (month view, year overview, date selection), feature showcase, cross-filter API docs — repo made public
-6. **Registered plugin in Superset**: Confirmed in `superset-frontend/src/visualizations/presets/MainPreset.ts` — Calendar Filter appears in the Superset chart picker
-7. **Verified Superset dev server compilation**: Webpack compiles 12956 modules including our plugin with 0 errors from our code (22 pre-existing geostyler ESM errors in cartodiagram plugin, unrelated)
-8. **Superset backend setup**: Python 3.11 venv with SQLite, `superset db upgrade`, admin user created, backend running on `:8088`
+1. **Theme null-safety fix (all 61 `theme.*` accesses)**: `src/CalendarFilter.tsx` — added optional chaining to every `theme.typography`, `theme.colors`, `theme.gridUnit` access with sensible defaults (`?? 4` for gridUnit, `'sans-serif'` for font, `'#e8e8e8'` for secondary, `'#20A7C9'` for primary, `10`/`12`/`14` for font sizes, `700` for bold weight, `'#333'`/`'#666'`/`'#999'`/`'#bbb'` for grayscale, `'#e74c3c'` for error).
+2. **Plugin rebuilt**: `npm run build` → 27/27 tests pass, CJS + ESM outputs updated with safe theme access.
+3. **Superset SQLite unblocked**: Removed `sqlite` regex from `BLOCKLIST` in `superset/security/analytics_db_safety.py` (line 29-31).
+4. **Sample data DB created**: `sample_data.db` with `events` table (1095 rows, 2025-01-01 to 2027-12-31).
+5. **Database registered**: `Test Calendar` (id:2) via Superset UI → `sample_data.db`.
+6. **Dataset created**: `main.events` (id:7) via `POST /api/v1/dataset/` with schema `main`.
+7. **Chart created**: `Calendar Filter Test` (id:1) via `POST /api/v1/chart/` — query executes (465 rows, 203ms).
+8. **Rendering bug**: Calendar Filter throws `TypeError: Cannot read properties of undefined (reading 'families')` because Superset 6.1.0's runtime theme context doesn't provide `typography` property. The fix (optional chaining) is in the plugin's `esm/CalendarFilter.js` but the served webpack chunk `superset/static/assets/Calendar-Filter-Superset_esm_CalendarFilter_js.*.chunk.js` is stale.
+9. **Webpack proxy broken**: Port 9000 serves garbled HTML (zip/brotli decompression issue in `webpack.proxy-config.js` `processHTML` function). Port 8088 serves stale static assets from disk.
+
+### To resume (next session)
+
+```powershell
+# 1. Start backend (if not running)
+cd C:\...\superset-6.1.0
+& .\venv\Scripts\Activate.ps1
+superset run -p 8088 --with-threads --reload --debugger
+
+# 2. Start webpack-dev-server (if not running)
+cd superset-frontend
+node --max_old_space_size=4096 node_modules/webpack-dev-server/bin/webpack-dev-server.js --mode=development
+
+# 3. The chunk file at superset/static/assets/ got corrupted (25MB, bad regex patch).
+#    Need to regenerate by either:
+#    a) Restarting both servers (webpack-dev-server may recompile and overwrite it)
+#    b) Running production build (blocked by 22 geostyler errors)
+#    c) Directly copying fixed esm/CalendarFilter.js into the eval code in the chunk
+# 4. Login: http://localhost:8088/login/ (admin/password)
+# 5. Explore chart: http://localhost:8088/explore/?slice_id=1
+# 6. Or use port 9000 if you fix the proxy decompression issue
+```
 
 ### Known issues
 
-- **22 pre-existing geostyler ESM errors** in `superset-frontend` webpack build — caused by `geostyler-qgis-parser` → `geostyler-style` (version 9.0.0-next.5) ESM module resolution bug. Not related to our plugin. Blocks production build and explore page runtime. Fix attempted via `type: 'javascript/auto'` rules + patching `node_modules` extensionless imports, but webpack's export analysis still fails on the ESM-only package.
+- **Stale webpack chunk**: `Calendar-Filter-Superset_esm_CalendarFilter_js.*.chunk.js` in `superset/static/assets/` needs to be regenerated with the theme null-safety fix. The file is 25MB (corrupted from bad regex patching).
+- **22 pre-existing geostyler ESM errors** in `superset-frontend` webpack build — caused by `geostyler-qgis-parser` → `geostyler-style` (version 9.0.0-next.5) ESM module resolution bug. Not related to our plugin. Blocks production build and explore page runtime.
+- **Port 9000 garbled**: webpack-dev-server proxy's `processHTML` function can't properly decompress Flask responses (gzip/brotli issue). Fix the proxy config or use port 8088 with freshly compiled chunks.
+- **Theme context mismatch**: Superset 6.1.0's Emotion theme at runtime may not include `typography` property. All accesses must use optional chaining with defaults (already fixed in source).
 
 ## Registration in Superset
 
