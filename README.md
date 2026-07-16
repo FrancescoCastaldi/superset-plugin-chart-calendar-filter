@@ -25,6 +25,30 @@
 You already have a Superset project on disk (it contains a `superset/` backend folder
 and a `superset-frontend/` folder). Just follow the steps below.
 
+### ⚡ One-command install (Option A, fully automated)
+
+Open a terminal **in the root folder of your cloned Superset project**
+(the one that contains both `superset/` and `superset-frontend/`) and run
+**a single command**. It will `npm install` the plugin and register it in
+`MainPreset.ts` for you.
+
+**Linux / macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/scripts/install-to-superset.sh | bash -s -- .
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/scripts/install-to-superset.ps1 | iex
+```
+
+That is all. After it finishes, rebuild the frontend (`npm run dev` or
+`npm run build`) and restart the backend — the **Calendar Filter** chart will
+appear in the picker.
+
+> Prefer to run the script locally instead of from GitHub? Clone this repo and run
+> `./scripts/install-to-superset.sh .` (or `.\scripts\install-to-superset.ps1`) from the
+> Superset root.
 ### Option A — Install from npm (easiest, recommended for production)
 
 1. **Open a terminal in your `superset-frontend/` folder** and install the plugin:
