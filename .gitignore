@@ -38,3 +38,16 @@ opencode.jsonc
 *chatgpt*
 *.ai-session
 .ai/
+
+# AI session/context notes (NOT project docs like README.md / AGENTS.md)
+context.md
+*.context.md
+*.session.md
+*.ai.md
+*.ai-session.md
+.context/
+.memory/
+.sessions/
+notes.md
+*snapshot*.md
+session-*.md
