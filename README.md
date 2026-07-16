@@ -17,6 +17,95 @@
 
 ---
 
+
+---
+
+## 🚀 Quick Start — Add this chart to an EXISTING Superset
+
+You already have a Superset project on disk (it contains a `superset/` backend folder
+and a `superset-frontend/` folder). Just follow the steps below.
+
+### Option A — Install from npm (easiest, recommended for production)
+
+1. **Open a terminal in your `superset-frontend/` folder** and install the plugin:
+
+   ```bash
+   npm install --save superset-plugin-chart-calendar-filter
+   ```
+
+2. **Register the chart.** Open `superset-frontend/src/visualizations/presets/MainPreset.ts`
+   (it may be `MainPreset.js` in older Superset versions) and add the import + plugin:
+
+   ```ts
+   import { SupersetPluginChartCalendarFilter } from 'superset-plugin-chart-calendar-filter';
+
+   // inside the preset constructor, alongside the other `new XxxPlugin()` lines:
+   new SupersetPluginChartCalendarFilter().configure({
+     key: 'superset-plugin-chart-calendar-filter',
+   }),
+   ```
+
+3. **Rebuild & restart.** From `superset-frontend/`:
+
+   ```bash
+   npm run dev        # development (hot reload)
+   # or, for production:
+   npm run build
+   ```
+
+   Then restart the Flask backend (`superset run` / your dev server).
+
+4. **Done!** Open Superset → **+ Chart** → you will find **Calendar Filter** under the
+   *Other* category.
+
+---
+
+### Option B — Link a local clone (best for development / customizing)
+
+1. **Clone this repo** next to your Superset folder (they should share the same parent):
+
+   ```bash
+   git clone https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter.git
+   cd superset-plugin-chart-calendar-filter
+   npm install
+   npm run build
+   ```
+
+   Your layout should look like:
+
+   ```
+   some-folder/
+   ├── superset/                      # backend
+   ├── superset-frontend/             # frontend
+   └── superset-plugin-chart-calendar-filter/   # this plugin (cloned)
+   ```
+
+2. **Point Superset at the local folder.** In `superset-frontend/package.json` add:
+
+   ```json
+   "dependencies": {
+     "superset-plugin-chart-calendar-filter": "file:../../superset-plugin-chart-calendar-filter"
+   }
+   ```
+
+3. **Install and register** (same registration snippet as Option A, step 2) and run
+   `npm install` inside `superset-frontend/`.
+
+4. **Restart** the frontend + backend. The chart now picks up your local source on every
+   change (hot reload).
+
+---
+
+### ✅ Verify it works
+
+1. Create a new chart, type = **Calendar Filter**.
+2. Pick a dataset that has a **date column** (text or datetime) and a numeric **metric**.
+3. Set *Group by* = your date column, *Metric* = e.g. `COUNT(*)`.
+4. Click any day in the calendar → the other dashboard charts are cross-filtered.
+
+If the chart does **not** appear, double-check the `key` string matches exactly
+`superset-plugin-chart-calendar-filter` in both `MainPreset` and the plugin, then
+restart the frontend once more.
 ## ✨ Features
 
 ### Month View — Heatmap at a Glance
