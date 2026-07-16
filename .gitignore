@@ -12,3 +12,29 @@ opencode.json
 opencode.jsonc
 .opencode/
 .opencode.json
+
+# debug / session artifacts
+.playwright-mcp/
+explore-after-wait.png
+explore-port9000.png
+login-page-snapshot.md
+
+
+# AI coding agent artifacts (opencode, copilot, cursor, claude, etc.)
+.opencode/
+opencode.json
+opencode.jsonc
+.opencode.json
+.playwright-mcp/
+.claude/
+.claude.json
+.cursor/
+.cursorrules
+.github/copilot/
+.aider/
+.aider.conf.yml
+*codeium*
+.windsurf/
+*chatgpt*
+*.ai-session
+.ai/
