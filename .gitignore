@@ -51,3 +51,5 @@ context.md
 notes.md
 *snapshot*.md
 session-*.md
+# agent memory / context files
+AGENTS.md
