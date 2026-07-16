@@ -5,11 +5,37 @@
   "sideEffects": false,
   "main": "lib/index.js",
   "module": "esm/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "esm",
-    "lib"
+    "lib",
+    "types"
   ],
-  "private": true,
+  "author": "Francesco Castaldi <fracas@mapsengineering.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues"
+  },
+  "homepage": "https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter#readme",
+  "keywords": [
+    "superset",
+    "apache-superset",
+    "plugin",
+    "chart",
+    "calendar",
+    "filter",
+    "cross-filter",
+    "heatmap",
+    "visualization",
+    "dashboard"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run build-cjs && npm run build-esm && npm run ts-types",
     "build-cjs": "babel src --extensions \".ts,.tsx,.js,.jsx\" --copy-files --out-dir lib",
@@ -20,12 +46,8 @@
     "prebuild": "npm run clean",
     "postbuild": "npm run test",
     "ts-types": "tsc --build",
-    "test": "jest"
-  },
-  "author": "",
-  "license": "Apache-2.0",
-  "publishConfig": {
-    "access": "public"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@superset-ui/chart-controls": "*",
