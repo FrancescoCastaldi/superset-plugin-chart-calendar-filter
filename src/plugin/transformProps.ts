@@ -27,6 +27,7 @@ export default function transformProps(chartProps: ChartProps) {
     showWeekNumbers = false,
     showYearDropdown = true,
     enableOverview = true,
+    cellDensity = 'compact',
   } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
@@ -40,5 +41,6 @@ export default function transformProps(chartProps: ChartProps) {
     showWeekNumbers: showWeekNumbers === true,
     showYearDropdown: showYearDropdown !== false,
     enableOverview: enableOverview !== false,
+    cellDensity,
   };
 }

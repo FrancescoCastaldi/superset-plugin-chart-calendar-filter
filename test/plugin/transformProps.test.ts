@@ -56,6 +56,7 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
       showWeekNumbers: true,
       showYearDropdown: false,
       enableOverview: false,
+      cellDensity: 'compact',
       data: [
         { ds: '2024-01-01', sum__num: 10 },
         { ds: '2024-01-02', sum__num: 20 },

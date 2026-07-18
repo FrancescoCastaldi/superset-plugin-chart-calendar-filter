@@ -35,6 +35,7 @@ interface CalendarFilterCustomizeProps {
   showWeekNumbers: boolean;
   showYearDropdown: boolean;
   enableOverview: boolean;
+  cellDensity?: 'compact' | 'normal';
 }
 
 export type CalendarFilterQueryFormData = QueryFormData &

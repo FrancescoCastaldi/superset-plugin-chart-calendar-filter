@@ -122,6 +122,22 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'cell_density',
+            config: {
+              type: 'SelectControl',
+              label: t('Cell Density'),
+              default: 'compact',
+              choices: [
+                ['compact', 'Compact'],
+                ['normal', 'Normal'],
+              ],
+              renderTrigger: true,
+              description: t('Calendar cell size: Compact for tighter fit, Normal for larger cells'),
+            },
+          },
+        ],
       ],
     },
   ],

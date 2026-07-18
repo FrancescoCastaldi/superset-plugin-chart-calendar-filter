@@ -218,9 +218,10 @@ describe('CalendarFilter', () => {
         selectedValues: { '2024-01-01': '2024-01-01' },
       },
     };
-    const { getByText } = render(<CalendarFilter {...propsWithSelection} />);
-    expect(getByText(/selected/)).toBeTruthy();
-    expect(getByText('Clear')).toBeTruthy();
+    const { container } = render(<CalendarFilter {...propsWithSelection} />);
+    // Badge now shows formatted date range instead of "N selected"
+    expect(container.textContent).toContain('Jan 1, 2024');
+    expect(container.textContent).toContain('Clear');
   });
 
   it('clears selection when Clear button is clicked', () => {

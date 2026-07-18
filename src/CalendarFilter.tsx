@@ -25,21 +25,20 @@ import {
   TooltipData,
 } from './types';
 
-// ─── Color palettes ────────────────────────────────────────────────────────────
-
+// Color palettes — GitHub-inspired gradients
 const COLOR_PALETTES: Record<string, string[]> = {
-  supersetColors: ['#F0F0F0', '#D2E8F4', '#8FD3E4', '#51B5C8', '#20A7C9', '#147C99', '#0E4D64'],
-  greens: ['#F0F0F0', '#E5F5E0', '#A1D99B', '#74C476', '#41AB5D', '#238B45', '#005A32'],
-  blues: ['#F0F0F0', '#DEEBF7', '#9ECAE1', '#6BAED6', '#4292C6', '#2171B5', '#084594'],
-  oranges: ['#F0F0F0', '#FEE6CE', '#FDAE6B', '#FD8D3C', '#F16913', '#D95F0E', '#993404'],
-  reds: ['#F0F0F0', '#FEE0D2', '#FCBBA1', '#FC9272', '#FB6A4A', '#EF3B2C', '#99000D'],
-  purples: ['#F0F0F0', '#EFEDF5', '#BCBDDC', '#9E9AC8', '#807DBA', '#6A51A3', '#3F007D'],
+  supersetColors: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+  greens: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+  blues: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
+  oranges: ['#ebedf0', '#fddfb8', '#fdb87d', '#f59241', '#e66b1f'],
+  reds: ['#ebedf0', '#ffd1d1', '#ff9b9b', '#ff6b6b', '#e63946'],
+  purples: ['#ebedf0', '#d5c6e0', '#b392c4', '#8c6bb1', '#6a3d9a'],
 };
 
 const DAY_LABELS_SUNDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_LABELS_MONDAY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-// ─── Styles ────────────────────────────────────────────────────────────────────
+// Styles
 
 const Styles = styled.div<CalendarFilterStylesProps>`
   height: ${({ height }) => height}px;
@@ -55,40 +54,40 @@ const CalendarHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+  padding: 8px 12px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  gap: 6px;
 `;
 
 const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  gap: 6px;
 `;
 
 const HeaderCenter = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+  gap: 8px;
 `;
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  gap: 6px;
 `;
 
 const NavButton = styled.button`
   background: none;
   border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+  font-size: 14px;
+  padding: 4px 8px;
   line-height: 1;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
-  transition: background 0.15s;
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
+  transition: background 0.2s ease;
 
   &:hover:not(:disabled) {
     background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
@@ -103,13 +102,13 @@ const NavButton = styled.button`
 const TodayButton = styled.button`
   background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
   border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 11px;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px ${({ theme }) => (theme?.gridUnit ?? 4) * 1.5}px;
+  font-size: 10px;
+  padding: 4px 8px;
   line-height: 1;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
-  transition: background 0.15s;
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
+  transition: background 0.2s ease;
 
   &:hover {
     background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f0f0f0')};
@@ -124,20 +123,20 @@ const MonthTitle = styled.div`
 `;
 
 const SelectionBadge = styled.span`
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.s ?? 12)}px;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
-  background: ${({ theme }) => (theme?.colors?.primary?.light2 ?? '#cce8f0')};
-  padding: 0 ${({ theme }) => (theme?.gridUnit ?? 4) * 1.5}px;
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+  font-size: 10px;
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
+  background: ${({ theme }) => (theme?.colors?.primary?.light2 ?? '#e0f5e8')};
+  padding: 0 8px;
+  border-radius: 10px;
   white-space: nowrap;
-  line-height: 22px;
+  line-height: 20px;
 `;
 
 const ClearButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10px;
   color: ${({ theme }) => theme?.colors?.error?.base || '#e74c3c'};
   text-decoration: underline;
   padding: 0;
@@ -149,10 +148,10 @@ const ClearButton = styled.button`
 `;
 
 const YearSelect = styled.select`
-  font-size: 12px;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  font-size: 11px;
+  padding: 3px 6px;
   border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  border-radius: 4px;
   background: white;
   color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
   cursor: pointer;
@@ -161,13 +160,13 @@ const YearSelect = styled.select`
 const ViewToggleButton = styled.button`
   background: none;
   border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 11px;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px ${({ theme }) => (theme?.gridUnit ?? 4) * 1.5}px;
+  font-size: 10px;
+  padding: 4px 8px;
   line-height: 1;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#20A7C9')};
-  transition: background 0.15s;
+  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
+  transition: background 0.2s ease;
   white-space: nowrap;
 
   &:hover {
@@ -178,19 +177,19 @@ const ViewToggleButton = styled.button`
 const CalendarGrid = styled.div<{ showWeekNumbers: boolean }>`
   display: grid;
   grid-template-columns: ${({ showWeekNumbers }) =>
-    showWeekNumbers ? '30px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
-  gap: 2px;
-  padding: 0 ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+    showWeekNumbers ? '24px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
+  gap: 1px;
+  padding: 0 8px 8px;
   flex: 1;
   align-content: start;
 `;
 
 const DayHeader = styled.div`
   text-align: center;
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
+  font-size: 9px;
   font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
   color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4)}px 0;
+  padding: 4px 0;
   text-transform: uppercase;
 `;
 
@@ -198,7 +197,7 @@ const WeekNumberCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9px;
   color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
   font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
 `;
@@ -207,37 +206,57 @@ interface DayCellProps {
   intensity: number;
   isSelected: boolean;
   isCurrentMonth: boolean;
+  $isToday: boolean;
   baseColor: string;
+  $cellHeight: number;
 }
 
 const DayCell = styled.div<DayCellProps>`
-  aspect-ratio: 1;
+  height: ${({ $cellHeight }) => $cellHeight}px;
+  width: 100%;
+  min-width: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
+  border-radius: 4px;
+  font-size: 11px;
   cursor: ${({ isCurrentMonth }) => (isCurrentMonth ? 'pointer' : 'default')};
   opacity: ${({ isCurrentMonth }) => (isCurrentMonth ? 1 : 0.3)};
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   position: relative;
   user-select: none;
 
   background-color: ${({ intensity, baseColor }) => {
-    if (intensity === 0) return '#f8f9fa';
+    if (intensity === 0) return '#ebedf0';
     const r = parseInt(baseColor.slice(1, 3), 16);
     const g = parseInt(baseColor.slice(3, 5), 16);
     const b = parseInt(baseColor.slice(5, 7), 16);
     const mix = (c1: number, c2: number, t: number) => Math.round(c1 + (c2 - c1) * t);
-    const white = 248;
+    const white = 235;
     return `rgb(${mix(white, r, intensity)}, ${mix(white, g, intensity)}, ${mix(white, b, intensity)})`;
   }};
 
   ${({ isSelected, baseColor }) =>
     isSelected
       ? `
-    box-shadow: 0 0 0 2px white, 0 0 0 4px ${baseColor};
-    font-weight: bold;
+    box-shadow: 0 0 0 2px white, 0 0 0 3px ${baseColor};
+    `
+      : ''}
+
+  ${({ $isToday }) =>
+    $isToday
+      ? `
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
     `
       : ''}
 
@@ -248,9 +267,11 @@ const DayCell = styled.div<DayCellProps>`
 `;
 
 const DayNumber = styled.span`
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
+  font-size: 11px;
+  font-weight: 600;
   pointer-events: none;
   line-height: 1;
+  color: #1a1a1a;
 `;
 
 const TooltipContainer = styled.div<{ x: number; y: number }>`
@@ -259,9 +280,9 @@ const TooltipContainer = styled.div<{ x: number; y: number }>`
   top: ${({ y }) => Math.max(y - 40, 0)}px;
   background: rgba(0, 0, 0, 0.85);
   color: white;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 12px;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
   pointer-events: none;
   z-index: 1000;
   white-space: nowrap;
@@ -293,38 +314,45 @@ const LegendContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+  gap: 6px;
+  padding: 6px 8px;
   flex-shrink: 0;
 `;
 
 const LegendGradient = styled.div`
-  width: 120px;
-  height: 12px;
-  border-radius: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  width: 100px;
+  height: 8px;
+  border-radius: 4px;
 `;
 
 const LegendLabel = styled.span`
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.xs ?? 10)}px;
+  font-size: 9px;
   color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
 `;
 
 const EmptyState = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#999'};
   font-size: ${({ theme }) => (theme?.typography?.sizes?.m ?? 12)}px;
+  gap: 8px;
 `;
 
-// ─── Year Overview Styles ──────────────────────────────────────────────────────
+const EmptyIcon = styled.div`
+  font-size: 16px;
+  line-height: 1;
+`;
+
+// Year Overview Styles
 
 const YearOverviewGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: ${({ theme }) => (theme?.gridUnit ?? 4) * 3}px;
-  padding: ${({ theme }) => (theme?.gridUnit ?? 4) * 2}px;
+  gap: 12px;
+  padding: 8px;
   flex: 1;
   overflow-y: auto;
 `;
@@ -336,16 +364,16 @@ const MiniMonth = styled.div`
 
 const MiniMonthTitle = styled.div`
   text-align: center;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
   color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
-  margin-bottom: ${({ theme }) => (theme?.gridUnit ?? 4)}px;
+  margin-bottom: 4px;
 `;
 
 const MiniMonthGrid = styled.div<{ showWeekNumbers: boolean }>`
   display: grid;
   grid-template-columns: ${({ showWeekNumbers }) =>
-    showWeekNumbers ? '18px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
+    showWeekNumbers ? '14px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
   gap: 1px;
 `;
 
@@ -368,28 +396,52 @@ const MiniWeekNum = styled.div`
 interface MiniDayCellProps {
   intensity: number;
   isSelected: boolean;
+  $isToday: boolean;
   baseColor: string;
 }
 
 const MiniDayCell = styled.div<MiniDayCellProps>`
-  aspect-ratio: 1;
+  aspect-ratio: 0.8;
   border-radius: 2px;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 600;
 
   background-color: ${({ intensity, baseColor }) => {
-    if (intensity === 0) return '#f8f9fa';
+    if (intensity === 0) return '#ebedf0';
     const r = parseInt(baseColor.slice(1, 3), 16);
     const g = parseInt(baseColor.slice(3, 5), 16);
     const b = parseInt(baseColor.slice(5, 7), 16);
     const mix = (c1: number, c2: number, t: number) => Math.round(c1 + (c2 - c1) * t);
-    const white = 248;
+    const white = 235;
     return `rgb(${mix(white, r, intensity)}, ${mix(white, g, intensity)}, ${mix(white, b, intensity)})`;
   }};
 
   ${({ isSelected, baseColor }) =>
     isSelected
-      ? `box-shadow: 0 0 0 1.5px white, 0 0 0 3px ${baseColor};`
+      ? `box-shadow: 0 0 0 1px white, 0 0 0 2px ${baseColor};`
+      : ''}
+
+  ${({ $isToday }) =>
+    $isToday
+      ? `
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    `
       : ''}
 
   &:hover {
@@ -398,7 +450,7 @@ const MiniDayCell = styled.div<MiniDayCellProps>`
   }
 `;
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 
 /** Parse a date value into a Date object */
 function parseDateValue(val: unknown): Date | null {
@@ -420,7 +472,6 @@ function formatDateKey(d: Date): string {
 /** Get the first day of the month adjusted for firstDayOfWeek */
 function getFirstDayOfMonth(year: number, month: number, firstDayOfWeek: number): number {
   const raw = new Date(year, month - 1, 1).getDay();
-  // Shift: if firstDayOfWeek=1 (Monday), raw Sunday=0 becomes 6, raw Monday=1 becomes 0, etc.
   return (raw - firstDayOfWeek + 7) % 7;
 }
 
@@ -448,9 +499,6 @@ function getBaseColor(paletteName: string): string {
   return palette ? palette[palette.length - 1] : COLOR_PALETTES.supersetColors[COLOR_PALETTES.supersetColors.length - 1];
 }
 
-/** Convert a color name to a DayJS-compatible format or just pass through */
-/** Not needed since we use native Date */
-
 /** Get all dates between two dates (inclusive) */
 function getDatesBetween(start: string, end: string): string[] {
   const dates: string[] = [];
@@ -466,7 +514,30 @@ function getDatesBetween(start: string, end: string): string[] {
   return dates;
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
+/** Format a date range for the selection badge */
+function formatSelectionRange(dates: string[]): string {
+  if (dates.length === 0) return '';
+  if (dates.length === 1) {
+    const d = new Date(dates[0] + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  const sorted = [...dates].sort();
+  const first = new Date(sorted[0] + 'T00:00:00');
+  const last = new Date(sorted[sorted.length - 1] + 'T00:00:00');
+
+  // Same month and year: "12-15 Mar 2026"
+  if (first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()) {
+    return `${first.getDate()}-${last.getDate()} ${first.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+  }
+  // Same year: "12 Mar - 15 Apr 2026"
+  if (first.getFullYear() === last.getFullYear()) {
+    return `${first.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - ${last.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  }
+  // Different years: "12 Mar 2026 - 15 Apr 2027"
+  return `${first.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} - ${last.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+}
+
+// Component
 
 export default function CalendarFilter(props: CalendarFilterProps) {
   const {
@@ -479,6 +550,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     showWeekNumbers = false,
     showYearDropdown = true,
     enableOverview = true,
+    cellDensity = 'compact',
     setDataMask,
     filterState,
   } = props;
@@ -487,6 +559,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
   // Current view: defaults to today's month/year
   const today = useMemo(() => new Date(), []);
+  const todayStr = useMemo(() => formatDateKey(today), [today]);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1); // 1-12
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
@@ -494,6 +567,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const [lastClickedDate, setLastClickedDate] = useState<string | null>(null);
 
   const dayLabels = firstDayOfWeek === 0 ? DAY_LABELS_SUNDAY : DAY_LABELS_MONDAY;
+
+  // Cell height based on density
+  const cellHeight = cellDensity === 'normal' ? 38 : 30;
 
   // Determine which columns are date vs metric
   const dataMap = useMemo(() => {
@@ -622,7 +698,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     const rows: { weekNumber: number; cells: (CalendarDay | null)[]; startIndex: number; endIndex: number }[] = [];
     for (let i = 0; i < calendarCells.length; i += 7) {
       const weekCells = calendarCells.slice(i, i + 7);
-      // Find the first non-null cell to determine the date for week number
       const firstRealCell = weekCells.find(c => c !== null);
       let weekNumber = 1;
       if (firstRealCell) {
@@ -691,7 +766,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       if (event?.shiftKey && lastClickedDate) {
         const range = getDatesBetween(lastClickedDate, dateStr);
         range.forEach(d => {
-          // Only add dates that exist in data
           if (dataMap.map.has(d)) {
             newSelected.add(d);
           } else {
@@ -747,8 +821,11 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }, [viewYear, viewMonth]);
 
-  // Selection count
-  const selectionCount = selectedDates.size;
+  // Selection badge text
+  const selectionBadgeText = useMemo(() => {
+    const sorted = Array.from(selectedDates).sort();
+    return formatSelectionRange(sorted);
+  }, [selectedDates]);
 
   // Legend gradient
   const legendGradient = useMemo(() => {
@@ -790,7 +867,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     setTooltip(null);
   }, []);
 
-  // ── Year Overview ──
+  // Year Overview
 
   const yearOverviewMonths = useMemo(() => {
     if (viewMode !== 'year') return [];
@@ -857,19 +934,22 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     [setDataMask, selectedDates],
   );
 
-  // ── Render ──
+  // Render
 
   if (!data || data.length === 0) {
     return (
       <Styles height={height} width={width}>
-        <EmptyState>No data available</EmptyState>
+        <EmptyState>
+          <EmptyIcon>📅</EmptyIcon>
+          <span>No data available</span>
+        </EmptyState>
       </Styles>
     );
   }
 
   return (
     <Styles height={height} width={width} ref={containerRef}>
-      {/* ── Header ── */}
+      {/* Header */}
       <CalendarHeader>
         <HeaderLeft>
           <NavButton
@@ -879,7 +959,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             disabled={isPrevDisabled}
             title={isPrevDisabled ? 'No data before this date' : 'Previous'}
           >
-            ‹
+            ◀
           </NavButton>
           {showYearDropdown && (
             <YearSelect
@@ -906,10 +986,10 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <MonthTitle>
             {viewMode === 'year' ? viewYear : monthLabel}
           </MonthTitle>
-          {selectionCount > 0 && (
+          {selectedDates.size > 0 && (
             <>
               <SelectionBadge>
-                {selectionCount} selected
+                {selectedDates.size}{selectionBadgeText ? ` · ${selectionBadgeText}` : ''}
               </SelectionBadge>
               <ClearButton type="button" onClick={clearSelection}>
                 Clear
@@ -929,12 +1009,12 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             disabled={isNextDisabled}
             title={isNextDisabled ? 'No data after this date' : 'Next'}
           >
-            ›
+            ▶
           </NavButton>
         </HeaderRight>
       </CalendarHeader>
 
-      {/* ── Calendar / Year Overview ── */}
+      {/* Calendar / Year Overview */}
       {viewMode === 'year' ? (
         <YearOverviewGrid>
           {yearOverviewMonths.map(m => (
@@ -954,6 +1034,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                           key={cell.date}
                           intensity={intensityScale(cell.value)}
                           isSelected={selectedDates.has(cell.date)}
+                      $isToday={cell.date === todayStr}
                           baseColor={baseColor}
                           onClick={() => handleMiniDayClick(cell.date)}
                           title={`${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`}
@@ -969,6 +1050,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                       key={cell.date}
                       intensity={intensityScale(cell.value)}
                       isSelected={selectedDates.has(cell.date)}
+                      $isToday={cell.date === todayStr}
                       baseColor={baseColor}
                       onClick={() => handleMiniDayClick(cell.date)}
                       title={`${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`}
@@ -1003,7 +1085,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                           intensity={intensityScale(cell.value)}
                           isSelected={selectedDates.has(cell.date)}
                           isCurrentMonth
+                          $isToday={cell.date === todayStr}
                           baseColor={baseColor}
+                          $cellHeight={cellHeight}
                           onClick={(e) => handleDayClick(cell, e)}
                           onMouseEnter={(e) => handleMouseEnter(cell, e)}
                           onMouseLeave={handleMouseLeave}
@@ -1025,7 +1109,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                       intensity={intensityScale(cell.value)}
                       isSelected={selectedDates.has(cell.date)}
                       isCurrentMonth
+                      $isToday={cell.date === todayStr}
                       baseColor={baseColor}
+                      $cellHeight={cellHeight}
                       onClick={(e) => handleDayClick(cell, e)}
                       onMouseEnter={(e) => handleMouseEnter(cell, e)}
                       onMouseLeave={handleMouseLeave}
@@ -1058,7 +1144,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         </>
       )}
 
-      {/* ── Legend ── */}
+      {/* Legend */}
       {showLegend && dataMap.hasData && viewMode === 'month' && (
         <LegendContainer>
           <LegendLabel>{dataMap.min.toFixed(1)}</LegendLabel>
