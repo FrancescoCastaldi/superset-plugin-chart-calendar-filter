@@ -33,6 +33,16 @@
     "visualization",
     "dashboard"
   ],
+  "overrides": {
+    "@superset-ui/core": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "@superset-ui/chart-controls": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -74,8 +84,9 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "json-bigint": "^1.0.0",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "@apache-superset/core": "^0.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
     "typescript": "^4.1.2"
   }
