@@ -119,6 +119,63 @@ Per testare il cross-filter:
 
 ---
 
+## 🎯 Test Interattivo del Cross-Filter
+
+### Configurazione
+
+Il chart calendar-filter è stato aggiunto alla dashboard **"USA Births Names"** (id:7):
+
+| Impostazione | Valore |
+|---|---|
+| **Dashboard** | USA Births Names (id:7) |
+| **Cross-filter** | Abilitato, scope globale |
+| **Dataset condiviso** | `birth_names` (tutti i chart della dashboard) |
+
+Tutti i chart della dashboard condividono lo stesso dataset `birth_names`, quindi il cross-filter funziona immediatamente su tutti gli elementi visivi.
+
+### Selezione Singolo Giorno
+
+Clicca su un giorno nel calendario per selezionarlo:
+
+- Il giorno viene evidenziato con un bordo
+- Il badge di selezione appare mostrando il giorno selezionato
+- Tutti gli altri chart della dashboard vengono filtrati per quella data
+
+![Singolo giorno selezionato](./dashboard-selection-single.png)
+
+### Selezione Range (Shift+click)
+
+Per selezionare un intervallo di giorni:
+
+1. Clicca su un giorno per iniziare la selezione
+2. Tieni premuto **Shift** e clicca su un altro giorno
+3. Tutti i giorni nell'intervallo vengono selezionati
+4. Il badge mostra il range formattato (es. "15 Jul - 20 Jul 2026")
+
+![Range selezionato](./dashboard-selection-range.png)
+
+### Cross-Filter Attivo sulla Dashboard
+
+Quando selezioni dei giorni nel calendario:
+
+- Tutti gli altri chart della dashboard vengono filtrati automaticamente
+- Il badge mostra il numero di giorni selezionati e il range
+- Per deselezionare, clicca su **Clear** nel badge
+- La dashboard si aggiorna in tempo reale mostrando solo i dati del periodo selezionato
+
+![Cross-filter attivo](./dashboard-crossfilter-active.png)
+
+### Casi d'Uso
+
+| Scenario | Descrizione |
+|---|---|
+| **Analisi mensile** | Seleziona un mese intero per vedere trend settimanali |
+| **Analisi outlier** | Seleziona giorni specifici per analizzare picchi o anomalie |
+| **Confronto periodi** | Naviga tra mesi/anni per confrontare periodi diversi |
+| **Filtro rapido** | Usa il calendario come filtro visivo per esplorare i dati temporali |
+
+---
+
 ## Note
 
 - Il dataset `birth_names` è incluso nell'installazione di esempio di Superset. Se non disponibile, caricare il dataset di esempio prima di procedere.
