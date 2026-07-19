@@ -29,7 +29,10 @@ export default function transformProps(chartProps: ChartProps) {
     enableOverview = true,
     cellDensity = 'compact',
   } = formData;
-  const data = queriesData[0].data as TimeseriesDataRecord[];
+  const { hooks, filterState } = chartProps;
+  const { setDataMask = () => {} } = hooks || {};
+  const data = (queriesData[0]?.data ?? []) as TimeseriesDataRecord[];
+  const [dateColumn] = formData.groupby ?? [];
 
   return {
     width,
@@ -42,5 +45,8 @@ export default function transformProps(chartProps: ChartProps) {
     showYearDropdown: showYearDropdown !== false,
     enableOverview: enableOverview !== false,
     cellDensity,
+    setDataMask,
+    filterState,
+    dateColumn,
   };
 }

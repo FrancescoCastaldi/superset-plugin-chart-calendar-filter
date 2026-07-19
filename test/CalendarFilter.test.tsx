@@ -49,6 +49,7 @@ const defaultProps = {
   enableOverview: true,
   setDataMask: mockSetDataMask,
   filterState: defaultFilterState,
+  dateColumn: 'ds',
 };
 
 describe('CalendarFilter', () => {
@@ -63,8 +64,12 @@ describe('CalendarFilter', () => {
 
   it('shows the month title', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    // Should show current month/year (July 2026 based on system date)
-    expect(getByText('July 2026')).toBeTruthy();
+    const now = new Date();
+    const expectedTitle = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+    expect(getByText(expectedTitle)).toBeTruthy();
   });
 
   it('shows day numbers in the grid', () => {
@@ -114,7 +119,7 @@ describe('CalendarFilter', () => {
         extraFormData: expect.objectContaining({
           filters: expect.arrayContaining([
             expect.objectContaining({
-              col: '__time_range',
+              col: 'ds',
               op: 'IN',
             }),
           ]),

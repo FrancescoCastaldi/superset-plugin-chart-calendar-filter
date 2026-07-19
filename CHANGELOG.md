@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.2] — Unreleased
+
+### Fixed
+
+- **Cross-filter compatibility with Superset 6.1.0**:
+  - `transformProps` now passes `hooks.setDataMask`, `filterState`, and `dateColumn` to the component
+  - plugin metadata declares `behaviors: [Behavior.InteractiveChart]` so dashboards include it in cross-filter scope
+  - cross-filter payload now uses the real date column (`dateColumn ?? '__timestamp'`) instead of non-existent `__time_range`
+- **Timezone-safe date parsing**: `YYYY-MM-DD` strings are parsed with local `new Date(y, m-1, d)` to avoid UTC-negative timezone shifts
+- **Peer dependencies**: added `@apache-superset/core` and `@emotion/styled`; React range expanded to `^16.13.1 || ^17.0.0`
+
 ## [0.1.1] — 2026-07-18
 
 ### Changed

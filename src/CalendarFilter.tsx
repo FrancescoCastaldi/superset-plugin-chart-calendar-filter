@@ -452,12 +452,21 @@ const MiniDayCell = styled.div<MiniDayCellProps>`
 
 // Helpers
 
-/** Parse a date value into a Date object */
+/** Parse a date value into a Date object. String YYYY-MM-DD is parsed as local midnight. */
 function parseDateValue(val: unknown): Date | null {
   if (!val) return null;
   if (val instanceof Date) return val;
   if (typeof val === 'number') return new Date(val);
-  const d = new Date(String(val));
+  const str = String(val);
+  const match = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const y = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10) - 1;
+    const d = parseInt(match[3], 10);
+    const date = new Date(y, m, d);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const d = new Date(str);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
@@ -502,8 +511,9 @@ function getBaseColor(paletteName: string): string {
 /** Get all dates between two dates (inclusive) */
 function getDatesBetween(start: string, end: string): string[] {
   const dates: string[] = [];
-  const current = new Date(start);
-  const endDate = new Date(end);
+  const current = parseDateValue(start);
+  const endDate = parseDateValue(end);
+  if (!current || !endDate) return dates;
   const step = current <= endDate ? 1 : -1;
 
   while (step > 0 ? current <= endDate : current >= endDate) {
@@ -517,13 +527,14 @@ function getDatesBetween(start: string, end: string): string[] {
 /** Format a date range for the selection badge */
 function formatSelectionRange(dates: string[]): string {
   if (dates.length === 0) return '';
+  const firstDate = parseDateValue(dates[0]);
+  if (!firstDate) return '';
   if (dates.length === 1) {
-    const d = new Date(dates[0] + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    return firstDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   const sorted = [...dates].sort();
-  const first = new Date(sorted[0] + 'T00:00:00');
-  const last = new Date(sorted[sorted.length - 1] + 'T00:00:00');
+  const first = parseDateValue(sorted[0]) || firstDate;
+  const last = parseDateValue(sorted[sorted.length - 1]) || firstDate;
 
   // Same month and year: "12-15 Mar 2026"
   if (first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()) {
@@ -553,6 +564,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     cellDensity = 'compact',
     setDataMask,
     filterState,
+    dateColumn,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -586,7 +598,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     const dateKey = keys.find(k => {
       const val = firstRow[k];
       return val && (typeof val === 'string' || typeof val === 'number' || val instanceof Date) &&
-        !Number.isNaN(new Date(String(val)).getTime());
+        parseDateValue(val) !== null;
     });
     const metricKey = keys.find(k => k !== dateKey && typeof firstRow[k] === 'number');
 
@@ -634,8 +646,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const y = today.getFullYear();
       return [y - 2, y - 1, y, y + 1, y + 2];
     }
-    const minY = new Date(minDateBound).getFullYear();
-    const maxY = new Date(maxDateBound).getFullYear();
+    const minY = parseDateValue(minDateBound)?.getFullYear() ?? viewYear;
+    const maxY = parseDateValue(maxDateBound)?.getFullYear() ?? viewYear;
     const years: number[] = [];
     for (let y = minY; y <= maxY; y++) years.push(y);
     return years;
@@ -645,7 +657,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const isPrevDisabled = useMemo(() => {
     if (!minDateBound) return false;
     if (viewMode === 'year') {
-      return viewYear <= new Date(minDateBound).getFullYear();
+      return viewYear <= (parseDateValue(minDateBound)?.getFullYear() ?? viewYear);
     }
     const firstOfMonth = `${viewYear}-${String(viewMonth).padStart(2, '0')}-01`;
     return firstOfMonth <= minDateBound;
@@ -654,7 +666,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const isNextDisabled = useMemo(() => {
     if (!maxDateBound) return false;
     if (viewMode === 'year') {
-      return viewYear >= new Date(maxDateBound).getFullYear();
+      return viewYear >= (parseDateValue(maxDateBound)?.getFullYear() ?? viewYear);
     }
     const lastOfMonth = `${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(getDaysInMonth(viewYear, viewMonth)).padStart(2, '0')}`;
     return lastOfMonth >= maxDateBound;
@@ -701,7 +713,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const firstRealCell = weekCells.find(c => c !== null);
       let weekNumber = 1;
       if (firstRealCell) {
-        weekNumber = getISOWeekNumber(new Date(firstRealCell.date));
+        weekNumber = getISOWeekNumber(parseDateValue(firstRealCell.date) || new Date());
       }
       rows.push({ weekNumber, cells: weekCells, startIndex: i, endIndex: i + 6 });
     }
@@ -787,7 +799,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       setDataMask({
         extraFormData: {
           filters: selectedArray.length
-            ? [{ col: '__time_range', op: 'IN' as const, val: selectedArray }]
+            ? [{ col: dateColumn ?? '__timestamp', op: 'IN' as const, val: selectedArray }]
             : [],
         },
         filterState: {
@@ -798,7 +810,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         },
       });
     },
-    [setDataMask, selectedDates, lastClickedDate, dataMap.map],
+    [setDataMask, selectedDates, lastClickedDate, dataMap.map, dateColumn],
   );
 
   const clearSelection = useCallback(() => {
@@ -893,7 +905,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           const weekCells = cells.slice(i, i + 7);
           const firstReal = weekCells.find(c => c !== null);
           let wn = 1;
-          if (firstReal) wn = getISOWeekNumber(new Date(firstReal.date));
+          if (firstReal) wn = getISOWeekNumber(parseDateValue(firstReal.date) || new Date());
           wRows.push({ weekNumber: wn, cells: weekCells });
         }
       }
@@ -920,7 +932,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       setDataMask({
         extraFormData: {
           filters: selectedArray.length
-            ? [{ col: '__time_range', op: 'IN' as const, val: selectedArray }]
+            ? [{ col: dateColumn ?? '__timestamp', op: 'IN' as const, val: selectedArray }]
             : [],
         },
         filterState: {
@@ -931,7 +943,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         },
       });
     },
-    [setDataMask, selectedDates],
+    [setDataMask, selectedDates, dateColumn],
   );
 
   // Render

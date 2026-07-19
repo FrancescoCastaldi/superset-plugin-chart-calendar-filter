@@ -50,9 +50,11 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@apache-superset/core": "*",
+    "@emotion/styled": "*",
     "@superset-ui/chart-controls": "*",
     "@superset-ui/core": "*",
-    "react": "^16.13.1"
+    "react": "^16.13.1 || ^17.0.0"
   },
   "devDependencies": {
     "@airbnb/config-babel": "^2.0.1",

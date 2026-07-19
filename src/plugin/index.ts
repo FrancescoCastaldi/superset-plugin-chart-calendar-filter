@@ -17,7 +17,7 @@
  * under the License.
  */
 import { t } from '@apache-superset/core/translation';
-import { ChartMetadata, ChartPlugin } from '@superset-ui/core';
+import { Behavior, ChartMetadata, ChartPlugin } from '@superset-ui/core';
 import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
@@ -29,6 +29,7 @@ export default class SupersetPluginChartCalendarFilter extends ChartPlugin {
       description: 'Calendar Filter Plugin for Apache Superset',
       name: t('Calendar Filter'),
       thumbnail,
+      behaviors: [Behavior.InteractiveChart],
     });
 
     super({

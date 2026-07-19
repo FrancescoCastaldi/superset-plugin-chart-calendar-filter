@@ -45,8 +45,9 @@ export type CalendarFilterQueryFormData = QueryFormData &
 export type CalendarFilterProps = CalendarFilterStylesProps &
   CalendarFilterCustomizeProps & {
     data: TimeseriesDataRecord[];
-    setDataMask: SetDataMaskHook;
+    setDataMask?: SetDataMaskHook;
     filterState?: DataMask['filterState'];
+    dateColumn?: string;
   };
 
 /** Calendar day data point */

@@ -2,15 +2,24 @@
 
 export const t = (str: string) => str;
 
+export enum Behavior {
+  InteractiveChart = 'INTERACTIVE_CHART',
+  NativeFilter = 'NATIVE_FILTER',
+  DrillToDetail = 'DRILL_TO_DETAIL',
+  DrillBy = 'DRILL_BY',
+}
+
 export class ChartMetadata {
   description: string;
   name: string;
   thumbnail: any;
+  behaviors?: Behavior[];
 
-  constructor({ description, name, thumbnail }: any) {
+  constructor({ description, name, thumbnail, behaviors }: any) {
     this.description = description;
     this.name = name;
     this.thumbnail = thumbnail;
+    this.behaviors = behaviors;
   }
 }
 
@@ -36,13 +45,19 @@ export class ChartProps {
   height: number;
   theme: any;
   queriesData: any[];
+  hooks: { setDataMask?: any; [key: string]: any };
+  filterState?: any;
+  emitCrossFilters?: boolean;
 
-  constructor({ formData, width, height, theme, queriesData }: any) {
+  constructor({ formData, width, height, theme, queriesData, hooks, filterState, emitCrossFilters }: any) {
     this.formData = formData;
     this.width = width;
     this.height = height;
     this.theme = theme;
     this.queriesData = queriesData;
+    this.hooks = hooks || {};
+    this.filterState = filterState;
+    this.emitCrossFilters = emitCrossFilters;
   }
 }
 

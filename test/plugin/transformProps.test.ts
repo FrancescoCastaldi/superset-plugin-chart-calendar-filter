@@ -33,6 +33,11 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
     enableOverview: false,
     viz_type: 'calendar_filter',
   };
+  const filterState = {
+    value: null,
+    selectedValues: null,
+  };
+  const setDataMask = jest.fn();
   const chartProps = new ChartProps({
     formData,
     width: 800,
@@ -44,6 +49,8 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
         { ds: '2024-01-02', sum__num: 20 },
       ],
     }],
+    hooks: { setDataMask },
+    filterState,
   });
 
   it('should transform chart props for viz', () => {
@@ -61,6 +68,9 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
         { ds: '2024-01-01', sum__num: 10 },
         { ds: '2024-01-02', sum__num: 20 },
       ],
+      setDataMask,
+      filterState,
+      dateColumn: 'ds',
     });
   });
 
@@ -80,11 +90,37 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
       queriesData: [{
         data: [{ ds: '2024-01-01', sum__num: 10 }],
       }],
+      hooks: { setDataMask: jest.fn() },
+      filterState: { value: null },
     });
     const result = transformProps(minimalProps);
     expect(result.firstDayOfWeek).toBe(0);
     expect(result.showWeekNumbers).toBe(false);
     expect(result.showYearDropdown).toBe(true);
     expect(result.enableOverview).toBe(true);
+    expect(result.dateColumn).toBe('ds');
+    expect(result.filterState).toEqual({ value: null });
+    expect(typeof result.setDataMask).toBe('function');
+  });
+
+  it('should handle empty queriesData without crashing', () => {
+    const emptyProps = new ChartProps({
+      formData: {
+        colorScheme: 'supersetColors',
+        datasource: '3__table',
+        granularity_sqla: 'ds',
+        groupby: ['ds'],
+        metric: 'sum__num',
+        viz_type: 'calendar_filter',
+      },
+      width: 400,
+      height: 300,
+      theme: supersetTheme,
+      queriesData: [],
+    });
+    const result = transformProps(emptyProps);
+    expect(result.data).toEqual([]);
+    expect(result.dateColumn).toBe('ds');
+    expect(typeof result.setDataMask).toBe('function');
   });
 });

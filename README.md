@@ -1,4 +1,4 @@
-# 📅 Calendar Filter — Superset Chart Plugin
+# Calendar Filter - Superset Chart Plugin
 
 > An interactive, selectable calendar heatmap chart for **Apache Superset 6.1.0** that doubles as a **dashboard cross-filter**. Click dates, filter your dashboard.
 
@@ -12,158 +12,92 @@
 ---
 
 <p align="center">
-  <img src="demo/screenshot.png" alt="Calendar Filter — Month view" width="800" />
+  <img src="demo/screenshot.png" alt="Calendar Filter - Month view" width="800" />
 </p>
 
 ---
 
+## Install in an existing Superset
 
----
+Add the **Calendar Filter** chart to a Superset checkout you already have on disk.
 
-## 🚀 Quick Start — Add this chart to an EXISTING Superset
+### One-command install (recommended)
 
-You already have a Superset project on disk (it contains a `superset/` backend folder
-and a `superset-frontend/` folder). Just follow the steps below.
-
-### ⚡ One-command install (Option A, fully automated)
-
-Open a terminal **in the root folder of your cloned Superset project**
-(the one that contains both `superset/` and `superset-frontend/`) and run
-**a single command**. It will `npm install` the plugin and register it in
-`MainPreset.ts` for you.
+Run the installer script from the plugin root. It will auto-detect the Superset checkout next to the plugin (or you can pass the path explicitly):
 
 **Linux / macOS:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/scripts/install-to-superset.sh | bash -s -- .
+./scripts/install-to-superset.sh
+# or with an explicit Superset path
+./scripts/install-to-superset.sh /path/to/superset
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/scripts/install-to-superset.ps1 | iex
+.\scripts\install-to-superset.ps1
+# or with an explicit Superset path
+.\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset
 ```
 
-That is all. After it finishes, rebuild the frontend (`npm run dev` or
-`npm run build`) and restart the backend — the **Calendar Filter** chart will
-appear in the picker.
+The script auto-detects the Superset checkout in this order: argument, `SUPERSET_HOME`, `../superset`, `../superset-6.1.0`, `./superset`.
 
-> Prefer to run the script locally instead of from GitHub? Clone this repo and run
-> `./scripts/install-to-superset.sh .` (or `.\scripts\install-to-superset.ps1`) from the
-> Superset root.
-### Option A — Install from npm (easiest, recommended for production)
+It builds the plugin if `lib/` is missing (skip with `--skip-build` / `-SkipBuild`), installs it via `npm install <plugin-path>`, and registers it in `MainPreset.ts`/`MainPreset.js` idempotently. A backup `MainPreset.ts.bak` is created before editing.
 
-1. **Open a terminal in your `superset-frontend/` folder** and install the plugin:
+For development with hot reload, use the `--link` / `-Link` flag:
 
-   ```bash
-   npm install --save superset-plugin-chart-calendar-filter
-   ```
+```bash
+./scripts/install-to-superset.sh --link
+```
 
-2. **Register the chart.** Open `superset-frontend/src/visualizations/presets/MainPreset.ts`
-   (it may be `MainPreset.js` in older Superset versions) and add the import + plugin:
+After the script finishes, rebuild the frontend:
 
-   ```ts
-   import { SupersetPluginChartCalendarFilter } from 'superset-plugin-chart-calendar-filter';
+```bash
+cd superset-frontend
+npm run dev-server   # development
+# or
+npm run build        # production
+```
 
-   // inside the preset constructor, alongside the other `new XxxPlugin()` lines:
-   new SupersetPluginChartCalendarFilter().configure({
-     key: 'superset-plugin-chart-calendar-filter',
-   }),
-   ```
+Then restart the Flask backend.
 
-3. **Rebuild & restart.** From `superset-frontend/`:
-
-   ```bash
-   npm run dev        # development (hot reload)
-   # or, for production:
-   npm run build
-   ```
-
-   Then restart the Flask backend (`superset run` / your dev server).
-
-4. **Done!** Open Superset → **+ Chart** → you will find **Calendar Filter** under the
-   *Other* category.
+For detailed manual steps, see [INSTALL.md](INSTALL.md).
 
 ---
 
-### Option B — Link a local clone (best for development / customizing)
+## Features
 
-1. **Clone this repo** next to your Superset folder (they should share the same parent):
-
-   ```bash
-   git clone https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter.git
-   cd superset-plugin-chart-calendar-filter
-   npm install
-   npm run build
-   ```
-
-   Your layout should look like:
-
-   ```
-   some-folder/
-   ├── superset/                      # backend
-   ├── superset-frontend/             # frontend
-   └── superset-plugin-chart-calendar-filter/   # this plugin (cloned)
-   ```
-
-2. **Point Superset at the local folder.** In `superset-frontend/package.json` add:
-
-   ```json
-   "dependencies": {
-     "superset-plugin-chart-calendar-filter": "file:../../superset-plugin-chart-calendar-filter"
-   }
-   ```
-
-3. **Install and register** (same registration snippet as Option A, step 2) and run
-   `npm install` inside `superset-frontend/`.
-
-4. **Restart** the frontend + backend. The chart now picks up your local source on every
-   change (hot reload).
-
----
-
-### ✅ Verify it works
-
-1. Create a new chart, type = **Calendar Filter**.
-2. Pick a dataset that has a **date column** (text or datetime) and a numeric **metric**.
-3. Set *Group by* = your date column, *Metric* = e.g. `COUNT(*)`.
-4. Click any day in the calendar → the other dashboard charts are cross-filtered.
-
-If the chart does **not** appear, double-check the `key` string matches exactly
-`superset-plugin-chart-calendar-filter` in both `MainPreset` and the plugin, then
-restart the frontend once more.
-## ✨ Features
-
-### Month View — Heatmap at a Glance
+### Month View - Heatmap at a Glance
 Color-coded day cells show metric intensity. Navigate between months, jump to any year, or return to today with one click.
 
 | Control | Description |
 |---|---|
-| ‹ / › | Previous / Next month |
+| < / > | Previous / Next month |
 | Year dropdown | Jump to any year in your data range |
 | Today | Return to current month |
 | Year / Month | Toggle between month and year overview |
 
-### Year Overview — All 12 Months
-See the full year as a 4×3 grid of mini-calendars. Each mini-calendar is interactive — dates are clickable.
+### Year Overview - All 12 Months
+See the full year as a 4x3 grid of mini-calendars. Each mini-calendar is interactive - dates are clickable.
 
 <p align="center">
-  <img src="demo/screenshot-yearview.png" alt="Calendar Filter — Year overview" width="800" />
+  <img src="demo/screenshot-yearview.png" alt="Calendar Filter - Year overview" width="800" />
 </p>
 
 ### Interactive Selection & Cross-Filter
-- **Single click** — toggle a date on/off
-- **Shift-click** — select a contiguous date range
-- **Clear all** — reset selection with one button
-- **Auto cross-filter** — emits `__time_range IN [...]` to filter all dashboard charts
+- **Single click** - toggle a date on/off
+- **Shift-click** - select a contiguous date range
+- **Clear all** - reset selection with one button
+- **Auto cross-filter** - emits `__time_range IN [...]` to filter all dashboard charts
 
 <p align="center">
-  <img src="demo/screenshot-selection.png" alt="Calendar Filter — Date selection" width="800" />
+  <img src="demo/screenshot-selection.png" alt="Calendar Filter - Date selection" width="800" />
 </p>
 
 ### Display Options
 | Feature | Description |
 |---|---|
 | **Color palettes** | 6 palettes: Superset Default, Greens, Blues, Oranges, Reds, Purples |
-| **Legend** | Gradient bar with min→max value range |
+| **Legend** | Gradient bar with min-max value range |
 | **Week numbers** | ISO 8601 week numbers on each week row |
 | **First day of week** | Configurable Sunday or Monday start |
 | **Rich tooltip** | Hover shows date, metric value, and % of max |
@@ -171,13 +105,15 @@ See the full year as a 4×3 grid of mini-calendars. Each mini-calendar is intera
 
 ---
 
-## 📦 Installation
+## Installation
+
+See [Install in an existing Superset](#install-in-an-existing-superset) above, or [INSTALL.md](INSTALL.md) for the full manual steps.
 
 ### Prerequisites
 - Apache Superset 6.1.0
 - Node.js 16+
 
-### 1. Build the plugin
+### Build the plugin
 
 ```bash
 cd superset-plugin-chart-calendar-filter
@@ -186,39 +122,14 @@ npm run build
 ```
 
 This produces:
-- `lib/` — CommonJS
-- `esm/` — ES Modules
+- `lib/` - CommonJS
+- `esm/` - ES Modules
 - TypeScript declarations
 - Runs the full test suite (27 tests)
 
-### 2. Link into Superset
-
-From your `superset-frontend/` directory:
-
-```bash
-npm i -S ../../superset-plugin-chart-calendar-filter
-```
-
-### 3. Register as a visualization
-
-Edit `superset-frontend/src/visualizations/presets/MainPreset.js`:
-
-```js
-import { SupersetPluginChartCalendarFilter } from 'superset-plugin-chart-calendar-filter';
-
-// Inside the preset constructor, add:
-new SupersetPluginChartCalendarFilter().configure({
-  key: 'superset-plugin-chart-calendar-filter',
-}),
-```
-
-### 4. Restart Superset
-
-Rebuild the frontend and restart the server. The **Calendar Filter** chart will appear in the chart picker.
-
 ---
 
-## 🎮 Usage
+## Usage
 
 1. Add a **Calendar Filter** chart to your dashboard
 2. Configure the **date column** (e.g. `ds`, `__timestamp`)
@@ -239,7 +150,7 @@ Rebuild the frontend and restart the server. The **Calendar Filter** chart will 
 
 ---
 
-## 🔌 Cross-Filter API
+## Cross-Filter API
 
 When dates are selected, the plugin emits cross-filters using the `__time_range` column:
 
@@ -260,10 +171,10 @@ setDataMask({
 
 ---
 
-## 🛠 Development
+## Development
 
 ```bash
-# Watch mode — rebuilds on every change
+# Watch mode - rebuilds on every change
 npm run dev
 
 # Run tests (27 tests across 4 suites)
@@ -293,7 +204,7 @@ npx esbuild demo/demo-wrapper.tsx --bundle --global-name=CalendarFilterDemo --ou
 
 ---
 
-## 🏗 Project Structure
+## Project Structure
 
 ```
 superset-plugin-chart-calendar-filter/
@@ -327,7 +238,7 @@ superset-plugin-chart-calendar-filter/
 
 ---
 
-## 📄 License
+## License
 
 [Apache License 2.0](LICENSE)
 
@@ -335,8 +246,8 @@ superset-plugin-chart-calendar-filter/
 
 <p align="center">
   Built for <a href="https://superset.apache.org/">Apache Superset</a>
-  ·
+  •
   <a href="https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues">Report a bug</a>
-  ·
+  •
   <a href="https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues">Request a feature</a>
 </p>
