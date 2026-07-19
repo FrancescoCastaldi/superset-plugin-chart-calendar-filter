@@ -1,0 +1,36 @@
+# -----------------------------------------------------------------------
+# Calendar Filter Plugin — Docker Compose add-on for Apache Superset
+#
+# Usage:
+#   docker compose -f /path/to/superset/docker-compose.yml \
+#                  -f docker-compose.yml up -d
+#
+# Or copy the services block into your own docker-compose.override.yml.
+# -----------------------------------------------------------------------
+services:
+  superset:
+    volumes:
+      # Mount the plugin project so npm's file: dependency resolves
+      - ../Calendar-Filter-Superset:/Calendar-Filter-Superset:delegated
+    environment:
+      # Skip slow UV reinstall on startup (packages are already in image)
+      DEV_MODE: "false"
+
+  superset-node:
+    volumes:
+      - ../Calendar-Filter-Superset:/Calendar-Filter-Superset:delegated
+    environment:
+      # Fix npm ERESOLVE peer dependency conflict in Superset 6.1
+      NPM_CONFIG_legacy_peer_deps: "true"
+
+  superset-worker:
+    volumes:
+      - ../Calendar-Filter-Superset:/Calendar-Filter-Superset:delegated
+    environment:
+      DEV_MODE: "false"
+
+  superset-worker-beat:
+    volumes:
+      - ../Calendar-Filter-Superset:/Calendar-Filter-Superset:delegated
+    environment:
+      DEV_MODE: "false"

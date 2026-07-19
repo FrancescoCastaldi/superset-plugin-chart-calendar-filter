@@ -84,3 +84,44 @@ Then register the plugin in `MainPreset.ts` as shown above and run `npm run dev-
 - **Chart does not appear in the picker** -- double-check that the `key` string is exactly `superset-plugin-chart-calendar-filter` in both `MainPreset` and the plugin, then restart the frontend.
 - **Build errors** -- ensure you are using Node.js 16+ and that Superset's peer dependencies are installed.
 - **Registration already present** -- the installer is idempotent; if you run it twice it will detect the plugin and skip the patch.
+
+
+## Docker Compose
+
+If you run Superset via Docker Compose, the plugin ships a `docker-compose.yml` that adds the required mounts alongside Superset's native `docker-compose.yml`.
+
+### Prerequisites
+- Superset cloned and checked out at your target version
+- Node.js 16+ for the initial plugin build
+
+### Usage
+
+```bash
+# 1. Build the plugin first (from plugin root)
+npm install --legacy-peer-deps
+npm run build
+
+# 2. Launch Superset with the plugin add-on (from Superset root)
+docker compose -f docker-compose.yml -f ../Calendar-Filter-Superset/docker-compose.yml up -d
+```
+
+This mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, so the npm `file:` dependency resolves correctly.
+
+### Override file alternative
+
+For a simpler setup, copy the `docker-compose.yml` from the plugin into your Superset root and use it as an override:
+
+```bash
+cp ../Calendar-Filter-Superset/docker-compose.yml docker-compose.calendar-filter.yml
+docker compose -f docker-compose.yml -f docker-compose.calendar-filter.yml up -d
+```
+
+Or merge the services block into your own `docker-compose.override.yml`.
+
+### Environment variables
+
+The add-on sets:
+- `DEV_MODE=false` — skips slow UV editable reinstalls on the backend (packages are already in the Docker image)
+- `NPM_CONFIG_legacy_peer_deps=true` — fixes npm ERESOLVE on Superset 6.1 frontend
+
+> **Windows note**: Docker Desktop needs file sharing access to the Calendar-Filter-Superset folder (Docker Settings > Resources > File Sharing > Add Folder).

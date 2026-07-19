@@ -21,7 +21,25 @@
 
 Add the **Calendar Filter** chart to a Superset checkout you already have on disk.
 
-### One-command install (recommended)
+### Method 1: Docker Compose (if you run Superset via Docker)
+
+If you run Superset via Docker Compose (from the official [Superset repo](https://github.com/apache/superset), checked out at 6.1.0), use the plugin's `docker-compose.yml` as an add-on:
+
+```bash
+# 1. Build the plugin first (from the plugin root)
+cd superset-plugin-chart-calendar-filter
+npm install --legacy-peer-deps
+npm run build
+
+# 2. Launch Superset with the plugin add-on (from your Superset root)
+cd /path/to/superset
+docker compose -f docker-compose.yml -f ../Calendar-Filter-Superset/docker-compose.yml up -d
+```
+
+The add‑on mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, and sets `DEV_MODE=false` to skip slow UV reinstalls.  
+For a full explanation see the [Docker Compose section](INSTALL.md#docker-compose) in the installation guide.
+
+### Method 2: One-command install (recommended for local setup)
 
 Run the installer script from the plugin root. It will auto-detect the Superset checkout next to the plugin (or you can pass the path explicitly):
 
