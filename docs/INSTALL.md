@@ -65,6 +65,41 @@ npm run build
 
 Restart the Flask backend (`superset run` or your dev server). The **Calendar Filter** chart will now appear in the chart picker under **Other**.
 
+## 🤖 Automatic Installer (Quick Start)
+
+The plugin includes a cross-platform installer script that automates the manual steps above.
+
+### Windows PowerShell
+
+```powershell
+.\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset
+```
+
+### Linux / macOS
+
+```bash
+./scripts/install-to-superset.sh --superset-root /path/to/superset
+```
+
+### With Docker and verification
+
+```powershell
+.\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset -Docker -Test
+```
+
+### Installer parameters
+
+| Windows | Linux / macOS | Description |
+|---|---|---|
+| `-SupersetRoot` | `--superset-root` | Path to your Superset checkout. **Required.** |
+| `-SkipBuild` | `--skip-build` | Skip the plugin build if you already have `lib/` and `esm/`. |
+| `-Link` | `--link` | Use `npm link` instead of a `file:` dependency for development. |
+| `-Docker` | `--docker` | Also configure the Docker Compose override for Superset. |
+| `-Test` | `--test` | Run build verification after installation. |
+| `-Help` | `--help` | Show the script usage and exit. |
+
+> **Tip:** Use `-Link` (or `--link`) when you are actively changing plugin code; Superset will pick up rebuilds automatically.
+
 ## Development mode with npm link
 
 If you are actively changing the plugin source, use `npm link` so Superset picks up rebuilds automatically:
@@ -84,7 +119,13 @@ Then register the plugin in `MainPreset.ts` as shown above and run `npm run dev-
 - **Chart does not appear in the picker** -- double-check that the `key` string is exactly `superset-plugin-chart-calendar-filter` in both `MainPreset` and the plugin, then restart the frontend.
 - **Build errors** -- ensure you are using Node.js 16+ and that Superset's peer dependencies are installed.
 - **Registration already present** -- the installer is idempotent; if you run it twice it will detect the plugin and skip the patch.
+- **Peer dependency conflicts** -- Superset 6.1 resolves some peer ranges differently than npm 7+. If you see `ERESOLVE` errors, set npm to use legacy peer deps:
 
+  ```bash
+  npm config set legacy-peer-deps true
+  ```
+
+  This is also the default when using the Docker Compose override.
 
 ## Docker Compose
 
