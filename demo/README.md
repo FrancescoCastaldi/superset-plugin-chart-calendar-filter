@@ -1,0 +1,1 @@
+Questa cartella contiene una demo autonoma del plugin calendario, utile per testare il componente al di fuori di Superset. Include il componente wrapper, i bundle compilati, la pagina HTML e uno script server (`server.js`) per servire la demo localmente. Le immagini `screenshot*.png` mostrano il calendario in azione.

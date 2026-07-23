@@ -1,0 +1,1 @@
+Questa cartella contiene il codice sorgente principale del plugin per Apache Superset `superset-plugin-chart-calendar-filter`. Qui sono definiti il componente React del calendario, i tipi TypeScript, la logica di registrazione del plugin e le immagini di anteprima. È il cuore del calendario filtro interattivo selezionabile per le dashboard.

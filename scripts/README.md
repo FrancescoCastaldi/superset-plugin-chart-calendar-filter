@@ -1,0 +1,1 @@
+Questa cartella contiene script di utilità per automatizzare la gestione del plugin. Gli script `install-to-superset` (PowerShell e shell) installano il plugin nell'istanza Superset locale, mentre `publish` (PowerShell e shell) gestiscono la pubblicazione del pacchetto.
