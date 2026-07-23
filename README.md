@@ -37,7 +37,7 @@ docker compose -f docker-compose.yml -f ../Calendar-Filter-Superset/docker-compo
 ```
 
 The add‑on mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, and sets `DEV_MODE=false` to skip slow UV reinstalls.  
-For a full explanation see the [Docker Compose section](INSTALL.md#docker-compose) in the installation guide.
+For a full explanation see the [Docker Compose section](docs/INSTALL.md#docker-compose) in the installation guide.
 
 ### Method 2: One-command install (recommended for local setup)
 
@@ -78,7 +78,7 @@ npm run build        # production
 
 Then restart the Flask backend.
 
-For detailed manual steps, see [INSTALL.md](INSTALL.md).
+For detailed manual steps, see [INSTALL.md](docs/INSTALL.md).
 
 ---
 
@@ -125,7 +125,7 @@ See the full year as a 4x3 grid of mini-calendars. Each mini-calendar is interac
 
 ## Installation
 
-See [Install in an existing Superset](#install-in-an-existing-superset) above, or [INSTALL.md](INSTALL.md) for the full manual steps.
+See [Install in an existing Superset](#install-in-an-existing-superset) above, or [INSTALL.md](docs/INSTALL.md) for the full manual steps.
 
 ### Prerequisites
 - Apache Superset 6.1.0
