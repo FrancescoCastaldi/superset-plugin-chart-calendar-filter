@@ -53,3 +53,20 @@ notes.md
 session-*.md
 # agent memory / context files
 AGENTS.md
+
+# sensitive files
+SESSION-CONTEXT.md
+**/.ssh/
+
+# personal backup files
+*-MacBook Air di Francesco.*
+bozza-email*.md
+
+# test coverage
+coverage/
+.nyc_output/
+
+# temp files
+*.tmp
+*.temp
+temp/
