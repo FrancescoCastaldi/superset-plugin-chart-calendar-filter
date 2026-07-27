@@ -254,11 +254,11 @@ try {
         npm link
         if ($LASTEXITCODE -ne 0) { throw "npm link in plugin root failed" }
         Set-Location $FE
-        npm link $PLUGIN_NAME
+        npm link $PLUGIN_NAME --legacy-peer-deps
         if ($LASTEXITCODE -ne 0) { throw "npm link in superset-frontend failed" }
     } else {
         Write-Host ">> Installing plugin via npm install (file dependency)..."
-        npm install --save $PluginRoot
+        npm install --legacy-peer-deps --save $PluginRoot
         if ($LASTEXITCODE -ne 0) { throw "npm install failed" }
     }
 } catch {

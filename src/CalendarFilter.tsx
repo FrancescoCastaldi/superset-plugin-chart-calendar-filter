@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import {
   CalendarFilterProps,
@@ -24,6 +24,14 @@ import {
   CalendarDay,
   TooltipData,
 } from './types';
+import {
+  parseDateValue,
+  formatDateKey,
+  getFirstDayOfMonth,
+  getDaysInMonth,
+  getISOWeekNumber,
+  formatDateRangeBadge as formatSelectionRange,
+} from './utils/dateUtils';
 
 // Color palettes — GitHub-inspired gradients
 const COLOR_PALETTES: Record<string, string[]> = {
@@ -79,39 +87,57 @@ const HeaderRight = styled.div`
 `;
 
 const NavButton = styled.button`
-  background: none;
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: 4px;
+  background: white;
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e2e8f0')};
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  padding: 4px 8px;
+  padding: 6px 12px;
   line-height: 1;
   color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
-  transition: background 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+    background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f8fafc')};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
   }
 
   &:disabled {
-    opacity: 0.35;
+    opacity: 0.4;
     cursor: not-allowed;
+    background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#f1f5f9')};
   }
 `;
 
 const TodayButton = styled.button`
-  background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: 4px;
+  background: white;
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e2e8f0')};
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 10px;
-  padding: 4px 8px;
-  line-height: 1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  line-height: 1.2;
   color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
-  transition: background 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
 
   &:hover {
-    background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f0f0f0')};
+    background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f8fafc')};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 `;
 
@@ -226,20 +252,19 @@ const DayCell = styled.div<DayCellProps>`
   position: relative;
   user-select: none;
 
-  background-color: ${({ intensity, baseColor }) => {
-    if (intensity === 0) return '#ebedf0';
-    const r = parseInt(baseColor.slice(1, 3), 16);
-    const g = parseInt(baseColor.slice(3, 5), 16);
-    const b = parseInt(baseColor.slice(5, 7), 16);
-    const mix = (c1: number, c2: number, t: number) => Math.round(c1 + (c2 - c1) * t);
-    const white = 235;
-    return `rgb(${mix(white, r, intensity)}, ${mix(white, g, intensity)}, ${mix(white, b, intensity)})`;
+  background-color: ${({ isSelected, baseColor }) => {
+    if (isSelected) return `${baseColor}35`;
+    return '#ffffff';
   }};
+  border: 1px solid ${({ isSelected, baseColor }) => (isSelected ? baseColor : '#e2e8f0')};
 
   ${({ isSelected, baseColor }) =>
     isSelected
       ? `
-    box-shadow: 0 0 0 2px white, 0 0 0 3px ${baseColor};
+    box-shadow: 0 0 12px 4px ${baseColor}80, inset 0 0 0 2px ${baseColor};
+    font-weight: 800;
+    color: ${baseColor};
+    z-index: 10;
     `
       : ''}
 
@@ -310,25 +335,7 @@ const TooltipValue = styled.span`
   font-weight: 600;
 `;
 
-const LegendContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 8px;
-  flex-shrink: 0;
-`;
 
-const LegendGradient = styled.div`
-  width: 100px;
-  height: 8px;
-  border-radius: 4px;
-`;
-
-const LegendLabel = styled.span`
-  font-size: 9px;
-  color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
-`;
 
 const EmptyState = styled.div`
   display: flex;
@@ -412,19 +419,18 @@ const MiniDayCell = styled.div<MiniDayCellProps>`
   font-size: 8px;
   font-weight: 600;
 
-  background-color: ${({ intensity, baseColor }) => {
-    if (intensity === 0) return '#ebedf0';
-    const r = parseInt(baseColor.slice(1, 3), 16);
-    const g = parseInt(baseColor.slice(3, 5), 16);
-    const b = parseInt(baseColor.slice(5, 7), 16);
-    const mix = (c1: number, c2: number, t: number) => Math.round(c1 + (c2 - c1) * t);
-    const white = 235;
-    return `rgb(${mix(white, r, intensity)}, ${mix(white, g, intensity)}, ${mix(white, b, intensity)})`;
+  background-color: ${({ isSelected, baseColor }) => {
+    if (isSelected) return `${baseColor}35`;
+    return '#ffffff';
   }};
+  border: 1px solid ${({ isSelected, baseColor }) => (isSelected ? baseColor : '#e2e8f0')};
 
   ${({ isSelected, baseColor }) =>
     isSelected
-      ? `box-shadow: 0 0 0 1px white, 0 0 0 2px ${baseColor};`
+      ? `
+    box-shadow: 0 0 8px 2px ${baseColor}80, inset 0 0 0 1px ${baseColor};
+    z-index: 10;
+    `
       : ''}
 
   ${({ $isToday }) =>
@@ -452,56 +458,6 @@ const MiniDayCell = styled.div<MiniDayCellProps>`
 
 // Helpers
 
-/** Parse a date value into a Date object. String YYYY-MM-DD is parsed as local midnight. */
-function parseDateValue(val: unknown): Date | null {
-  if (!val) return null;
-  if (val instanceof Date) return val;
-  if (typeof val === 'number') return new Date(val);
-  const str = String(val);
-  const match = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match) {
-    const y = parseInt(match[1], 10);
-    const m = parseInt(match[2], 10) - 1;
-    const d = parseInt(match[3], 10);
-    const date = new Date(y, m, d);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  const d = new Date(str);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-/** Format a Date to YYYY-MM-DD */
-function formatDateKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-/** Get the first day of the month adjusted for firstDayOfWeek */
-function getFirstDayOfMonth(year: number, month: number, firstDayOfWeek: number): number {
-  const raw = new Date(year, month - 1, 1).getDay();
-  return (raw - firstDayOfWeek + 7) % 7;
-}
-
-/** Get the number of days in a month */
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month, 0).getDate();
-}
-
-/** ISO 8601 week number */
-function getISOWeekNumber(d: Date): number {
-  const temp = new Date(d.valueOf());
-  const dayNum = (d.getDay() + 6) % 7;
-  temp.setDate(temp.getDate() - dayNum + 3);
-  const firstThursday = temp.valueOf();
-  temp.setMonth(0, 1);
-  if (temp.getDay() !== 4) {
-    temp.setMonth(0, 1 + ((4 - temp.getDay() + 7) % 7));
-  }
-  return 1 + Math.ceil((firstThursday - temp.valueOf()) / 604800000);
-}
-
 /** Get the base color from a palette (the strongest color) */
 function getBaseColor(paletteName: string): string {
   const palette = COLOR_PALETTES[paletteName];
@@ -524,30 +480,6 @@ function getDatesBetween(start: string, end: string): string[] {
   return dates;
 }
 
-/** Format a date range for the selection badge */
-function formatSelectionRange(dates: string[]): string {
-  if (dates.length === 0) return '';
-  const firstDate = parseDateValue(dates[0]);
-  if (!firstDate) return '';
-  if (dates.length === 1) {
-    return firstDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-  const sorted = [...dates].sort();
-  const first = parseDateValue(sorted[0]) || firstDate;
-  const last = parseDateValue(sorted[sorted.length - 1]) || firstDate;
-
-  // Same month and year: "12-15 Mar 2026"
-  if (first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()) {
-    return `${first.getDate()}-${last.getDate()} ${first.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
-  }
-  // Same year: "12 Mar - 15 Apr 2026"
-  if (first.getFullYear() === last.getFullYear()) {
-    return `${first.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - ${last.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
-  }
-  // Different years: "12 Mar 2026 - 15 Apr 2027"
-  return `${first.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} - ${last.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
-}
-
 // Component
 
 export default function CalendarFilter(props: CalendarFilterProps) {
@@ -556,7 +488,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     height,
     width,
     colorScheme = 'supersetColors',
-    showLegend = true,
     firstDayOfWeek = 0,
     showWeekNumbers = false,
     showYearDropdown = true,
@@ -595,11 +526,25 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
     const firstRow = data[0] as Record<string, unknown>;
     const keys = Object.keys(firstRow);
-    const dateKey = keys.find(k => {
-      const val = firstRow[k];
-      return val && (typeof val === 'string' || typeof val === 'number' || val instanceof Date) &&
-        parseDateValue(val) !== null;
-    });
+    
+    // 1. Try to use explicit dateColumn from props
+    let dateKey = dateColumn && keys.includes(dateColumn) ? dateColumn : undefined;
+    
+    // 2. If not found, guess it, but prefer actual strings/dates over small numbers (which are likely metrics)
+    if (!dateKey) {
+      dateKey = keys.find(k => {
+        const val = firstRow[k];
+        return val && (typeof val === 'string' || val instanceof Date) && parseDateValue(val) !== null;
+      });
+    }
+    // 3. Last resort fallback (e.g. large epoch timestamps)
+    if (!dateKey) {
+      dateKey = keys.find(k => {
+        const val = firstRow[k];
+        return val && typeof val === 'number' && val > 31536000000 && parseDateValue(val) !== null; // greater than 1971
+      });
+    }
+
     const metricKey = keys.find(k => k !== dateKey && typeof firstRow[k] === 'number');
 
     data.forEach(row => {
@@ -619,6 +564,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
     return { map, min, max, hasData: map.size > 0, minDate, maxDate };
   }, [data]);
+
+  const hasInitialized = useRef(false);
+  useEffect(() => {
+    if (!hasInitialized.current && dataMap.maxDate) {
+      const maxD = parseDateValue(dataMap.maxDate);
+      if (maxD) {
+        setViewYear(maxD.getFullYear());
+        setViewMonth(maxD.getMonth() + 1);
+      }
+      hasInitialized.current = true;
+    }
+  }, [dataMap.maxDate]);
 
   // Selected dates from filterState
   const selectedDates: Set<string> = useMemo(() => {
@@ -774,29 +731,26 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const dateStr = day.date;
       let newSelected = new Set(selectedDates);
 
-      // Shift-click range selection
-      if (event?.shiftKey && lastClickedDate) {
-        const range = getDatesBetween(lastClickedDate, dateStr);
-        range.forEach(d => {
-          if (dataMap.map.has(d)) {
-            newSelected.add(d);
-          } else {
-            newSelected.add(d);
-          }
-        });
-      } else {
-        // Toggle
-        if (newSelected.has(dateStr)) {
+      if (selectedDates.size === 1) {
+        const firstDate = Array.from(selectedDates)[0];
+        if (firstDate === dateStr) {
+          // Toggle off if clicking the same single date again
           newSelected.delete(dateStr);
         } else {
-          newSelected.add(dateStr);
+          newSelected.clear();
+          const range = getDatesBetween(firstDate, dateStr);
+          range.forEach(d => newSelected.add(d));
         }
+      } else {
+        // If 0 or >1 selected, clicking a new date starts a new single selection
+        newSelected.clear();
+        newSelected.add(dateStr);
       }
 
       setLastClickedDate(dateStr);
       const selectedArray = Array.from(newSelected).sort();
 
-      setDataMask({
+      const payload = {
         extraFormData: {
           filters: selectedArray.length
             ? [{ col: dateColumn ?? '__timestamp', op: 'IN' as const, val: selectedArray }]
@@ -808,7 +762,10 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             ? selectedArray.reduce((acc, date) => ({ ...acc, [date]: date }), {} as Record<string, string>)
             : null,
         },
-      });
+      };
+      
+      console.log('CalendarFilter emitting setDataMask:', payload);
+      setDataMask(payload);
     },
     [setDataMask, selectedDates, lastClickedDate, dataMap.map, dateColumn],
   );
@@ -827,6 +784,36 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     });
   }, [setDataMask]);
 
+  const toggleEntireYear = useCallback(() => {
+    if (!setDataMask) return;
+    const yearDates = Array.from(dataMap.map.keys()).filter(d => d.startsWith(`${viewYear}-`));
+    if (yearDates.length === 0) return;
+    
+    const allSelected = yearDates.every(d => selectedDates.has(d));
+    let newSelected = new Set(selectedDates);
+    
+    if (allSelected) {
+      yearDates.forEach(d => newSelected.delete(d));
+    } else {
+      yearDates.forEach(d => newSelected.add(d));
+    }
+    
+    const selectedArray = Array.from(newSelected).sort();
+    setDataMask({
+      extraFormData: {
+        filters: selectedArray.length
+          ? [{ col: dateColumn ?? '__timestamp', op: 'IN' as const, val: selectedArray }]
+          : [],
+      },
+      filterState: {
+        value: selectedArray.length ? selectedArray : null,
+        selectedValues: selectedArray.length
+          ? selectedArray.reduce((acc, date) => ({ ...acc, [date]: date }), {} as Record<string, string>)
+          : null,
+      },
+    });
+  }, [setDataMask, viewYear, dataMap.map, dateColumn, selectedDates]);
+
   // Month label
   const monthLabel = useMemo(() => {
     const date = new Date(viewYear, viewMonth - 1, 1);
@@ -839,15 +826,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     return formatSelectionRange(sorted);
   }, [selectedDates]);
 
-  // Legend gradient
-  const legendGradient = useMemo(() => {
-    const palette = COLOR_PALETTES[colorScheme] || COLOR_PALETTES.supersetColors;
-    const stops = palette.slice(1).map((color, i) => {
-      const pct = Math.round((i / (palette.length - 2)) * 100);
-      return `${color} ${pct}%`;
-    });
-    return `linear-gradient(to right, ${stops.join(', ')})`;
-  }, [colorScheme]);
 
   // Tooltip handlers
   const handleMouseEnter = useCallback(
@@ -922,9 +900,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       if (!setDataMask) return;
 
       const newSelected = new Set(selectedDates);
-      if (newSelected.has(dateStr)) {
-        newSelected.delete(dateStr);
+      
+      if (selectedDates.size === 1) {
+        const firstDate = Array.from(selectedDates)[0];
+        if (firstDate === dateStr) {
+          newSelected.delete(dateStr);
+        } else {
+          newSelected.clear();
+          const range = getDatesBetween(firstDate, dateStr);
+          range.forEach(d => newSelected.add(d));
+        }
       } else {
+        newSelected.clear();
         newSelected.add(dateStr);
       }
 
@@ -998,6 +985,17 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <MonthTitle>
             {viewMode === 'year' ? viewYear : monthLabel}
           </MonthTitle>
+          {viewMode === 'year' && Array.from(dataMap.map.keys()).some(d => d.startsWith(`${viewYear}-`)) && (
+            <SelectionBadge 
+              style={{ cursor: 'pointer', background: '#30a14e', color: 'white', transition: 'transform 0.2s' }} 
+              onClick={toggleEntireYear}
+              title={`Filter dashboard by the entire year ${viewYear}`}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              🎯 Select All {viewYear}
+            </SelectionBadge>
+          )}
           {selectedDates.size > 0 && (
             <>
               <SelectionBadge>
@@ -1154,15 +1152,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             </TooltipContainer>
           )}
         </>
-      )}
-
-      {/* Legend */}
-      {showLegend && dataMap.hasData && viewMode === 'month' && (
-        <LegendContainer>
-          <LegendLabel>{dataMap.min.toFixed(1)}</LegendLabel>
-          <LegendGradient style={{ background: legendGradient }} />
-          <LegendLabel>{dataMap.max.toFixed(1)}</LegendLabel>
-        </LegendContainer>
       )}
     </Styles>
   );

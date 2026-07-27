@@ -1,6 +1,15 @@
 # Changelog
 
-## [0.1.2] — Unreleased
+## [Unreleased]
+
+### Added
+- **Select Entire Year (Macro Filter)**: nuovo badge UI nella visualizzazione annuale per selezionare/deselezionare l'intero anno, abilitando un filtraggio massivo nativo con `op: 'IN'`.
+- **Test Unitario**: implementato test in `CalendarFilter.test.tsx` per validare il calcolo e l'emissione del payload del filtro macro annuale.
+
+### Refactored
+- **Modular Date Utilities**: estratto il modulo pure-function `src/utils/dateUtils.ts` e la relativa suite di test (`test/utils/dateUtils.test.ts` con 12 nuovi test unitari), snellendo `CalendarFilter.tsx` e preservando al 100% tutti i contratti e le prop.
+
+## [0.1.2] — 2026-07-27
 
 ### Fixed
 

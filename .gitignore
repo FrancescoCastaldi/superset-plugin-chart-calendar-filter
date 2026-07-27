@@ -7,20 +7,7 @@ dist/
 .DS_Store
 *.log
 
-# opencode
-opencode.json
-opencode.jsonc
-.opencode/
-.opencode.json
-
-# debug / session artifacts
-.playwright-mcp/
-explore-after-wait.png
-explore-port9000.png
-login-page-snapshot.md
-
-
-# AI coding agent artifacts (opencode, copilot, cursor, claude, etc.)
+# AI coding agent artifacts
 .opencode/
 opencode.json
 opencode.jsonc
@@ -39,7 +26,7 @@ opencode.jsonc
 *.ai-session
 .ai/
 
-# AI session/context notes (NOT project docs like README.md / AGENTS.md)
+# AI session/context notes
 context.md
 *.context.md
 *.session.md
@@ -51,16 +38,27 @@ context.md
 notes.md
 *snapshot*.md
 session-*.md
-# agent memory / context files
 AGENTS.md
 
 # sensitive files
 SESSION-CONTEXT.md
 **/.ssh/
 
-# personal backup files
+# work tracking
+COMMESSA.md
+
+# Python utility/setup scripts
+*.py
+
+# personal files
+-FrancescoCasta.npmrc
 *-MacBook Air di Francesco.*
 bozza-email*.md
+
+# debug / session artifacts
+explore-after-wait.png
+explore-port9000.png
+login-page-snapshot.md
 
 # test coverage
 coverage/

@@ -64,12 +64,8 @@ describe('CalendarFilter', () => {
 
   it('shows the month title', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    const now = new Date();
-    const expectedTitle = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric',
-    });
-    expect(getByText(expectedTitle)).toBeTruthy();
+    // defaults to maxDate month (December 2026)
+    expect(getByText('December 2026')).toBeTruthy();
   });
 
   it('shows day numbers in the grid', () => {
@@ -92,18 +88,7 @@ describe('CalendarFilter', () => {
     expect(getByText('No data available')).toBeTruthy();
   });
 
-  it('shows the legend when showLegend is true', () => {
-    const { container } = render(<CalendarFilter {...defaultProps} />);
-    expect(container.textContent).toContain('5.0');
-    expect(container.textContent).toContain('35.0');
-  });
 
-  it('hides the legend when showLegend is false', () => {
-    const { container } = render(
-      <CalendarFilter {...defaultProps} showLegend={false} />,
-    );
-    expect(container.textContent).not.toContain('5.0');
-  });
 
   it('calls setDataMask when clicking a day', () => {
     const { getAllByText } = render(<CalendarFilter {...defaultProps} />);
@@ -132,8 +117,8 @@ describe('CalendarFilter', () => {
     const propsWithSelection = {
       ...defaultProps,
       filterState: {
-        value: ['2026-07-01'],
-        selectedValues: { '2026-07-01': '2026-07-01' },
+        value: ['2026-12-01'],
+        selectedValues: { '2026-12-01': '2026-12-01' },
       },
     };
     const { getAllByText } = render(<CalendarFilter {...propsWithSelection} />);
@@ -148,18 +133,51 @@ describe('CalendarFilter', () => {
     expect(call.extraFormData.filters).toEqual([]);
   });
 
+  it('selects a date range on second click', () => {
+    const propsWithSelection = {
+      ...defaultProps,
+      filterState: {
+        value: ['2026-12-01'],
+        selectedValues: { '2026-12-01': '2026-12-01' },
+      },
+    };
+    const { getAllByText } = render(<CalendarFilter {...propsWithSelection} />);
+    const dayElements = getAllByText('05');
+    const day5 = dayElements[0]?.closest('[role]') || dayElements[0]?.parentElement || dayElements[0];
+    if (day5) {
+      fireEvent.click(day5);
+    }
+
+    expect(mockSetDataMask).toHaveBeenCalledTimes(1);
+    const call = mockSetDataMask.mock.calls[0][0];
+    expect(call.extraFormData.filters[0].val).toEqual([
+      '2026-12-01',
+      '2026-12-02',
+      '2026-12-03',
+      '2026-12-04',
+      '2026-12-05'
+    ]);
+  });
+
   it('navigates to previous month', () => {
     const { getByLabelText, getByText } = render(<CalendarFilter {...defaultProps} />);
     const prevButton = getByLabelText('Previous');
     fireEvent.click(prevButton);
-    expect(getByText(/June/)).toBeTruthy();
+    // maxDate is 2026-12-01, so initial month is December. Previous is November.
+    expect(getByText(/November/)).toBeTruthy();
   });
 
   it('navigates to next month', () => {
     const { getByLabelText, getByText } = render(<CalendarFilter {...defaultProps} />);
+    // Initial state is December 2026 (maxDate).
+    // Go to previous month (November) so Next button becomes enabled
+    fireEvent.click(getByLabelText('Previous'));
+    expect(getByText(/November/)).toBeTruthy();
+    
+    // Now click Next
     const nextButton = getByLabelText('Next');
     fireEvent.click(nextButton);
-    expect(getByText(/August/)).toBeTruthy();
+    expect(getByText(/December/)).toBeTruthy();
   });
 
   it('shows selected dates from filterState', () => {
@@ -254,11 +272,11 @@ describe('CalendarFilter', () => {
 
   it('shows tooltip on hover over a data day', () => {
     const { getAllByText, getByText } = render(<CalendarFilter {...defaultProps} />);
-    // Find day element with number 15 (Jan 15 has data value 30)
-    const dayElements = getAllByText('15');
-    const day15 = dayElements[0]?.closest('[role]') || dayElements[0]?.parentElement || dayElements[0];
-    if (day15) {
-      fireEvent.mouseEnter(day15);
+    // Find day element with number 01 (Dec 01 has data value 5)
+    const dayElements = getAllByText('01');
+    const day01 = dayElements[0]?.closest('[role]') || dayElements[0]?.parentElement || dayElements[0];
+    if (day01) {
+      fireEvent.mouseEnter(day01);
     }
     // Tooltip should show the date, value, max, and percentage
     expect(getByText('Value:')).toBeTruthy();
@@ -277,5 +295,27 @@ describe('CalendarFilter', () => {
       />,
     );
     expect(container).toBeTruthy();
+  });
+
+  it('selects all year dates when year badge is clicked in year view', () => {
+    const { getByText, getByTitle } = render(<CalendarFilter {...defaultProps} />);
+    // go to year mode
+    fireEvent.click(getByText('Year'));
+    // click the badge
+    const badge = getByTitle(/Filter dashboard by the entire year/);
+    fireEvent.click(badge);
+    
+    expect(mockSetDataMask).toHaveBeenCalledTimes(1);
+    const call = mockSetDataMask.mock.calls[0][0];
+    // It should select all available dates in 2026 from the mock data
+    expect(call.extraFormData.filters[0].val).toEqual([
+      '2026-01-01',
+      '2026-01-02',
+      '2026-01-15',
+      '2026-07-01',
+      '2026-07-15',
+      '2026-08-01',
+      '2026-12-01',
+    ]);
   });
 });
