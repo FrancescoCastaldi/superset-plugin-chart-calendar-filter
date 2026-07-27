@@ -101,7 +101,7 @@ describe('dateUtils', () => {
     });
 
     it('formats single date badge', () => {
-      expect(formatDateRangeBadge(['2026-03-15'])).toBe('Mar 15, 2026');
+      expect(formatDateRangeBadge(['2026-03-15'])).toBe('15 mar 2026');
     });
 
     it('formats contiguous date range in same month', () => {

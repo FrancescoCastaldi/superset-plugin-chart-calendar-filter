@@ -64,8 +64,8 @@ describe('CalendarFilter', () => {
 
   it('shows the month title', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    // defaults to maxDate month (December 2026)
-    expect(getByText('December 2026')).toBeTruthy();
+    // defaults to maxDate month (Dicembre 2026)
+    expect(getByText(/dicembre 2026/i)).toBeTruthy();
   });
 
   it('shows day numbers in the grid', () => {
@@ -85,10 +85,8 @@ describe('CalendarFilter', () => {
     const { getByText } = render(
       <CalendarFilter {...defaultProps} data={[]} />,
     );
-    expect(getByText('No data available')).toBeTruthy();
+    expect(getByText('Nessun dato disponibile')).toBeTruthy();
   });
-
-
 
   it('calls setDataMask when clicking a day', () => {
     const { getAllByText } = render(<CalendarFilter {...defaultProps} />);
@@ -161,23 +159,23 @@ describe('CalendarFilter', () => {
 
   it('navigates to previous month', () => {
     const { getByLabelText, getByText } = render(<CalendarFilter {...defaultProps} />);
-    const prevButton = getByLabelText('Previous');
+    const prevButton = getByLabelText('Precedente');
     fireEvent.click(prevButton);
     // maxDate is 2026-12-01, so initial month is December. Previous is November.
-    expect(getByText(/November/)).toBeTruthy();
+    expect(getByText(/novembre/i)).toBeTruthy();
   });
 
   it('navigates to next month', () => {
     const { getByLabelText, getByText } = render(<CalendarFilter {...defaultProps} />);
     // Initial state is December 2026 (maxDate).
     // Go to previous month (November) so Next button becomes enabled
-    fireEvent.click(getByLabelText('Previous'));
-    expect(getByText(/November/)).toBeTruthy();
+    fireEvent.click(getByLabelText('Precedente'));
+    expect(getByText(/novembre/i)).toBeTruthy();
     
     // Now click Next
-    const nextButton = getByLabelText('Next');
+    const nextButton = getByLabelText('Successivo');
     fireEvent.click(nextButton);
-    expect(getByText(/December/)).toBeTruthy();
+    expect(getByText(/dicembre/i)).toBeTruthy();
   });
 
   it('shows selected dates from filterState', () => {
@@ -196,7 +194,7 @@ describe('CalendarFilter', () => {
 
   it('shows year dropdown when showYearDropdown is true', () => {
     const { getByLabelText } = render(<CalendarFilter {...defaultProps} />);
-    const yearSelect = getByLabelText('Select year');
+    const yearSelect = getByLabelText('Seleziona anno');
     expect(yearSelect).toBeTruthy();
   });
 
@@ -204,25 +202,25 @@ describe('CalendarFilter', () => {
     const { queryByLabelText } = render(
       <CalendarFilter {...defaultProps} showYearDropdown={false} />,
     );
-    expect(queryByLabelText('Select year')).toBeNull();
+    expect(queryByLabelText('Seleziona anno')).toBeNull();
   });
 
   it('shows view toggle button when enableOverview is true', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    expect(getByText('Year')).toBeTruthy();
+    expect(getByText('Anno')).toBeTruthy();
   });
 
   it('switches to year overview when clicking toggle', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    fireEvent.click(getByText('Year'));
+    fireEvent.click(getByText('Anno'));
     // Should now show year view with month labels
-    expect(getByText('Jan')).toBeTruthy();
-    expect(getByText('Dec')).toBeTruthy();
+    expect(getByText('gen')).toBeTruthy();
+    expect(getByText('dic')).toBeTruthy();
   });
 
   it('shows Today button and navigates to today', () => {
     const { getByText } = render(<CalendarFilter {...defaultProps} />);
-    expect(getByText('Today')).toBeTruthy();
+    expect(getByText('Oggi')).toBeTruthy();
   });
 
   it('shows week numbers when showWeekNumbers is true', () => {
@@ -242,9 +240,8 @@ describe('CalendarFilter', () => {
       },
     };
     const { container } = render(<CalendarFilter {...propsWithSelection} />);
-    // Badge now shows formatted date range instead of "N selected"
-    expect(container.textContent).toContain('Jan 1, 2024');
-    expect(container.textContent).toContain('Clear');
+    expect(container.textContent).toMatch(/1 gen 2024/i);
+    expect(container.textContent).toContain('Azzera');
   });
 
   it('clears selection when Clear button is clicked', () => {
@@ -256,7 +253,7 @@ describe('CalendarFilter', () => {
       },
     };
     const { getByText } = render(<CalendarFilter {...propsWithSelection} />);
-    fireEvent.click(getByText('Clear'));
+    fireEvent.click(getByText('Azzera'));
     expect(mockSetDataMask).toHaveBeenCalledWith({
       extraFormData: { filters: [] },
       filterState: { value: null, selectedValues: null },
@@ -279,9 +276,9 @@ describe('CalendarFilter', () => {
       fireEvent.mouseEnter(day01);
     }
     // Tooltip should show the date, value, max, and percentage
-    expect(getByText('Value:')).toBeTruthy();
-    expect(getByText('Max:')).toBeTruthy();
-    expect(getByText('% of max:')).toBeTruthy();
+    expect(getByText('Valore:')).toBeTruthy();
+    expect(getByText('Massimo:')).toBeTruthy();
+    expect(getByText('% del max:')).toBeTruthy();
   });
 
   it('renders with minimal config (no optional features)', () => {
@@ -300,9 +297,9 @@ describe('CalendarFilter', () => {
   it('selects all year dates when year badge is clicked in year view', () => {
     const { getByText, getByTitle } = render(<CalendarFilter {...defaultProps} />);
     // go to year mode
-    fireEvent.click(getByText('Year'));
+    fireEvent.click(getByText('Anno'));
     // click the badge
-    const badge = getByTitle(/Filter dashboard by the entire year/);
+    const badge = getByTitle(/Filtra la dashboard per l'intero anno/);
     fireEvent.click(badge);
     
     expect(mockSetDataMask).toHaveBeenCalledTimes(1);
@@ -314,6 +311,7 @@ describe('CalendarFilter', () => {
       '2026-01-15',
       '2026-07-01',
       '2026-07-15',
+      '2026-08-01',
       '2026-08-01',
       '2026-12-01',
     ]);

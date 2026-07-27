@@ -43,8 +43,8 @@ const COLOR_PALETTES: Record<string, string[]> = {
   purples: ['#ebedf0', '#d5c6e0', '#b392c4', '#8c6bb1', '#6a3d9a'],
 };
 
-const DAY_LABELS_SUNDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const DAY_LABELS_MONDAY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_LABELS_SUNDAY = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+const DAY_LABELS_MONDAY = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
 // Styles
 
@@ -817,7 +817,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   // Month label
   const monthLabel = useMemo(() => {
     const date = new Date(viewYear, viewMonth - 1, 1);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
   }, [viewYear, viewMonth]);
 
   // Selection badge text
@@ -888,7 +888,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         }
       }
 
-      const label = new Date(viewYear, m - 1, 1).toLocaleDateString('en-US', { month: 'short' });
+      const label = new Date(viewYear, m - 1, 1).toLocaleDateString('it-IT', { month: 'short' });
       months.push({ month: m, label, cells, weekRows: wRows });
     }
 
@@ -940,7 +940,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       <Styles height={height} width={width}>
         <EmptyState>
           <EmptyIcon>📅</EmptyIcon>
-          <span>No data available</span>
+          <span>Nessun dato disponibile</span>
         </EmptyState>
       </Styles>
     );
@@ -954,9 +954,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <NavButton
             onClick={goPrevMonth}
             type="button"
-            aria-label="Previous"
+            aria-label="Precedente"
             disabled={isPrevDisabled}
-            title={isPrevDisabled ? 'No data before this date' : 'Previous'}
+            title={isPrevDisabled ? 'Nessun dato prima di questa data' : 'Precedente'}
           >
             ◀
           </NavButton>
@@ -964,7 +964,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             <YearSelect
               value={viewYear}
               onChange={e => setViewYear(Number(e.target.value))}
-              aria-label="Select year"
+              aria-label="Seleziona anno"
             >
               {availableYears.map(y => (
                 <option key={y} value={y}>{y}</option>
@@ -976,7 +976,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
               type="button"
               onClick={() => setViewMode(viewMode === 'month' ? 'year' : 'month')}
             >
-              {viewMode === 'month' ? 'Year' : 'Month'}
+              {viewMode === 'month' ? 'Anno' : 'Mese'}
             </ViewToggleButton>
           )}
         </HeaderLeft>
@@ -989,11 +989,11 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             <SelectionBadge 
               style={{ cursor: 'pointer', background: '#30a14e', color: 'white', transition: 'transform 0.2s' }} 
               onClick={toggleEntireYear}
-              title={`Filter dashboard by the entire year ${viewYear}`}
+              title={`Filtra la dashboard per l'intero anno ${viewYear}`}
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-              🎯 Select All {viewYear}
+              🎯 Seleziona Tutto {viewYear}
             </SelectionBadge>
           )}
           {selectedDates.size > 0 && (
@@ -1002,7 +1002,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                 {selectedDates.size}{selectionBadgeText ? ` · ${selectionBadgeText}` : ''}
               </SelectionBadge>
               <ClearButton type="button" onClick={clearSelection}>
-                Clear
+                Azzera
               </ClearButton>
             </>
           )}
@@ -1010,14 +1010,14 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
         <HeaderRight>
           <TodayButton type="button" onClick={goToToday}>
-            Today
+            Oggi
           </TodayButton>
           <NavButton
             onClick={goNextMonth}
             type="button"
-            aria-label="Next"
+            aria-label="Successivo"
             disabled={isNextDisabled}
-            title={isNextDisabled ? 'No data after this date' : 'Next'}
+            title={isNextDisabled ? 'Nessun dato dopo questa data' : 'Successivo'}
           >
             ▶
           </NavButton>
@@ -1138,15 +1138,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             <TooltipContainer x={tooltip.x} y={tooltip.y}>
               <TooltipTitle>{tooltip.date}</TooltipTitle>
               <TooltipRow>
-                <TooltipLabel>Value:</TooltipLabel>
-                <TooltipValue>{tooltip.value?.toLocaleString() ?? 'N/A'}</TooltipValue>
+                <TooltipLabel>Valore:</TooltipLabel>
+                <TooltipValue>{tooltip.value?.toLocaleString() ?? 'N/D'}</TooltipValue>
               </TooltipRow>
               <TooltipRow>
-                <TooltipLabel>Max:</TooltipLabel>
+                <TooltipLabel>Massimo:</TooltipLabel>
                 <TooltipValue>{dataMap.max.toLocaleString()}</TooltipValue>
               </TooltipRow>
               <TooltipRow>
-                <TooltipLabel>% of max:</TooltipLabel>
+                <TooltipLabel>% del max:</TooltipLabel>
                 <TooltipValue>{tooltip.percentage}%</TooltipValue>
               </TooltipRow>
             </TooltipContainer>

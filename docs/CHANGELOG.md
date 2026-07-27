@@ -4,10 +4,18 @@
 
 ### Added
 - **Select Entire Year (Macro Filter)**: nuovo badge UI nella visualizzazione annuale per selezionare/deselezionare l'intero anno, abilitando un filtraggio massivo nativo con `op: 'IN'`.
-- **Test Unitario**: implementato test in `CalendarFilter.test.tsx` per validare il calcolo e l'emissione del payload del filtro macro annuale.
+- **Italian Localization**: traduzione completa in italiano di tutti i componenti UI (giorni della settimana, mesi, pulsanti *Oggi*, *Azzera*, *Anno/Mese*, *Seleziona Tutto* e tooltip *Valore/Massimo/% del max*).
+- **Test Unitari (40/40)**: suite Jest aggiornata e ampliata a 40 test unitari superati con successo.
+
+### Changed
+- **Aseptic Plain Cell Styling**: rimosso lo sfondo gradiente/heatmap condizionato dall'intensità dei dati. Tutte le caselle non selezionate ora hanno uno sfondo bianco neutro (`#ffffff`) con bordo discreto (`1px solid #e2e8f0`), evidenziando solo le date selezionate dall'utente.
+
+### Fixed
+- **Nested Query OrderBy Stripping**: rimosso l'inserimento di clausole `ORDER BY`, `timeseries_limit_metric` e `order_desc` in `buildQuery.ts` per prevenire errori SQL su sottoquery annidate in Apache Superset.
+- **Cross-Filter Dataset Alignment**: documentata e risolta la problematica di disallineamento dei dataset dei cross-filter nelle dashboard.
 
 ### Refactored
-- **Modular Date Utilities**: estratto il modulo pure-function `src/utils/dateUtils.ts` e la relativa suite di test (`test/utils/dateUtils.test.ts` con 12 nuovi test unitari), snellendo `CalendarFilter.tsx` e preservando al 100% tutti i contratti e le prop.
+- **Modular Date Utilities**: estratto il modulo pure-function `src/utils/dateUtils.ts` e la relativa suite di test (`test/utils/dateUtils.test.ts`), snellendo `CalendarFilter.tsx` e preservando al 100% tutte le prop ed i contratti API.
 
 ## [0.1.2] — 2026-07-27
 
