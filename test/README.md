@@ -10,63 +10,20 @@ Questa cartella contiene il materiale di test per il **Calendar Filter Plugin**,
 
 Il plugin permette di:
 - Visualizzare dati temporali su una griglia calendario mensile/annuale
-- Selezionare singoli giorni o range di date con click e drag
+- Selezionare singoli giorni o range di date con click
 - Filtrare automaticamente tutti gli altri chart della dashboard collegati
 - Navigare tra mesi e anni con controlli compatti
 
 ---
 
-## Requisiti
-
-| Elemento | Dettaglio |
-|---|---|
-| **Superset** | 6.1.0 con plugin installato |
-| **Database** | `examples` (database di esempio incluso in Superset) |
-| **Tabella sorgente** | `birth_names` |
-| **Colonne richieste** | `ds` (DATE/TIMESTAMP), `total_births` (DECIMAL) |
-| **Metrica** | `COUNT(*)` oppure `SUM(total_births)` |
-
----
-
-## Setup del Dataset
-
-### 1. Creare il dataset virtuale
-
-1. Aprire **SQL Lab** → **SQL Editor**
-2. Eseguire la seguente query:
-
-   ```sql
-   SELECT ds, SUM(num) as total_births
-   FROM birth_names
-   GROUP BY ds
-   ```
-
-3. Cliccare **Explore** o **Save as dataset**
-4. Assegnare il nome `birth_names_calendar_filter`
-5. Verificare i tipi delle colonne:
-
-   | Colonna | Tipo |
-   |---|---|
-   | `ds` | DATE / TIMESTAMP |
-   | `total_births` | DECIMAL / NUMERIC |
-
-### 2. Verificare il dataset
-
-Da **Data** → **Datasets**, cercare `birth_names_calendar_filter` e confermare che le colonne siano riconosciute correttamente.
-
----
-
 ## Configurazione del Chart
-
-Creare un nuovo chart con i seguenti parametri:
 
 | Parametro | Valore |
 |---|---|
-| **Dataset** | `birth_names_calendar_filter` |
 | **Chart type** | Calendar Filter |
 | **Viz type** | `superset-plugin-chart-calendar-filter` |
-| **Metric** | `COUNT(*)` oppure `SUM(total_births)` |
-| **Date column** | `ds` |
+| **Metric** | `COUNT(*)` o metrica personalizzata |
+| **Date column** | Colonna data del dataset |
 | **Time range** | No filter |
 
 ---
@@ -79,23 +36,23 @@ Una volta configurato il chart, verificare che:
 - I colori della heatmap riflettano l'intensità dei dati
 - I controlli di navigazione (mese/anno) siano visibili e funzionanti
 - L'indicatore del giorno corrente sia evidenziato
+- La legenda gradient mostri i valori min/max
 
 ![Calendar Filter in Explore](./explore-calendar-filter.png)
 
 ---
 
-## Aggiungere a Dashboard
+## Test su Dashboard (Sales Dashboard)
 
-Per testare il cross-filter:
-
-1. Aprire o creare una dashboard (es. **World Bank's Data**, id:9)
-2. Aggiungere il chart Calendar Filter alla dashboard
-3. Impostare lo **scope del filtro** su **globale**
-4. Salvare la dashboard
-5. Cliccare e trascinare sui giorni del calendario per selezionare un range
-6. Verificare che gli altri chart della dashboard si aggiornino in base alla selezione
+Il chart Calendar Filter è stato integrato nella **Sales Dashboard** con cross-filter globale, permettendo di filtrare tutti i chart della dashboard selezionando date sul calendario.
 
 ![Calendar Filter in Dashboard](./superset-dashboard-calendar-filter.png)
+
+La dashboard mostra diversi tipi di chart che reagiscono alla selezione:
+- **Total Revenue** e **Total Products Sold** (big number)
+- **Quarterly Revenue** (time series)
+- **Products Sold By Product Line** (table)
+- **Quarterly Revenue (By Product Line)** e **Total Revenue By Product** (bar chart)
 
 ![Dashboard completa](./dashboard-worldbank-full.png)
 
@@ -105,52 +62,49 @@ Per testare il cross-filter:
 
 | Funzionalità | Stato | Note |
 |---|---|---|
-| Rendering calendar heatmap | ✅ | Colori GitHub-style (light/dark) |
+| Rendering calendar heatmap | ✅ | Colori GitHub-style |
 | Navigazione mesi (◀ ▶) | ✅ | Pulsanti compatti |
 | Navigazione anni | ✅ | Selettore anno con frecce |
 | Indicatore giorno corrente | ✅ | Evidenziato con bordo |
-| Selezione singolo giorno | ✅ | Click per selezionare |
-| Selezione range (drag) | ✅ | Click + drag per range |
-| Badge selezione | ✅ | Mostra range selezionato |
+| Selezione singolo giorno | ✅ | Click per selezionare/deselezionare |
+| Badge selezione | ✅ | Mostra conteggio giorni selezionati |
+| Year/Month toggle | ✅ | Vista anno con 4x3 mini-calendari |
 | Cross-filter dashboard | ✅ | Scope globale |
 | Modalità compact | ✅ | Opzione Cell Density |
-| Palette GitHub-style | ✅ | Light + Dark mode |
-| Year selector | ✅ | Navigazione rapida per anno |
+| Palette colori multiple | ✅ | 6 palette disponibili |
 
 ---
 
-## 🎯 Test Interattivo del Cross-Filter
+## Test Interattivo del Cross-Filter
 
 ### Configurazione
 
-Il chart calendar-filter è stato aggiunto alla dashboard **"USA Births Names"** (id:7):
+Il chart calendar-filter è stato aggiunto alla **Sales Dashboard** (id:5):
 
 | Impostazione | Valore |
 |---|---|
-| **Dashboard** | USA Births Names (id:7) |
+| **Dashboard** | Sales Dashboard (id:5) |
 | **Cross-filter** | Abilitato, scope globale |
-| **Dataset condiviso** | `birth_names` (tutti i chart della dashboard) |
-
-Tutti i chart della dashboard condividono lo stesso dataset `birth_names`, quindi il cross-filter funziona immediatamente su tutti gli elementi visivi.
+| **Dataset** | Dataset condiviso tra i chart |
 
 ### Selezione Singolo Giorno
 
 Clicca su un giorno nel calendario per selezionarlo:
 
 - Il giorno viene evidenziato con un bordo
-- Il badge di selezione appare mostrando il giorno selezionato
+- Il badge di selezione appare mostrando i giorni selezionati
 - Tutti gli altri chart della dashboard vengono filtrati per quella data
 
 ![Singolo giorno selezionato](./dashboard-selection-single.png)
 
-### Selezione Range (Shift+click)
+### Selezione Multipla (click multipli)
 
-Per selezionare un intervallo di giorni:
+Per selezionare più giorni:
 
-1. Clicca su un giorno per iniziare la selezione
-2. Tieni premuto **Shift** e clicca su un altro giorno
-3. Tutti i giorni nell'intervallo vengono selezionati
-4. Il badge mostra il range formattato (es. "15 Jul - 20 Jul 2026")
+1. Clicca su un giorno per selezionarlo
+2. Clicca su altri giorni per aggiungerli alla selezione
+3. Ogni giorno selezionato viene evidenziato
+4. Il badge mostra il numero di giorni selezionati
 
 ![Range selezionato](./dashboard-selection-range.png)
 
@@ -159,8 +113,8 @@ Per selezionare un intervallo di giorni:
 Quando selezioni dei giorni nel calendario:
 
 - Tutti gli altri chart della dashboard vengono filtrati automaticamente
-- Il badge mostra il numero di giorni selezionati e il range
-- Per deselezionare, clicca su **Clear** nel badge
+- Il badge mostra il numero di giorni selezionati
+- Per deselezionare, clicca su **Clear** nel badge o clicca di nuovo sul giorno
 - La dashboard si aggiorna in tempo reale mostrando solo i dati del periodo selezionato
 
 ![Cross-filter attivo](./dashboard-crossfilter-active.png)
@@ -169,7 +123,7 @@ Quando selezioni dei giorni nel calendario:
 
 | Scenario | Descrizione |
 |---|---|
-| **Analisi mensile** | Seleziona un mese intero per vedere trend settimanali |
+| **Analisi mensile** | Seleziona giorni specifici per vedere trend |
 | **Analisi outlier** | Seleziona giorni specifici per analizzare picchi o anomalie |
 | **Confronto periodi** | Naviga tra mesi/anni per confrontare periodi diversi |
 | **Filtro rapido** | Usa il calendario come filtro visivo per esplorare i dati temporali |
@@ -178,7 +132,6 @@ Quando selezioni dei giorni nel calendario:
 
 ## Note
 
-- Il dataset `birth_names` è incluso nell'installazione di esempio di Superset. Se non disponibile, caricare il dataset di esempio prima di procedere.
-- Il plugin richiede che la colonna data sia di tipo DATE o TIMESTAMP. Colonne di tipo TEXT potrebbero non funzionare correttamente.
+- Il plugin richiede che la colonna data sia di tipo DATE o TIMESTAMP.
 - Il cross-filter funziona solo con chart nella stessa dashboard e con scope di filtro compatibile.
 - Per il test in modalità standalone (senza Superset), utilizzare la demo inclusa nella cartella `demo/` del plugin.
