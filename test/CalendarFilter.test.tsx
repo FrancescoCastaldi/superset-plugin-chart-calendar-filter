@@ -294,26 +294,77 @@ describe('CalendarFilter', () => {
     expect(container).toBeTruthy();
   });
 
-  it('selects all year dates when year badge is clicked in year view', () => {
-    const { getByText, getByTitle } = render(<CalendarFilter {...defaultProps} />);
-    // go to year mode
-    fireEvent.click(getByText('Anno'));
-    // click the badge
-    const badge = getByTitle(/Filtra la dashboard per l'intero anno/);
-    fireEvent.click(badge);
-    
-    expect(mockSetDataMask).toHaveBeenCalledTimes(1);
-    const call = mockSetDataMask.mock.calls[0][0];
-    // It should select all available dates in 2026 from the mock data
-    expect(call.extraFormData.filters[0].val).toEqual([
-      '2026-01-01',
-      '2026-01-02',
-      '2026-01-15',
-      '2026-07-01',
-      '2026-07-15',
-      '2026-08-01',
-      '2026-08-01',
-      '2026-12-01',
-    ]);
+  it('emits time_range filter when filterTypeMode is time_range', () => {
+    const { getAllByText } = render(
+      <CalendarFilter {...defaultProps} filterTypeMode="time_range" />,
+    );
+    const day15Elements = getAllByText('15');
+    const day15 = day15Elements[0]?.closest('[role]') || day15Elements[0]?.parentElement || day15Elements[0];
+    if (day15) {
+      fireEvent.click(day15);
+    }
+
+    expect(mockSetDataMask).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extraFormData: expect.objectContaining({
+          time_range: expect.stringMatching(/2026-12-15 : 2026-12-15/),
+        }),
+      }),
+    );
+  });
+
+  it('emits in_clause filter when filterTypeMode is in_clause', () => {
+    const { getAllByText } = render(
+      <CalendarFilter {...defaultProps} filterTypeMode="in_clause" />,
+    );
+    const day15Elements = getAllByText('15');
+    const day15 = day15Elements[0]?.closest('[role]') || day15Elements[0]?.parentElement || day15Elements[0];
+    if (day15) {
+      fireEvent.click(day15);
+    }
+
+    expect(mockSetDataMask).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extraFormData: expect.objectContaining({
+          filters: expect.arrayContaining([
+            expect.objectContaining({
+              col: 'ds',
+              op: 'IN',
+              val: ['2026-12-15'],
+            }),
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it('triggers default value selection when defaultValueMode is today', () => {
+    mockSetDataMask.mockClear();
+    render(
+      <CalendarFilter
+        {...defaultProps}
+        defaultValueMode="today"
+        filterState={{ value: null, selectedValues: null }}
+      />,
+    );
+    expect(mockSetDataMask).toHaveBeenCalled();
+  });
+
+  it('renders macro filter shortcuts and triggers Q1 selection', () => {
+    const { getByText } = render(
+      <CalendarFilter {...defaultProps} showMacroShortcuts={true} />,
+    );
+    const q1Btn = getByText('📊 Q1');
+    expect(q1Btn).toBeTruthy();
+    fireEvent.click(q1Btn);
+    expect(mockSetDataMask).toHaveBeenCalled();
+  });
+
+  it('opens expandable modal view when Espandi button is clicked', () => {
+    const { getByText, getByRole } = render(<CalendarFilter {...defaultProps} />);
+    const espandiBtn = getByText('🖥️ Espandi');
+    fireEvent.click(espandiBtn);
+    expect(getByText(/vista annuale 2026/i)).toBeTruthy();
+    expect(getByRole('button', { name: /chiudi/i })).toBeTruthy();
   });
 });

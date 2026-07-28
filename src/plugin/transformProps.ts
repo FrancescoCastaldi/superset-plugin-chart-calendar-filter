@@ -28,6 +28,11 @@ export default function transformProps(chartProps: ChartProps) {
     showYearDropdown = true,
     enableOverview = true,
     cellDensity = 'compact',
+    filterTypeMode = 'in_clause',
+    defaultValueMode = 'none',
+    showMacroShortcuts = true,
+    customDefaultStartDate,
+    customDefaultEndDate,
   } = formData;
   const { hooks, filterState } = chartProps;
   const { setDataMask = () => {} } = hooks || {};
@@ -37,6 +42,7 @@ export default function transformProps(chartProps: ChartProps) {
   return {
     width,
     height,
+    formData,
     data,
     colorScheme,
     showLegend,
@@ -45,6 +51,11 @@ export default function transformProps(chartProps: ChartProps) {
     showYearDropdown: showYearDropdown !== false,
     enableOverview: enableOverview !== false,
     cellDensity,
+    filterTypeMode,
+    defaultValueMode,
+    showMacroShortcuts: showMacroShortcuts !== false,
+    customDefaultStartDate,
+    customDefaultEndDate,
     setDataMask,
     filterState,
     dateColumn,

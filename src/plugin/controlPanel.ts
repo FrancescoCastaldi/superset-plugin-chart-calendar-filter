@@ -140,6 +140,58 @@ const config: ControlPanelConfig = {
         ],
       ],
     },
+    {
+      label: t('Native Filter Settings'),
+      expanded: true,
+      controlSetRows: [
+        [
+          {
+            name: 'filter_type_mode',
+            config: {
+              type: 'SelectControl',
+              label: t('Tipo di Filtro Emesso'),
+              default: 'in_clause',
+              choices: [
+                ['in_clause', t('Date Discrete (IN su colonna)')],
+                ['time_range', t('Filtro Tempo Nativo (time_range)')],
+              ],
+              renderTrigger: true,
+              description: t('Scegli se emettere un intervallo temporale nativo o una lista di date discrete IN'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'default_value_mode',
+            config: {
+              type: 'SelectControl',
+              label: t('Valore di Default Iniziale'),
+              default: 'none',
+              choices: [
+                ['none', t('Nessun Filtro (Tutte le date)')],
+                ['today', t('Oggi')],
+                ['current_month', t('Mese Corrente')],
+                ['current_year', t('Anno Corrente')],
+              ],
+              renderTrigger: true,
+              description: t('Selezione iniziale da applicare all\'apertura del filtro'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'show_macro_shortcuts',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Mostra Scorciatoie Macro Filtri'),
+              renderTrigger: true,
+              default: true,
+              description: t('Mostra pulsanti di selezione rapida (Anno, Mese, Trimestri Q1-Q4, Feriali)'),
+            },
+          },
+        ],
+      ],
+    },
   ],
   controlOverrides: {
     metric: {

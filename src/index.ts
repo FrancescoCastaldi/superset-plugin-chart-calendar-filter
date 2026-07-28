@@ -16,5 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line import/prefer-default-export
-export { default as SupersetPluginChartCalendarFilter } from './plugin';
+import SupersetPluginChartCalendarFilter from './plugin';
+export { SupersetPluginChartCalendarFilter };
+export default SupersetPluginChartCalendarFilter;

@@ -2,7 +2,21 @@
 
 This guide explains how to add the **Calendar Filter** plugin to a Superset checkout you already have on disk.
 
-For the automated one-command installer, see the [README](README.md#install-in-an-existing-superset).
+## 🚀 Quick Start (Automated 1-Command Installer for Beginners)
+
+Run the Python installer from the plugin folder:
+
+```bash
+python install.py --superset-path /path/to/superset-6.1.0
+```
+
+This single command automatically:
+1. Adds `"superset-plugin-chart-calendar-filter"` to `superset-frontend/package.json`.
+2. Registers `SupersetPluginChartCalendarFilter` under **"Filters and controls"** in `MainPreset.ts`.
+3. Applies TypeScript type-checking compatibility fixes (`AceEditorProvider.tsx`).
+4. Prepares `superset-frontend` for build/dev-server execution.
+
+---
 
 ## Manual install
 

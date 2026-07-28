@@ -57,6 +57,7 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
     expect(transformProps(chartProps)).toEqual({
       width: 800,
       height: 600,
+      formData,
       colorScheme: 'supersetColors',
       showLegend: true,
       firstDayOfWeek: 1,
@@ -64,6 +65,11 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
       showYearDropdown: false,
       enableOverview: false,
       cellDensity: 'compact',
+      filterTypeMode: 'in_clause',
+      defaultValueMode: 'none',
+      showMacroShortcuts: true,
+      customDefaultStartDate: undefined,
+      customDefaultEndDate: undefined,
       data: [
         { ds: '2024-01-01', sum__num: 10 },
         { ds: '2024-01-02', sum__num: 20 },

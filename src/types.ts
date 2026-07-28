@@ -28,6 +28,9 @@ export interface CalendarFilterStylesProps {
   width: number;
 }
 
+export type FilterTypeMode = 'time_range' | 'in_clause';
+export type DefaultValueMode = 'none' | 'today' | 'current_month' | 'current_year' | 'custom';
+
 interface CalendarFilterCustomizeProps {
   colorScheme: string;
   showLegend: boolean;
@@ -36,6 +39,11 @@ interface CalendarFilterCustomizeProps {
   showYearDropdown: boolean;
   enableOverview: boolean;
   cellDensity?: 'compact' | 'normal';
+  filterTypeMode?: FilterTypeMode;
+  defaultValueMode?: DefaultValueMode;
+  showMacroShortcuts?: boolean;
+  customDefaultStartDate?: string;
+  customDefaultEndDate?: string;
 }
 
 export type CalendarFilterQueryFormData = QueryFormData &
@@ -48,6 +56,7 @@ export type CalendarFilterProps = CalendarFilterStylesProps &
     setDataMask?: SetDataMaskHook;
     filterState?: DataMask['filterState'];
     dateColumn?: string;
+    formData?: QueryFormData;
   };
 
 /** Calendar day data point */

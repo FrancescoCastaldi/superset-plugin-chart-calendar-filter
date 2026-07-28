@@ -1,21 +1,29 @@
 # Changelog
 
-## [Unreleased]
-
-### Added
-- **Select Entire Year (Macro Filter)**: nuovo badge UI nella visualizzazione annuale per selezionare/deselezionare l'intero anno, abilitando un filtraggio massivo nativo con `op: 'IN'`.
-- **Italian Localization**: traduzione completa in italiano di tutti i componenti UI (giorni della settimana, mesi, pulsanti *Oggi*, *Azzera*, *Anno/Mese*, *Seleziona Tutto* e tooltip *Valore/Massimo/% del max*).
-- **Test Unitari (40/40)**: suite Jest aggiornata e ampliata a 40 test unitari superati con successo.
+## [0.1.4] — 2026-07-28
 
 ### Changed
-- **Aseptic Plain Cell Styling**: rimosso lo sfondo gradiente/heatmap condizionato dall'intensità dei dati. Tutte le caselle non selezionate ora hanno uno sfondo bianco neutro (`#ffffff`) con bordo discreto (`1px solid #e2e8f0`), evidenziando solo le date selezionate dall'utente.
+- **Modal Vista Annuale — Layout Rettangolare & Posizionamento**: abbassata l'origine del modal (`padding-top: 145px`) per evitare qualsiasi sovrapposizione con l'header e le schede della dashboard Superset; allargato il contenitore a `width: 96%` e `max-width: 1350px` per una visualizzazione rettangolare panoramica a 12 mesi.
 
 ### Fixed
-- **Nested Query OrderBy Stripping**: rimosso l'inserimento di clausole `ORDER BY`, `timeseries_limit_metric` e `order_desc` in `buildQuery.ts` per prevenire errori SQL su sottoquery annidate in Apache Superset.
-- **Cross-Filter Dataset Alignment**: documentata e risolta la problematica di disallineamento dei dataset dei cross-filter nelle dashboard.
+- **Webpack Stub Modules (0 error build)**: creati stub completi in `/app/superset-frontend/node_modules/` per `@deck.gl/widgets` (export sia prefissati `_` che standard), `@react-spring/web` (`animated`, `a`, `useTransition`, `useSpring`, ecc.), e `@fontsource/inter` (`100-900.css`). Il webpack-dev-server di Superset 6.1.0 compila ora con **0 errori**.
 
-### Refactored
-- **Modular Date Utilities**: estratto il modulo pure-function `src/utils/dateUtils.ts` e la relativa suite di test (`test/utils/dateUtils.test.ts`), snellendo `CalendarFilter.tsx` e preservando al 100% tutte le prop ed i contratti API.
+## [0.1.3] — 2026-07-28
+
+### Added
+- **Native Filter Evolution (`Behavior.NativeFilter`)**: registrazione del plugin nel registro Native Filters di Apache Superset 6.1.0 in architettura ibrida per l'utilizzo sia come Native Filter nella barra laterale che come Chart interattivo.
+- **Dual View Layout (Mini Inline + Modal 12 Mesi)**: mini calendario compatto a 1 mese per la barra filtri laterale affiancato dal pulsante `🖥️ Espandi` per l'apertura di un modal popover ad alta risoluzione a 12 mesi.
+- **Formato Filtro Emesso Configurabile**: scelta nel pannello di controllo tra intervallo temporale nativo (`time_range`) e lista adhoc di date discrete (clausola `IN` su colonna).
+- **Barra Scorciatoie Macro Filtri**: pulsanti rapidi per *🎯 Anno [YYYY]*, *📅 Mese Corrente*, *📊 Q1-Q4*, *💼 Feriali (Lun-Ven)* e *❌ Azzera*.
+- **Valori di Default Configurabili**: selezione iniziale del filtro personalizzabile da pannello (*Nessun filtro*, *Oggi*, *Mese Corrente*, *Anno Corrente*, *Intervallo Personalizzato*).
+- **Italian Localization**: traduzione completa in italiano di tutti i componenti UI (giorni della settimana, mesi, pulsanti *Oggi*, *Azzera*, *Anno/Mese*, *Espandi Modal*, e tooltip).
+- **Test Unitari (44/44)**: estesa la suite di test Jest a 44 test unitari passati con successo.
+
+### Changed
+- **Aseptic Plain Cell Styling**: rimosso lo sfondo gradiente/heatmap condizionato dall'intensità dei dati. Le caselle non selezionate ora hanno uno sfondo bianco neutro (`#ffffff`) con bordo discreto (`1px solid #e2e8f0`).
+
+### Fixed
+- **Nested Query OrderBy Stripping**: rimosso l'inserimento di clausole `ORDER BY` in `buildQuery.ts` per prevenire errori SQL su sottoquery annidate in Apache Superset.
 
 ## [0.1.2] — 2026-07-27
 
