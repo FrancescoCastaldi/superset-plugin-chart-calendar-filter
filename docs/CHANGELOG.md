@@ -2,8 +2,11 @@
 
 ## [0.1.4] — 2026-07-28
 
+### Added
+- **Selettore Anno Dinamico nel Modal**: aggiunti i pulsanti di navigazione anno (`◀`, `▶`) ed il menu a tendina di selezione anno (`<YearSelect>`) nell'header della finestra modale (Native Filter e Chart), consentendo la selezione e navigazione diretta tra qualsiasi anno (2024, 2025, 2026, 2027, ecc.).
+
 ### Changed
-- **Modal Vista Annuale — Layout Rettangolare & Posizionamento**: abbassata l'origine del modal (`padding-top: 145px`) per evitare qualsiasi sovrapposizione con l'header e le schede della dashboard Superset; allargato il contenitore a `width: 96%` e `max-width: 1350px` per una visualizzazione rettangolare panoramica a 12 mesi.
+- **Modal Vista Annuale — Layout Rettangolare & Posizionamento**: regolata l'origine del modal (`padding-top: 210px`) per posizionarlo perfettamente al di sotto delle barre di intestazione/schede della dashboard Superset; allargato il contenitore a `width: 96%` e `max-width: 1350px` per una visualizzazione panoramica rettangolare a 12 mesi.
 
 ### Fixed
 - **Webpack Stub Modules (0 error build)**: creati stub completi in `/app/superset-frontend/node_modules/` per `@deck.gl/widgets` (export sia prefissati `_` che standard), `@react-spring/web` (`animated`, `a`, `useTransition`, `useSpring`, ecc.), e `@fontsource/inter` (`100-900.css`). Il webpack-dev-server di Superset 6.1.0 compila ora con **0 errori**.

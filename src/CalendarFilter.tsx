@@ -1144,7 +1144,37 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <ModalOverlay onClick={() => setIsModalOpen(false)}>
             <ModalContent onClick={e => e.stopPropagation()}>
               <ModalHeader>
-                <ModalTitle>📅 Calendar Filter — Vista Annuale {viewYear}</ModalTitle>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <ModalTitle>📅 Calendar Filter — Vista Annuale</ModalTitle>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <NavButton
+                      type="button"
+                      onClick={() => setViewYear(y => y - 1)}
+                      title="Anno precedente"
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      ◀
+                    </NavButton>
+                    <YearSelect
+                      value={viewYear}
+                      onChange={e => setViewYear(Number(e.target.value))}
+                      aria-label="Seleziona anno"
+                      style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {availableYears.map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </YearSelect>
+                    <NavButton
+                      type="button"
+                      onClick={() => setViewYear(y => y + 1)}
+                      title="Anno successivo"
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      ▶
+                    </NavButton>
+                  </div>
+                </div>
                 <ModalCloseButton type="button" onClick={() => setIsModalOpen(false)}>
                   ✕ Chiudi
                 </ModalCloseButton>
@@ -1449,7 +1479,37 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         <ModalOverlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={e => e.stopPropagation()}>
             <ModalHeader>
-              <ModalTitle>📅 Calendar Filter — Vista Annuale {viewYear}</ModalTitle>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <ModalTitle>📅 Calendar Filter — Vista Annuale</ModalTitle>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <NavButton
+                    type="button"
+                    onClick={() => setViewYear(y => y - 1)}
+                    title="Anno precedente"
+                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                  >
+                    ◀
+                  </NavButton>
+                  <YearSelect
+                    value={viewYear}
+                    onChange={e => setViewYear(Number(e.target.value))}
+                    aria-label="Seleziona anno"
+                    style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {availableYears.map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </YearSelect>
+                  <NavButton
+                    type="button"
+                    onClick={() => setViewYear(y => y + 1)}
+                    title="Anno successivo"
+                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                  >
+                    ▶
+                  </NavButton>
+                </div>
+              </div>
               <ModalCloseButton type="button" onClick={() => setIsModalOpen(false)}>
                 ✕ Chiudi
               </ModalCloseButton>
