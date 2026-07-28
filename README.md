@@ -7,12 +7,15 @@
 [![Build](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.1-blue)
 ![React](https://img.shields.io/badge/React-17-61dafb)
-![Tests](https://img.shields.io/badge/Tests-27%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-44%20passing-brightgreen)
 
 ---
 
 <p align="center">
-  <img src="demo/screenshot.png" alt="Calendar Filter - Month view" width="800" />
+  <img src="docs/screenshots/sales_dashboard_calendar.png" alt="Calendar Filter - Native Filter & Dashboard View" width="800" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/calendar_filter_screenshot.png" alt="Calendar Filter - Annual View Modal" width="800" />
 </p>
 
 ---
