@@ -30,25 +30,19 @@ Il plugin **Calendar Filter** (`superset-plugin-chart-calendar-filter`) è un co
 ## 🖼️ Galleria & Screenshot Reali
 
 ### 1. Integrazione nella Sales Dashboard (Native Filter Bar & Chart Slice)
-<p align="center">
-  <img src="https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/docs/screenshots/sales_dashboard_calendar.png" alt="Sales Dashboard Calendar Filter" width="850" />
-</p>
+![Sales Dashboard Calendar Filter](sales_dashboard_calendar.png)
 > *Figura 1: Integrazione del plugin sia come Native Filter Trigger Pill nella barra laterale sinistra che come Chart Slice nella Sales Dashboard.*
 
 ---
 
 ### 2. Vista Annuale Popover Espansa (12 Mesi con Selettore Anno & Macro)
-<p align="center">
-  <img src="https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/docs/screenshots/calendar_filter_screenshot.png" alt="Calendar Filter Annual View Modal" width="850" />
-</p>
+![Calendar Filter Annual View Modal](calendar_filter_screenshot.png)
 > *Figura 2: Finestra modale rettangolare a 12 mesi con Selettore Anno (◀ 2026 ▶), Macro Filtri ed origine posizionata al di sotto dell'header Superset.*
 
 ---
 
 ### 3. Panoramica Dettagliata Selezione Interattiva
-<p align="center">
-  <img src="https://raw.githubusercontent.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/master/docs/screenshots/screenshot-calendar-full.png" alt="Full Overview" width="850" />
-</p>
+![Full Overview](screenshot-calendar-full.png)
 > *Figura 3: Dettaglio della selezione interattiva sulla griglia dei 12 mesi.*
 
 ---
