@@ -30,19 +30,19 @@ Il plugin **Calendar Filter** (`superset-plugin-chart-calendar-filter`) è un co
 ## 🖼️ Galleria & Screenshot Reali
 
 ### 1. Integrazione nella Sales Dashboard (Native Filter Bar & Chart Slice)
-![Sales Dashboard Calendar Filter](file:///c:/Users/fracas/OneDrive%20-%20mapsengineering.com/Calendar-Filter-Superset/docs/screenshots/sales_dashboard_calendar.png)
+![Sales Dashboard Calendar Filter](screenshots/sales_dashboard_calendar.png)
 > *Figura 1: Integrazione del plugin sia come Native Filter Trigger Pill nella barra laterale sinistra che come Chart Slice nella Sales Dashboard.*
 
 ---
 
 ### 2. Vista Annuale Popover Espansa (12 Mesi con Selettore Anno & Macro)
-![Calendar Filter Annual View Modal](file:///c:/Users/fracas/OneDrive%20-%20mapsengineering.com/Calendar-Filter-Superset/docs/screenshots/calendar_filter_screenshot.png)
+![Calendar Filter Annual View Modal](screenshots/calendar_filter_screenshot.png)
 > *Figura 2: Finestra modale rettangolare a 12 mesi con Selettore Anno (◀ 2026 ▶), Macro Filtri ed origine posizionata al di sotto dell'header Superset.*
 
 ---
 
 ### 3. Panoramica Dettagliata Selezione Interattiva
-![Full Overview](file:///c:/Users/fracas/OneDrive%20-%20mapsengineering.com/Calendar-Filter-Superset/demo/screenshot-calendar-full.png)
+![Full Overview](../demo/screenshot-calendar-full.png)
 > *Figura 3: Dettaglio della selezione interattiva sulla griglia dei 12 mesi.*
 
 ---
