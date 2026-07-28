@@ -1145,7 +1145,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             <ModalContent onClick={e => e.stopPropagation()}>
               <ModalHeader>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <ModalTitle>📅 Calendar Filter — Vista Annuale</ModalTitle>
+                  <ModalTitle>📅 Calendar Filter — Vista Annuale {viewYear}</ModalTitle>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <NavButton
                       type="button"
@@ -1480,7 +1480,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <ModalContent onClick={e => e.stopPropagation()}>
             <ModalHeader>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <ModalTitle>📅 Calendar Filter — Vista Annuale</ModalTitle>
+                <ModalTitle>📅 Calendar Filter — Vista Annuale {viewYear}</ModalTitle>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <NavButton
                     type="button"
