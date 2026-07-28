@@ -501,7 +501,7 @@ const ModalOverlay = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 145px 24px 24px 24px;
+  padding: 210px 24px 24px 24px;
 `;
 
 const ModalContent = styled.div`
@@ -510,7 +510,7 @@ const ModalContent = styled.div`
   width: 96%;
   max-width: 1350px;
   height: auto;
-  max-height: calc(100vh - 170px);
+  max-height: calc(100vh - 240px);
   display: flex;
   flex-direction: column;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
