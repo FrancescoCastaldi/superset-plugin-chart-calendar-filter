@@ -1,56 +1,56 @@
-# 📅 Superset Plugin: Calendar Filter Chart & Native Filter
+# Superset Plugin: Calendar Filter Chart & Native Filter
 
-> **Pagina Confluence**: Presentazione e Guida Funzionale del Plugin Calendar Filter per Apache Superset 6.1.0
+> **Documentazione Confluence**: Presentazione e Guida Funzionale del Plugin Calendar Filter per Apache Superset 6.1.0
 
 ---
 
-## 🎯 Cos'è il Calendar Filter?
+## Architettura e Obiettivi
 
 Il plugin **Calendar Filter** (`superset-plugin-chart-calendar-filter`) è un componente di visualizzazione e filtraggio temporale ad alte prestazioni sviluppato per **Apache Superset 6.1.0**. 
 
-È progettato in **Architettura Ibrida Duale** per funzionare in due modalità complementari:
-1. **Interactive Dashboard Chart**: integrabile come grafico standard nella griglia della dashboard con supporto Cross-Filtering bidirezionale su tutti gli altri grafici.
-2. **Native Filter Bar Component**: inserito direttamente nella barra filtri nativa (pannello laterale sinistro) per controllare l'intero cruscotto analitico.
+È progettato con un'**Architettura Ibrida Duale** per operare in due modalità complementari:
+1. **Interactive Dashboard Chart**: integrabile come grafico standard nella griglia della dashboard con supporto Cross-Filtering bidirezionale su tutti gli altri widget.
+2. **Native Filter Bar Component**: inserito direttamente nella barra filtri nativa (pannello laterale) per il controllo globale dell'intero cruscotto analitico.
 
 ---
 
-## 🌟 Funzionalità Principali
+## Funzionalità Principali
 
 | Funzionalità | Descrizione |
 |---|---|
-| 🖥️ **Vista Duale (Mini Inline + Modal)** | Mini calendario compatto a 1 mese per la barra laterale o card ridotte, affiancato dal pulsante **Espandi** per l'apertura di un modal panoramico a 12 mesi. |
-| 📅 **Selettore Anno Dinamico** | Controlli di navigazione anno (`◀`, `<select>`, `▶`) integrati nell'header della modale per scorrere ed esplorare liberamente qualsiasi anno (2024, 2025, 2026, 2027, ecc.). |
-| 🚀 **Scorciatoie Macro Rapide** | Pulsanti d'azione *1-Click* per selezioni immediate: **🎯 Anno**, **📅 Mese Corrente**, **📊 Q1-Q4**, **💼 Feriali (Lun-Ven)** e **❌ Azzera**. |
-| ⚙️ **Formato Filtro Emesso Configurabile** | Supporto per l'emissione sia di intervalli nativi Superset (`time_range`) che di liste discrete di date (clausola SQL `IN ('YYYY-MM-DD', ...)`). |
-| ✨ **Design Asettico & Glow Effect** | Fondo celle pulito e neutro (`#ffffff`) per massima leggibilità dei numeri, con evidenziazione grafica al neon e bagliore coordinato per le date selezionate. |
-| 🇮🇹 **Localizzazione Italiana Completa** | Interfaccia utente interamente localizzata in italiano (giorni, mesi, pulsanti e tooltip). |
+| **Vista Duale (Mini Inline + Modal)** | Interfaccia compatta a 1 mese per la barra laterale o card ridotte, affiancata da un pulsante di espansione per l'apertura di un modal panoramico a 12 mesi. |
+| **Selettore Anno Dinamico** | Controlli di navigazione temporale integrati nell'header della modale per scorrere ed esplorare liberamente il calendario senza restrizioni. |
+| **Scorciatoie Macro Rapide** | Trigger rapidi per selezioni immediate: **Anno**, **Mese Corrente**, **Q1-Q4**, **Feriali (Lun-Ven)** e **Reset selezione**. |
+| **Formato Filtro Emesso Configurabile** | Supporto per l'emissione sia di intervalli nativi Superset (`time_range`) che di liste discrete di date (clausola SQL `IN ('YYYY-MM-DD', ...)`). |
+| **Design Asettico & Minimalista** | Interfaccia pulita per la massima leggibilità dei dati, con evidenziazione grafica dinamica e coordinata per le date selezionate. |
+| **Localizzazione Completa** | Interfaccia utente interamente localizzata in lingua italiana (giorni, mesi, label e tooltip). |
 
 ---
 
-## 🖼️ Galleria & Screenshot Reali
+## Panoramica Visuale e Integrazione
 
-### 1. Integrazione nella Sales Dashboard (Native Filter Bar & Chart Slice)
+### 1. Integrazione nella Sales Dashboard come Native Filter
 ![Sales Dashboard Calendar Filter](./screenshots/sales_dashboard_calendar.png)
-> *Figura 1: Integrazione del plugin sia come Native Filter Trigger Pill nella barra laterale sinistra che come Chart Slice nella Sales Dashboard.*
+> *Figura 1: Il plugin integrato come Native Filter nella Sales Dashboard. È visibile il trigger button ("Seleziona Date Calendario") nella barra dei filtri laterale, pronto per l'espansione della modale.*
 
 ---
 
-### 2. Vista Annuale Popover Espansa (12 Mesi con Selettore Anno & Macro)
+### 2. Finestra Modale Vista Annuale (Layout Iniziale)
 ![Calendar Filter Annual View Modal](./screenshots/calendar_filter_screenshot.png)
-> *Figura 2: Finestra modale rettangolare a 12 mesi con Selettore Anno (◀ 2026 ▶), Macro Filtri ed origine posizionata al di sotto dell'header Superset.*
+> *Figura 2: La modale espansa a 12 mesi generata dal Native Filter. La griglia annuale si presenta vuota (nessuna data selezionata), esponendo il layout panoramico rettangolare, il selettore dell'anno e le macro d'uso frequente.*
 
 ---
 
-### 3. Panoramica Dettagliata Selezione Interattiva
+### 3. Selezione Interattiva (Macro Q1 Attivata)
 ![Full Overview](./screenshots/screenshot-calendar-full.png)
-> *Figura 3: Dettaglio della selezione interattiva sulla griglia dei 12 mesi.*
+> *Figura 3: Dettaglio dell'interazione utente. Attivando la scorciatoia "Q1" (Primo Trimestre), le date corrispondenti vengono istantaneamente selezionate ed evidenziate dinamicamente sulla griglia.*
 
 ---
 
-## ⚙️ Come Funziona (Flusso Operativo)
+## Flusso Operativo e DataMask
 
 ```text
-[ Utente Seleziona Date / Macro ]
+[ Input Utente: Selezione Date o Macro ]
                │
                ▼
 [ CalendarFilter Component ] ───(setDataMask)───► [ Superset Filter Engine ]
@@ -59,13 +59,13 @@ Il plugin **Calendar Filter** (`superset-plugin-chart-calendar-filter`) è un co
                                              [ SQL Query Update su Dashboard ]
 ```
 
-1. **Selezione Interattiva**: L'utente può cliccare una singola data, trascinare un intervallo temporale (click primo giorno ➔ click ultimo giorno) oppure cliccare una Macro (*es. Q1* o *Feriali*).
-2. **Propagazione DataMask**: Il plugin notifica lo stato tramite la hook nativa `setDataMask`.
-3. **Filtro Sincrono Dashboard**: Apache Superset aggiorna automaticamente le query di tutti i grafici compresi nello scope del filtro.
+1. **Selezione Interattiva**: L'utente può interagire selezionando una singola data, trascinando un intervallo temporale (drag & drop point-to-point) oppure utilizzando una Macro.
+2. **Propagazione DataMask**: Il plugin notifica le variazioni di stato tramite la hook nativa `setDataMask`.
+3. **Filtro Sincrono Dashboard**: L'engine di Apache Superset intercetta la maschera dati e aggiorna le query di tutti i grafici inclusi nello scope semantico del filtro.
 
 ---
 
-## 📊 Specifiche Tecniche
+## Specifiche Tecniche
 
 - **Package**: `superset-plugin-chart-calendar-filter`
 - **Compatibilità**: Apache Superset **6.1.0** (Node 18+, React 17, TypeScript 5)
