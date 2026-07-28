@@ -101,7 +101,7 @@ Color-coded day cells show metric intensity. Navigate between months, jump to an
 See the full year as a 4x3 grid of mini-calendars. Each mini-calendar is interactive - dates are clickable.
 
 <p align="center">
-  <img src="demo/screenshot-yearview.png" alt="Calendar Filter - Year overview" width="800" />
+  <img src="docs/screenshots/calendar_filter_screenshot.png" alt="Calendar Filter - Year overview" width="800" />
 </p>
 
 ### Interactive Selection & Cross-Filter
@@ -111,7 +111,7 @@ See the full year as a 4x3 grid of mini-calendars. Each mini-calendar is interac
 - **Auto cross-filter** - emits `__time_range IN [...]` to filter all dashboard charts
 
 <p align="center">
-  <img src="demo/screenshot-selection.png" alt="Calendar Filter - Date selection" width="800" />
+  <img src="demo/screenshot-calendar-full.png" alt="Calendar Filter - Date selection" width="800" />
 </p>
 
 ### Display Options
