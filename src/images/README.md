@@ -1,6 +1,6 @@
-# Source Images
+# 📂 Static Assets (`/src/images`)
 
-This directory contains static image assets used by the plugin source code or metadata.
+> **Image and Graphic Resources**
 
-## Files
-- `thumbnail.png`: A 100x100 pixel thumbnail image used by the Superset chart picker to represent this calendar filter visualization.
+This directory stores static graphical assets utilized within the plugin.
+- **`thumbnail.png`**: The 100x100 preview image displayed in the Apache Superset chart picker interface when adding a new visualization.

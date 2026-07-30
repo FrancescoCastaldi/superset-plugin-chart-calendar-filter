@@ -1,1 +1,5 @@
-Questa cartella raccoglie le immagini del plugin calendario in azione: lo screenshot principale del filtro, la selezione nel chart picker, le schermate della demo e alcune immagini di debug. Le immagini vengono utilizzate nella documentazione del progetto, come il README principale e il `CHANGELOG.md`. I file di debug sono ignorati da Git e servono solo per l’attività di sviluppo locale.
+# 📂 UI Visual Assets (`/docs/screenshots`)
+
+> **Application Rendering Previews**
+
+This directory stores high-resolution screenshots capturing the plugin's integration into Apache Superset dashboards and native filter modals. These assets are utilized in `README.md` and Confluence presentations.

@@ -1,6 +1,7 @@
-# Source Utilities
+# 📂 Utilities (`/src/utils`)
 
-This directory contains utility functions and helpers used throughout the plugin's source code.
+> **Temporal Computations & Formatting**
 
-## Files
-- `dateUtils.ts`: Provides helper functions for parsing, formatting, and manipulating dates within the calendar filter.
+This directory provides stateless utility functions isolated from React components.
+
+- **`dateUtils.ts`**: Highly specialized, timezone-safe algorithms handling date parsing, layout matrices, and string formatting, mitigating `+1/-1 day` drift caused by browser UTC conversions.

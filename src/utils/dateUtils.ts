@@ -121,3 +121,19 @@ export function formatDateRangeBadge(dates: string[]): string {
 
   return `${dates.length} selezionati`;
 }
+
+/** Get all dates between two dates (inclusive) */
+export function getDatesBetween(start: string, end: string): string[] {
+  const dates: string[] = [];
+  const current = parseDateValue(start);
+  const endDate = parseDateValue(end);
+  if (!current || !endDate) return dates;
+  const step = current <= endDate ? 1 : -1;
+
+  while (step > 0 ? current <= endDate : current >= endDate) {
+    dates.push(formatDateKey(current));
+    current.setDate(current.getDate() + step);
+  }
+
+  return dates;
+}

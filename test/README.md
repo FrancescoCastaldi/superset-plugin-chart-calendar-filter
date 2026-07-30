@@ -1,137 +1,124 @@
-# Test del Calendar Filter Plugin
+# 📂 Testing Suite (`/test`)
 
-> Verifica funzionale del plugin `superset-plugin-chart-calendar-filter` per Apache Superset 6.1.0
-
----
-
-## Introduzione
-
-Questa cartella contiene il materiale di test per il **Calendar Filter Plugin**, un chart plugin per Apache Superset che visualizza un calendario interattivo (heatmap) utilizzabile come filtro incrociato (cross-filter) nelle dashboard.
-
-Il plugin permette di:
-- Visualizzare dati temporali su una griglia calendario mensile/annuale
-- Selezionare singoli giorni o range di date con click
-- Filtrare automaticamente tutti gli altri chart della dashboard collegati
-- Navigare tra mesi e anni con controlli compatti
+> **Functional Verification & Unit Testing for `superset-plugin-chart-calendar-filter` (Apache Superset 6.1.0)**
 
 ---
 
-## Configurazione del Chart
+## 🧪 Overview
 
-| Parametro | Valore |
+This directory contains the comprehensive testing suite for the **Calendar Filter Plugin**, ensuring the reliability and functional correctness of the interactive calendar heatmap and its cross-filtering capabilities within Superset dashboards.
+
+The test suite validates:
+- Rendering of temporal data on the monthly/annual calendar grids.
+- Single-day and continuous date range selection (click & drag/shift-click).
+- Automated global cross-filtering dispatching to linked dashboard charts.
+- Fluid temporal navigation across months and years.
+
+---
+
+## 🛠️ Chart Configuration Parameters
+
+| Parameter | Value |
 |---|---|
 | **Chart type** | Calendar Filter |
 | **Viz type** | `superset-plugin-chart-calendar-filter` |
-| **Metric** | `COUNT(*)` o metrica personalizzata |
-| **Date column** | Colonna data del dataset |
+| **Metric** | `COUNT(*)` or custom metric |
+| **Date column** | The dataset's primary temporal column |
 | **Time range** | No filter |
 
 ---
 
-## Test in Explore
+## 🔍 Explore View Validation
 
-Una volta configurato il chart, verificare che:
+Once the chart is configured in the Explore view, verify the following:
 
-- La griglia calendario venga renderizzata correttamente
-- I colori della heatmap riflettano l'intensità dei dati
-- I controlli di navigazione (mese/anno) siano visibili e funzionanti
-- L'indicatore del giorno corrente sia evidenziato
-- La legenda gradient mostri i valori min/max
+- The calendar grid renders correctly without DOM overflow.
+- Heatmap coloring accurately reflects data density/intensity.
+- Month/Year navigation controls (`◀ ▶` and dropdowns) operate flawlessly.
+- The "Today" indicator correctly highlights the current local date.
+- The gradient legend dynamically displays accurate min/max ranges.
 
-![Calendar Filter in Explore](./explore-calendar-filter.png)
-
----
-
-## Test su Dashboard (Sales Dashboard)
-
-Il chart Calendar Filter è stato integrato nella **Sales Dashboard** con cross-filter globale, permettendo di filtrare tutti i chart della dashboard selezionando date sul calendario.
-
-![Calendar Filter in Dashboard](./superset-dashboard-calendar-filter.png)
-
-La dashboard mostra diversi tipi di chart che reagiscono alla selezione:
-- **Total Revenue** e **Total Products Sold** (big number)
-- **Quarterly Revenue** (time series)
-- **Products Sold By Product Line** (table)
-- **Quarterly Revenue (By Product Line)** e **Total Revenue By Product** (bar chart)
-
-![Dashboard completa](./dashboard-worldbank-full.png)
+![Calendar Filter in Explore](../docs/screenshots/explore-calendar-filter.png)
 
 ---
 
-## Funzionalità Testate
+## 📊 Dashboard Integration (Sales Dashboard)
 
-| Funzionalità | Stato | Note |
+The Calendar Filter chart is designed to integrate into dashboards (e.g., **Sales Dashboard**) with global cross-filtering enabled, allowing seamless temporal slicing across all analytical widgets.
+
+![Calendar Filter in Dashboard](../docs/screenshots/superset-dashboard-calendar-filter.png)
+
+Linked charts must react synchronously to calendar selections:
+- **Big Numbers** (Total Revenue, Total Products Sold)
+- **Time Series** (Quarterly Revenue)
+- **Tables** (Products Sold By Product Line)
+- **Bar Charts** (Quarterly Revenue By Product Line)
+
+---
+
+## ✅ Tested Features Matrix
+
+| Feature | Status | Notes |
 |---|---|---|
-| Rendering calendar heatmap | ✅ | Colori GitHub-style |
-| Navigazione mesi (◀ ▶) | ✅ | Pulsanti compatti |
-| Navigazione anni | ✅ | Selettore anno con frecce |
-| Indicatore giorno corrente | ✅ | Evidenziato con bordo |
-| Selezione singolo giorno | ✅ | Click per selezionare/deselezionare |
-| Badge selezione | ✅ | Mostra conteggio giorni selezionati |
-| Year/Month toggle | ✅ | Vista anno con 4x3 mini-calendari |
-| Cross-filter dashboard | ✅ | Scope globale |
-| Modalità compact | ✅ | Opzione Cell Density |
-| Palette colori multiple | ✅ | 6 palette disponibili |
+| Calendar heatmap rendering | ✅ | GitHub-style base styling |
+| Month navigation (`◀ ▶`) | ✅ | Compact trigger buttons |
+| Year navigation | ✅ | Dynamic `<YearSelect>` dropdown |
+| Current day indicator | ✅ | Green dot visual highlight |
+| Single day toggle | ✅ | Click to select/deselect |
+| Selection badge | ✅ | Renders active day count |
+| Year/Month dual view | ✅ | Toggle between 1-month and 12-month grids |
+| Dashboard Cross-filtering | ✅ | Global scope `setDataMask` emission |
+| Compact density mode | ✅ | Cell Density UI option |
+| Multiple color palettes | ✅ | 6 dynamic Superset palettes |
 
 ---
 
-## Test Interattivo del Cross-Filter
+## 🖱️ Interactive Cross-Filter Testing Protocol
 
-### Configurazione
+### Configuration Setup
 
-Il chart calendar-filter è stato aggiunto alla **Sales Dashboard** (id:5):
+Ensure the calendar-filter chart is added to the target dashboard (e.g., **Sales Dashboard** id:5):
 
-| Impostazione | Valore |
+| Setting | Value |
 |---|---|
 | **Dashboard** | Sales Dashboard (id:5) |
-| **Cross-filter** | Abilitato, scope globale |
-| **Dataset** | Dataset condiviso tra i chart |
+| **Cross-filter** | Enabled, global scope |
+| **Dataset** | Shared dataset among target charts |
 
-### Selezione Singolo Giorno
+### Single Day Selection
 
-Clicca su un giorno nel calendario per selezionarlo:
+Click a specific calendar day to trigger a selection:
+- The target day is highlighted with a neon border.
+- The selection badge updates to reflect the active selection.
+- All target dashboard charts synchronously filter to the selected date.
 
-- Il giorno viene evidenziato con un bordo
-- Il badge di selezione appare mostrando i giorni selezionati
-- Tutti gli altri chart della dashboard vengono filtrati per quella data
+### Multiple Date Selection (Range)
 
-![Singolo giorno selezionato](./dashboard-selection-single.png)
+To define a temporal range:
+1. Click the origin date to initiate selection.
+2. Click subsequent dates (or use shift-click) to expand the selection.
+3. Every selected cell receives the active glow state.
+4. The badge displays the aggregate selected days.
 
-### Selezione Multipla (click multipli)
+### Active Dashboard Cross-Filtering
 
-Per selezionare più giorni:
+During active calendar selection:
+- Dashboard widgets auto-update in real-time to reflect the temporal slice.
+- To clear the filter, utilize the **Clear** macro button or toggle the active day.
 
-1. Clicca su un giorno per selezionarlo
-2. Clicca su altri giorni per aggiungerli alla selezione
-3. Ogni giorno selezionato viene evidenziato
-4. Il badge mostra il numero di giorni selezionati
+### Use Cases
 
-![Range selezionato](./dashboard-selection-range.png)
-
-### Cross-Filter Attivo sulla Dashboard
-
-Quando selezioni dei giorni nel calendario:
-
-- Tutti gli altri chart della dashboard vengono filtrati automaticamente
-- Il badge mostra il numero di giorni selezionati
-- Per deselezionare, clicca su **Clear** nel badge o clicca di nuovo sul giorno
-- La dashboard si aggiorna in tempo reale mostrando solo i dati del periodo selezionato
-
-![Cross-filter attivo](./dashboard-crossfilter-active.png)
-
-### Casi d'Uso
-
-| Scenario | Descrizione |
+| Scenario | Description |
 |---|---|
-| **Analisi mensile** | Seleziona giorni specifici per vedere trend |
-| **Analisi outlier** | Seleziona giorni specifici per analizzare picchi o anomalie |
-| **Confronto periodi** | Naviga tra mesi/anni per confrontare periodi diversi |
-| **Filtro rapido** | Usa il calendario come filtro visivo per esplorare i dati temporali |
+| **Monthly trend analysis** | Select specific days to identify micro-trends. |
+| **Outlier investigation** | Isolate specific days to analyze metric spikes or anomalies. |
+| **Period comparison** | Navigate across months/years to benchmark different temporal periods. |
+| **Visual filtering** | Leverage the calendar as an intuitive visual filter to explore dataset timeframes. |
 
 ---
 
-## Note
+## ⚠️ Important Notes
 
-- Il plugin richiede che la colonna data sia di tipo DATE o TIMESTAMP.
-- Il cross-filter funziona solo con chart nella stessa dashboard e con scope di filtro compatibile.
-- Per il test in modalità standalone (senza Superset), utilizzare la demo inclusa nella cartella `demo/` del plugin.
+- The plugin strictly requires the target date column to be of type `DATE` or `TIMESTAMP`.
+- Cross-filtering operates exclusively on charts within the same dashboard utilizing a compatible semantic filter scope.
+- To execute tests in a standalone environment (detached from Superset), utilize the local esbuild demo located in the `/demo` directory.

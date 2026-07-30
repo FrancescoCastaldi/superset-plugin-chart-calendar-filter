@@ -1,9 +1,10 @@
-# GitHub
+# 📂 GitHub Architecture (`/.github`)
 
-Questa cartella contiene le configurazioni GitHub per la gestione del repository.
+> **Repository CI/CD & Governance**
 
-- `workflows/` — definisce le pipeline CI/CD, inclusi i test automatici e l'analisi di sicurezza CodeQL.
-- `ISSUE_TEMPLATE/` — modelli in italiano per segnalare bug e richiedere nuove funzionalità.
-- `PULL_REQUEST_TEMPLATE.md` — modello standard per le pull request.
+This directory dictates the GitHub-specific automation and repository governance structures.
 
-Questi file aiutano a mantenere qualità, sicurezza e coerenza nelle contribuzioni al progetto.
+## Infrastructure
+- **`workflows/`**: Defines the CI/CD pipelines (GitHub Actions), encompassing automated Jest testing, TypeScript validation, and CodeQL security analysis.
+- **`ISSUE_TEMPLATE/`**: Standardized, structured markdown templates for bug reporting and feature requests.
+- **`PULL_REQUEST_TEMPLATE.md`**: The strict compliance template applied to all incoming Pull Requests.

@@ -48,14 +48,14 @@
   },
   "scripts": {
     "build": "npm run build-cjs && npm run build-esm && npm run ts-types",
-    "build-cjs": "babel src --extensions \".ts,.tsx,.js,.jsx\" --copy-files --out-dir lib",
-    "build-clean": "rimraf {lib,esm,tsconfig.tsbuildinfo} && npm run build",
-    "build-esm": "cross-env BABEL_OUTPUT=esm babel src --extensions \".ts,.tsx,.js,.jsx\" --copy-files --out-dir esm",
-    "dev": "cross-env BABEL_OUTPUT=esm babel src --extensions \".ts,.tsx,.js,.jsx\" --watch --copy-files --out-dir esm",
-    "clean": "rimraf {lib,esm,tsconfig.tsbuildinfo}",
+    "build-cjs": "esbuild src/index.ts --outdir=lib --format=cjs --packages=external --sourcemap",
+    "build-esm": "esbuild src/index.ts --outdir=esm --format=esm --packages=external --sourcemap",
+    "build-clean": "rimraf {lib,esm} && npm run build",
+    "dev": "esbuild src/index.ts --outdir=esm --format=esm --packages=external --watch",
+    "clean": "rimraf {lib,esm}",
     "prebuild": "npm run clean",
     "postbuild": "npm run test",
-    "ts-types": "tsc --build",
+    "ts-types": "tsc --emitDeclarationOnly --outDir lib",
     "test": "jest",
     "prepublishOnly": "npm run build"
   },
@@ -67,9 +67,8 @@
     "react": "^16.13.1 || ^17.0.0"
   },
   "devDependencies": {
-    "@airbnb/config-babel": "^2.0.1",
-    "@babel/cli": "^7.16.0",
-    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@airbnb/config-babel": "^3.1.0",
+    "@apache-superset/core": "^0.1.0",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -78,16 +77,15 @@
     "@testing-library/react": "^12.1.5",
     "@types/jest": "^26.0.4",
     "@types/react": "^17.0.93",
-    "babel-plugin-transform-dev": "^2.0.1",
-    "babel-plugin-typescript-to-proptypes": "^2.0.0",
     "cross-env": "^10.1.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "json-bigint": "^1.0.0",
-    "@apache-superset/core": "^0.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
+    "semantic-release": "^25.0.8",
+    "tsup": "^8.5.1",
     "typescript": "^4.1.2"
   }
 }

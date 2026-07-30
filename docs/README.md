@@ -1,1 +1,5 @@
-Questa cartella contiene la documentazione del progetto: il changelog delle versioni (`CHANGELOG.md`), la guida per contribuire (`CONTRIBUTING.md`), le istruzioni di installazione (`INSTALL.md`) e le immagini dimostrative nella sottocartella `screenshots/`. Ogni file è pensato per aiutare utenti e sviluppatori a comprendere, installare e migliorare il plugin calendario. Per maggiori dettagli, consultare i file elencati o il README principale del repository.
+# 📂 Global Documentation (`/docs`)
+
+> **Comprehensive Knowledge Base**
+
+This directory is the central repository for project-wide documentation, historical session context, structural architectural references, and visual assets (screenshots). It serves as the primary reference point for developers and AI agents interacting with the codebase.

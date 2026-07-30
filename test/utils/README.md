@@ -1,6 +1,5 @@
-# Utility Tests
+# 📂 Utilities Unit Tests (`/test/utils`)
 
-This directory contains unit tests for the utility functions used by the plugin.
+> **Date Algorithm Verification**
 
-## Files
-- `dateUtils.test.ts`: Tests for date manipulation and formatting helpers.
+This directory contains Jest test suites asserting the absolute correctness of temporal calculations and localized formatting exposed by `dateUtils.ts`. Evaluates timezone resilience and leap year compliance.

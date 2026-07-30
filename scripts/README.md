@@ -1,1 +1,7 @@
-Questa cartella contiene script di utilità per automatizzare la gestione del plugin. Gli script `install-to-superset` (PowerShell e shell) installano il plugin nell'istanza Superset locale, mentre `publish` (PowerShell e shell) gestiscono la pubblicazione del pacchetto.
+# 📂 Automation Scripts (`/scripts`)
+
+> **CI/CD & Local Installation Automation**
+
+This directory contains utility scripts engineered to automate the plugin lifecycle. 
+- **`install-to-superset`** (PowerShell and Bash): Zero-touch installers that link and register the plugin directly into a local Apache Superset checkout.
+- **`publish`**: Deployment scripts to package and release the plugin to the npm registry.

@@ -12,11 +12,7 @@ const config = getConfig({
   },
 });
 
-config.plugins = [
-  ['babel-plugin-transform-dev', { evaluate: false }],
-  ['babel-plugin-typescript-to-proptypes', { loose: true }],
-  ['@babel/plugin-proposal-class-properties', { loose: true }],
-];
+config.plugins = [];
 
 // Do not ignore @superset-ui modules when running tests via Jest
 if (process.env.NODE_ENV === 'test') {

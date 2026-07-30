@@ -1,1 +1,13 @@
-Questa cartella contiene il codice sorgente principale del plugin per Apache Superset `superset-plugin-chart-calendar-filter`. Qui sono definiti il componente React del calendario, i tipi TypeScript, la logica di registrazione del plugin e le immagini di anteprima. È il cuore del calendario filtro interattivo selezionabile per le dashboard.
+# 📂 Source Code Directory (`/src`)
+
+> **Core Logic of `superset-plugin-chart-calendar-filter`**
+
+This directory houses the primary TypeScript/React source code for the Superset Calendar Filter plugin. It orchestrates the dual-hybrid architecture (Interactive Chart + Native Filter).
+
+## Key Components
+- **`index.ts`**: Main export and registry entry point for the plugin.
+- **`CalendarFilter.tsx`**: The core React component managing DOM rendering, state hooks, conditional layouts (inline vs. modal), and styling.
+- **`types.ts`**: TypeScript contracts, interfaces, and prop definitions.
+- **`plugin/`**: Superset-specific integration layers (`buildQuery`, `transformProps`, `controlPanel`).
+- **`utils/`**: Temporal computation and string formatting utilities.
+- **`images/`**: Static assets, including the chart picker thumbnail.

@@ -1,9 +1,11 @@
-# Plugin Registry & Metadata
+# 📂 Superset Integration Layer (`/src/plugin`)
 
-This directory contains the core Apache Superset chart plugin registration logic, metadata definition, query building, and data transformation pipeline.
+> **Chart Registration & Pipeline Contracts**
 
-## Files
-- `buildQuery.ts`: Constructs the query context (metrics, groupby, filters) to be sent to the Superset backend.
-- `controlPanel.ts`: Defines the configuration options and UI controls available in the Explore view.
-- `index.ts`: The main entry point for registering the `ChartPlugin` and `ChartMetadata`.
-- `transformProps.ts`: Transforms the data returned by the backend into props suitable for the React component.
+This directory encapsulates the integration logic required to interface the React component with the Apache Superset ecosystem.
+
+## Key Modules
+- **`index.ts`**: Defines the `ChartPlugin` class, registering the module, its metadata (`category: Filters and controls`), and operational behaviors.
+- **`buildQuery.ts`**: The query builder responsible for forging the SQL payload dispatched to the Superset Flask backend.
+- **`controlPanel.ts`**: Configures the UI form controls available in the Superset Explore view.
+- **`transformProps.ts`**: The transformation pipeline that maps raw `chartProps` into specific React props injected into the `CalendarFilter` component.

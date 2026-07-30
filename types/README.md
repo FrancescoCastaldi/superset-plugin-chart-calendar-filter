@@ -1,1 +1,5 @@
-Questa cartella contiene le dichiarazioni di tipo TypeScript per moduli esterni che non forniscono tipi nativi. Il file `external.d.ts` dichiara ad esempio il modulo `@apache-superset/core/translation`, permettendo una compilazione sicura e senza errori di tipo nel progetto.
+# 📂 TypeScript Definitions (`/types`)
+
+> **External Module Declarations**
+
+This directory contains ambient TypeScript declarations (`*.d.ts`) for external modules that lack native typing. For instance, `external.d.ts` exposes the `@apache-superset/core/translation` module, ensuring type-safe compilation and strict semantic enforcement across the project.

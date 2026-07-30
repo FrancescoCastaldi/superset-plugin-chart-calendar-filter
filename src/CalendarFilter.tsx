@@ -17,11 +17,21 @@
  * under the License.
  */
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import styled from '@emotion/styled';
+
 import { Global } from '@emotion/react';
 import {
+  Styles, NativeFilterTriggerContainer, NativeFilterPillButton, CalendarHeader, HeaderLeft, HeaderCenter, HeaderRight,
+  NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton,
+  CalendarGrid, DayHeader, WeekNumberCell, DayCell, DayNumber, TooltipContainer, TooltipTitle, TooltipRow,
+  TooltipLabel, TooltipValue, EmptyState, EmptyIcon, YearOverviewGrid, MiniMonth, MiniMonthTitle, MiniMonthGrid,
+  MiniDayHeader, MiniWeekNum, MiniDayCell, ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton,
+  MacroBar, MacroButton
+} from './styles/CalendarFilter.styles';
+import { useCalendarData } from './hooks/useCalendarData';
+import { useSelectionMask } from './hooks/useSelectionMask';
+
+import {
   CalendarFilterProps,
-  CalendarFilterStylesProps,
   CalendarDay,
   TooltipData,
 } from './types';
@@ -34,590 +44,7 @@ import {
   formatDateRangeBadge as formatSelectionRange,
 } from './utils/dateUtils';
 
-// Color palettes — GitHub-inspired gradients
-const COLOR_PALETTES: Record<string, string[]> = {
-  supersetColors: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
-  greens: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
-  blues: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
-  oranges: ['#ebedf0', '#fddfb8', '#fdb87d', '#f59241', '#e66b1f'],
-  reds: ['#ebedf0', '#ffd1d1', '#ff9b9b', '#ff6b6b', '#e63946'],
-  purples: ['#ebedf0', '#d5c6e0', '#b392c4', '#8c6bb1', '#6a3d9a'],
-};
 
-const DAY_LABELS_SUNDAY = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-const DAY_LABELS_MONDAY = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-
-// Styles
-
-const Styles = styled.div<CalendarFilterStylesProps>`
-  height: ${({ height }) => (height && height > 120 ? `${height}px` : 'auto')};
-  min-height: ${({ height }) => (height && height > 120 ? `${height}px` : '36px')};
-  width: ${({ width }) => (width ? `${width}px` : '100%')};
-  display: flex;
-  flex-direction: column;
-  font-family: ${({ theme }) => theme?.typography?.families?.sansSerif || 'sans-serif'};
-  overflow: hidden;
-  position: relative;
-  /* Evita sovrapposizione con la sticky filterbar-action-buttons (116px) */
-  padding-bottom: 116px;
-`;
-
-const NativeFilterTriggerContainer = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 2px 0;
-`;
-
-const NativeFilterPillButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #111827;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-  &:hover {
-    border-color: #2563eb;
-    color: #1d4ed8;
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
-  }
-`;
-
-const CalendarHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  gap: 6px;
-`;
-
-const HeaderLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
-
-const HeaderCenter = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
-
-const NavButton = styled.button`
-  background: white;
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e2e8f0')};
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 6px 12px;
-  line-height: 1;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f8fafc')};
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: none;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#f1f5f9')};
-  }
-`;
-
-const TodayButton = styled.button`
-  background: white;
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e2e8f0')};
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 6px 12px;
-  line-height: 1.2;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${({ theme }) => (theme?.colors?.secondary?.light1 ?? '#f8fafc')};
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: none;
-  }
-`;
-
-const MonthTitle = styled.div`
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.l ?? 14)}px;
-  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
-  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
-  white-space: nowrap;
-`;
-
-const SelectionBadge = styled.span`
-  font-size: 10px;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
-  background: ${({ theme }) => (theme?.colors?.primary?.light2 ?? '#e0f5e8')};
-  padding: 0 8px;
-  border-radius: 10px;
-  white-space: nowrap;
-  line-height: 20px;
-`;
-
-const ClearButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 10px;
-  color: ${({ theme }) => theme?.colors?.error?.base || '#e74c3c'};
-  text-decoration: underline;
-  padding: 0;
-  line-height: 1;
-
-  &:hover {
-    color: ${({ theme }) => theme?.colors?.error?.dark1 || '#c0392b'};
-  }
-`;
-
-const YearSelect = styled.select`
-  font-size: 11px;
-  padding: 3px 6px;
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: 4px;
-  background: white;
-  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
-  cursor: pointer;
-`;
-
-const MonthSelect = styled.select`
-  font-size: 11px;
-  padding: 3px 6px;
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: 4px;
-  background: white;
-  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
-  cursor: pointer;
-`;
-
-const ViewToggleButton = styled.button`
-  background: none;
-  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 10px;
-  padding: 4px 8px;
-  line-height: 1;
-  color: ${({ theme }) => (theme?.colors?.primary?.base ?? '#40c463')};
-  transition: background 0.2s ease;
-  white-space: nowrap;
-
-  &:hover {
-    background: ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
-  }
-`;
-
-const CalendarGrid = styled.div<{ showWeekNumbers: boolean }>`
-  display: grid;
-  grid-template-columns: ${({ showWeekNumbers }) =>
-    showWeekNumbers ? '24px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
-  gap: 1px;
-  padding: 0 8px 8px;
-  flex: 1;
-  align-content: start;
-`;
-
-const DayHeader = styled.div`
-  text-align: center;
-  font-size: 9px;
-  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
-  color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
-  padding: 4px 0;
-  text-transform: uppercase;
-`;
-
-const WeekNumberCell = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
-  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
-`;
-
-interface DayCellProps {
-  intensity: number;
-  isSelected: boolean;
-  isCurrentMonth: boolean;
-  $isToday: boolean;
-  baseColor: string;
-  $cellHeight: number;
-}
-
-const DayCell = styled.div<DayCellProps>`
-  height: ${({ $cellHeight }) => $cellHeight}px;
-  width: 100%;
-  min-width: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  font-size: 11px;
-  cursor: ${({ isCurrentMonth }) => (isCurrentMonth ? 'pointer' : 'default')};
-  opacity: ${({ isCurrentMonth }) => (isCurrentMonth ? 1 : 0.3)};
-  transition: all 0.2s ease;
-  position: relative;
-  user-select: none;
-
-  background-color: ${({ isSelected, baseColor }) => {
-    if (isSelected) return `${baseColor}35`;
-    return '#ffffff';
-  }};
-  border: 1px solid ${({ isSelected, baseColor }) => (isSelected ? baseColor : '#e2e8f0')};
-
-  ${({ isSelected, baseColor }) =>
-    isSelected
-      ? `
-    box-shadow: 0 0 12px 4px ${baseColor}80, inset 0 0 0 2px ${baseColor};
-    font-weight: 800;
-    color: ${baseColor};
-    z-index: 10;
-    `
-      : ''}
-
-  ${({ $isToday }) =>
-    $isToday
-      ? `
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    `
-      : ''}
-
-  &:hover {
-    transform: ${({ isCurrentMonth }) => (isCurrentMonth ? 'scale(1.15)' : 'none')};
-    z-index: 1;
-  }
-`;
-
-const DayNumber = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  pointer-events: none;
-  line-height: 1;
-  color: #1a1a1a;
-`;
-
-const TooltipContainer = styled.div<{ x: number; y: number }>`
-  position: fixed;
-  left: ${({ x }) => Math.min(x, window.innerWidth - 200)}px;
-  top: ${({ y }) => Math.max(y - 40, 0)}px;
-  background: rgba(0, 0, 0, 0.85);
-  color: white;
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-size: 11px;
-  pointer-events: none;
-  z-index: 1000000;
-  white-space: nowrap;
-  line-height: 1.5;
-  font-family: ${({ theme }) => theme?.typography?.families?.sansSerif || 'sans-serif'};
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-`;
-
-const TooltipTitle = styled.div`
-  font-weight: bold;
-  margin-bottom: 2px;
-`;
-
-const TooltipRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-`;
-
-const TooltipLabel = styled.span`
-  color: rgba(255, 255, 255, 0.7);
-`;
-
-const TooltipValue = styled.span`
-  font-weight: 600;
-`;
-
-const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#999'};
-  font-size: ${({ theme }) => (theme?.typography?.sizes?.m ?? 12)}px;
-  gap: 8px;
-`;
-
-const EmptyIcon = styled.div`
-  font-size: 16px;
-  line-height: 1;
-`;
-
-// Year Overview Styles
-
-const YearOverviewGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 8px;
-  flex: 1;
-  overflow-y: auto;
-`;
-
-const MiniMonth = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const MiniMonthTitle = styled.div`
-  text-align: center;
-  font-size: 10px;
-  font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
-  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
-  margin-bottom: 4px;
-`;
-
-const MiniMonthGrid = styled.div<{ showWeekNumbers: boolean }>`
-  display: grid;
-  grid-template-columns: ${({ showWeekNumbers }) =>
-    showWeekNumbers ? '14px repeat(7, 1fr)' : 'repeat(7, 1fr)'};
-  gap: 1px;
-`;
-
-const MiniDayHeader = styled.div`
-  text-align: center;
-  font-size: 7px;
-  font-weight: bold;
-  color: ${({ theme }) => theme?.colors?.grayscale?.base ?? '#666'};
-  text-transform: uppercase;
-`;
-
-const MiniWeekNum = styled.div`
-  font-size: 7px;
-  color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-interface MiniDayCellProps {
-  intensity: number;
-  isSelected: boolean;
-  $isToday: boolean;
-  baseColor: string;
-}
-
-const MiniDayCell = styled.div<MiniDayCellProps>`
-  aspect-ratio: 0.8;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  font-weight: 600;
-
-  background-color: ${({ isSelected, baseColor }) => {
-    if (isSelected) return `${baseColor}35`;
-    return '#ffffff';
-  }};
-  border: 1px solid ${({ isSelected, baseColor }) => (isSelected ? baseColor : '#e2e8f0')};
-
-  ${({ isSelected, baseColor }) =>
-    isSelected
-      ? `
-    box-shadow: 0 0 8px 2px ${baseColor}80, inset 0 0 0 1px ${baseColor};
-    z-index: 10;
-    `
-      : ''}
-
-  ${({ $isToday }) =>
-    $isToday
-      ? `
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 1px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 3px;
-      height: 3px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    `
-      : ''}
-
-  &:hover {
-    transform: scale(1.3);
-    z-index: 1;
-  }
-`;
-
-// Native Filter Modal & Macro Shortcuts Styles
-
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(4px);
-  z-index: 999999;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 210px 24px 24px 24px;
-`;
-
-const ModalContent = styled.div`
-  background: #ffffff;
-  border-radius: 12px;
-  width: 96%;
-  max-width: 1350px;
-  height: auto;
-  max-height: calc(100vh - 240px);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
-  overflow: hidden;
-  position: relative;
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
-`;
-
-const ModalTitle = styled.h3`
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: #1e293b;
-`;
-
-const ModalCloseButton = styled.button`
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 4px 10px;
-  color: #475569;
-  transition: all 0.2s ease;
-  &:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-  }
-`;
-
-const MacroBar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  padding: 8px 12px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-`;
-
-const MacroButton = styled.button`
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #334155;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  transition: all 0.15s ease;
-  white-space: nowrap;
-
-  &:hover {
-    background: #e0f5e8;
-    border-color: #40c463;
-    color: #216e39;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-// Helpers
-
-/** Get the base color from a palette (the strongest color) */
-function getBaseColor(paletteName: string): string {
-  const palette = COLOR_PALETTES[paletteName];
-  return palette ? palette[palette.length - 1] : COLOR_PALETTES.supersetColors[COLOR_PALETTES.supersetColors.length - 1];
-}
-
-/** Get all dates between two dates (inclusive) */
-function getDatesBetween(start: string, end: string): string[] {
-  const dates: string[] = [];
-  const current = parseDateValue(start);
-  const endDate = parseDateValue(end);
-  if (!current || !endDate) return dates;
-  const step = current <= endDate ? 1 : -1;
-
-  while (step > 0 ? current <= endDate : current >= endDate) {
-    dates.push(formatDateKey(current));
-    current.setDate(current.getDate() + step);
-  }
-
-  return dates;
-}
 
 // Component
 
@@ -654,57 +81,38 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const DAY_LABELS_SUNDAY = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+  const DAY_LABELS_MONDAY = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
   const dayLabels = firstDayOfWeek === 0 ? DAY_LABELS_SUNDAY : DAY_LABELS_MONDAY;
 
-  // Cell height based on density
   const cellHeight = cellDensity === 'normal' ? 38 : 30;
 
-  // Determine date column and records
-  const dataMap = useMemo(() => {
-    if (!data || data.length === 0) return { map: new Map<string, number>(), min: 0, max: 0, hasData: false, minDate: null as string | null, maxDate: null as string | null };
+  const {
+    dataMap,
+    minDateBound,
+    maxDateBound,
+    availableYears,
+    intensityScale,
+    baseColor,
+  } = useCalendarData(data, dateColumn, colorScheme, viewYear, today);
 
-    const map = new Map<string, number>();
-    let min = Infinity;
-    let max = -Infinity;
-    let minDate: string | null = null;
-    let maxDate: string | null = null;
-
-    const firstRow = data[0] as Record<string, unknown>;
-    const keys = Object.keys(firstRow);
-    
-    let dateKey = dateColumn && keys.includes(dateColumn) ? dateColumn : undefined;
-    if (!dateKey) {
-      dateKey = keys.find(k => {
-        const val = firstRow[k];
-        return val && (typeof val === 'string' || val instanceof Date) && parseDateValue(val) !== null;
-      });
-    }
-    if (!dateKey) {
-      dateKey = keys.find(k => {
-        const val = firstRow[k];
-        return val && typeof val === 'number' && val > 31536000000 && parseDateValue(val) !== null;
-      });
-    }
-
-    const metricKey = keys.find(k => k !== dateKey && typeof firstRow[k] === 'number');
-
-    data.forEach(row => {
-      const r = row as Record<string, unknown>;
-      const dateVal = dateKey ? r[dateKey] : null;
-      const metricVal = metricKey ? Number(r[metricKey]) : 0;
-      const d = parseDateValue(dateVal);
-      if (d && metricVal != null && !Number.isNaN(metricVal)) {
-        const key = formatDateKey(d);
-        map.set(key, metricVal);
-        if (metricVal < min) min = metricVal;
-        if (metricVal > max) max = metricVal;
-        if (minDate === null || key < minDate) minDate = key;
-        if (maxDate === null || key > maxDate) maxDate = key;
-      }
-    });
-
-    return { map, min, max, hasData: map.size > 0, minDate, maxDate };
-  }, [data, dateColumn]);
+  const {
+    selectedDates,
+    emitSelection,
+    clearSelection,
+    handleDayToggle,
+    handleDragStart,
+    handleDragEnter,
+    handleDragEnd,
+  } = useSelectionMask(
+    filterState,
+    setDataMask,
+    filterTypeMode,
+    dateColumn,
+    defaultValueMode,
+    customDefaultStartDate,
+    customDefaultEndDate
+  );
 
   const hasInitialized = useRef(false);
   useEffect(() => {
@@ -717,93 +125,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       hasInitialized.current = true;
     }
   }, [dataMap.maxDate]);
-
-  // Selected dates from filterState
-  const selectedDates: Set<string> = useMemo(() => {
-    if (filterState?.selectedValues) {
-      return new Set(Object.keys(filterState.selectedValues));
-    }
-    if (filterState?.value) {
-      const vals = Array.isArray(filterState.value) ? filterState.value : [filterState.value];
-      return new Set(vals.map(String));
-    }
-    return new Set<string>();
-  }, [filterState]);
-
-  // Unified selection emission handler
-  const emitSelection = useCallback(
-    (datesArray: string[]) => {
-      if (!setDataMask) return;
-      const sorted = Array.from(new Set(datesArray)).sort();
-      let extraFormData: Record<string, unknown> = {};
-
-      if (sorted.length > 0) {
-        if (filterTypeMode === 'time_range') {
-          const minD = sorted[0];
-          const maxD = sorted[sorted.length - 1];
-          extraFormData = {
-            time_range: `${minD} : ${maxD}`,
-            filters: [
-              { col: dateColumn ?? '__timestamp', op: '>=', val: minD },
-              { col: dateColumn ?? '__timestamp', op: '<=', val: maxD },
-            ],
-          };
-        } else {
-          extraFormData = {
-            filters: [{ col: dateColumn ?? '__timestamp', op: 'IN' as const, val: sorted }],
-          };
-        }
-      } else {
-        extraFormData = { filters: [] };
-      }
-
-      setDataMask({
-        extraFormData,
-        filterState: {
-          value: sorted.length ? sorted : null,
-          selectedValues: sorted.length
-            ? sorted.reduce((acc, date) => ({ ...acc, [date]: date }), {} as Record<string, string>)
-            : null,
-        },
-      });
-    },
-    [setDataMask, filterTypeMode, dateColumn],
-  );
-
-  // Initialize Default Value on Mount if not already selected
-  const defaultInitialized = useRef(false);
-  useEffect(() => {
-    if (defaultInitialized.current || !setDataMask || selectedDates.size > 0 || defaultValueMode === 'none') {
-      return;
-    }
-    defaultInitialized.current = true;
-    const now = new Date();
-    const currentY = now.getFullYear();
-    const currentM = now.getMonth() + 1;
-    const todayFormatted = formatDateKey(now);
-
-    if (defaultValueMode === 'today') {
-      emitSelection([todayFormatted]);
-    } else if (defaultValueMode === 'current_month') {
-      const days = getDaysInMonth(currentY, currentM);
-      const monthDates: string[] = [];
-      for (let d = 1; d <= days; d++) {
-        monthDates.push(`${currentY}-${String(currentM).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-      }
-      emitSelection(monthDates);
-    } else if (defaultValueMode === 'current_year') {
-      const yearDates: string[] = [];
-      for (let m = 1; m <= 12; m++) {
-        const days = getDaysInMonth(currentY, m);
-        for (let d = 1; d <= days; d++) {
-          yearDates.push(`${currentY}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-        }
-      }
-      emitSelection(yearDates);
-    } else if (defaultValueMode === 'custom' && customDefaultStartDate && customDefaultEndDate) {
-      emitSelection(getDatesBetween(customDefaultStartDate, customDefaultEndDate));
-    }
-  }, [defaultValueMode, setDataMask, selectedDates.size, customDefaultStartDate, customDefaultEndDate, emitSelection]);
 
   // Macro Filter Actions
   const selectEntireYear = useCallback(() => {
@@ -857,30 +178,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     }
     emitSelection(weekdays);
   }, [viewYear, viewMonth, emitSelection]);
-
-  // Parse min/max dates for navigation constraints
-  const { minDateBound, maxDateBound } = useMemo(() => {
-    if (!dataMap.minDate || !dataMap.maxDate) {
-      return { minDateBound: null, maxDateBound: null };
-    }
-    return { minDateBound: dataMap.minDate, maxDateBound: dataMap.maxDate };
-  }, [dataMap.minDate, dataMap.maxDate]);
-
-  // Available years for dropdown
-  const availableYears = useMemo(() => {
-    if (!minDateBound || !maxDateBound) {
-      const y = today.getFullYear();
-      return [y - 2, y - 1, y, y + 1, y + 2];
-    }
-    const minY = parseDateValue(minDateBound)?.getFullYear() ?? viewYear;
-    const maxY = Math.max(
-      parseDateValue(maxDateBound)?.getFullYear() ?? viewYear,
-      today.getFullYear()
-    );
-    const years: number[] = [];
-    for (let y = minY; y <= maxY; y++) years.push(y);
-    return years;
-  }, [minDateBound, maxDateBound, today, viewYear]);
 
   // Is prev/next disabled?
   const isPrevDisabled = useMemo(() => {
@@ -946,18 +243,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     return rows;
   }, [calendarCells, showWeekNumbers]);
 
-  // Color scale
-  const { intensityScale, baseColor } = useMemo(() => {
-    const base = getBaseColor(colorScheme);
-    const range = dataMap.max - dataMap.min;
-    return {
-      baseColor: base,
-      intensityScale: (val: number | null): number => {
-        if (val == null || range === 0) return 0;
-        return (val - dataMap.min) / range;
-      },
-    };
-  }, [colorScheme, dataMap.min, dataMap.max]);
+
 
   // Navigation
   const goPrevMonth = useCallback(() => {
@@ -993,35 +279,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   }, []);
 
   // Toggle date selection
-  const handleDayClick = useCallback(
-    (day: CalendarDay, event?: React.MouseEvent) => {
-      if (!setDataMask) return;
+  
 
-      const dateStr = day.date;
-      let newSelected = new Set(selectedDates);
-
-      if (selectedDates.size === 1) {
-        const firstDate = Array.from(selectedDates)[0];
-        if (firstDate === dateStr) {
-          newSelected.delete(dateStr);
-        } else {
-          newSelected.clear();
-          const range = getDatesBetween(firstDate, dateStr);
-          range.forEach(d => newSelected.add(d));
-        }
-      } else {
-        newSelected.clear();
-        newSelected.add(dateStr);
-      }
-
-      emitSelection(Array.from(newSelected));
-    },
-    [setDataMask, selectedDates, emitSelection],
-  );
-
-  const clearSelection = useCallback(() => {
-    emitSelection([]);
-  }, [emitSelection]);
+  
 
   // Month labels for dropdown
   const MONTH_LABELS = useMemo(() => {
@@ -1110,29 +370,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     return months;
   }, [viewYear, viewMode, isModalOpen, dataMap, firstDayOfWeek, showWeekNumbers]);
 
-  const handleMiniDayClick = useCallback(
-    (dateStr: string) => {
-      if (!setDataMask) return;
-
-      const newSelected = new Set(selectedDates);
-      if (selectedDates.size === 1) {
-        const firstDate = Array.from(selectedDates)[0];
-        if (firstDate === dateStr) {
-          newSelected.delete(dateStr);
-        } else {
-          newSelected.clear();
-          const range = getDatesBetween(firstDate, dateStr);
-          range.forEach(d => newSelected.add(d));
-        }
-      } else {
-        newSelected.clear();
-        newSelected.add(dateStr);
-      }
-
-      emitSelection(Array.from(newSelected));
-    },
-    [setDataMask, selectedDates, emitSelection],
-  );
+  
 
   const isCompactNativeFilter = Boolean(formData?.inView || (height && height <= 120));
 
@@ -1296,7 +534,12 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                                 isSelected={selectedDates.has(cell.date)}
                                 $isToday={cell.date === todayStr}
                                 baseColor={baseColor}
-                                onClick={() => handleMiniDayClick(cell.date)}
+                                onClick={() => handleDayToggle(cell.date)}
+                                onMouseDown={() => handleDragStart(cell.date)}
+                                onMouseEnter={() => handleDragEnter(cell.date)}
+                                onMouseUp={handleDragEnd}
+                                tabIndex={0}
+                                onKeyDown={e => e.key === 'Enter' && handleDayToggle(cell.date)}
                                 title={cell.date}
                               />
                             );
@@ -1329,8 +572,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                                   $isToday={cell.date === todayStr}
                                   baseColor={baseColor}
                                   $cellHeight={Math.max(cellHeight, 36)}
-                                  onClick={(e) => handleDayClick(cell, e)}
-                                  onMouseEnter={(e) => handleMouseEnter(cell, e)}
+                                  onClick={(e) => handleDayToggle(cell.date)}
+                                  onMouseDown={() => handleDragStart(cell.date)}
+                                  onMouseUp={handleDragEnd}
+                                  tabIndex={0}
+                                  onKeyDown={e => e.key === 'Enter' && handleDayToggle(cell.date)}
+                                  onMouseEnter={(e) => {
+                                    handleDragEnter(cell.date);
+                                    handleMouseEnter(cell, e);
+                                  }}
                                   onMouseLeave={handleMouseLeave}
                                   title=""
                                 >
@@ -1353,7 +603,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                               $isToday={cell.date === todayStr}
                               baseColor={baseColor}
                               $cellHeight={Math.max(cellHeight, 36)}
-                              onClick={(e) => handleDayClick(cell, e)}
+                              onClick={(e) => handleDayToggle(cell.date)}
                               onMouseEnter={(e) => handleMouseEnter(cell, e)}
                               onMouseLeave={handleMouseLeave}
                               title=""
@@ -1536,7 +786,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                           isSelected={selectedDates.has(cell.date)}
                           $isToday={cell.date === todayStr}
                           baseColor={baseColor}
-                          onClick={() => handleMiniDayClick(cell.date)}
+                          onClick={() => handleDayToggle(cell.date)}
                           title={`${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`}
                         />
                       );
@@ -1552,7 +802,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                       isSelected={selectedDates.has(cell.date)}
                       $isToday={cell.date === todayStr}
                       baseColor={baseColor}
-                      onClick={() => handleMiniDayClick(cell.date)}
+                      onClick={() => handleDayToggle(cell.date)}
                       title={`${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`}
                     />
                   );
@@ -1586,7 +836,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                           $isToday={cell.date === todayStr}
                           baseColor={baseColor}
                           $cellHeight={cellHeight}
-                          onClick={(e) => handleDayClick(cell, e)}
+                          onClick={(e) => handleDayToggle(cell.date)}
                           onMouseEnter={(e) => handleMouseEnter(cell, e)}
                           onMouseLeave={handleMouseLeave}
                           title=""
@@ -1610,7 +860,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                       $isToday={cell.date === todayStr}
                       baseColor={baseColor}
                       $cellHeight={cellHeight}
-                      onClick={(e) => handleDayClick(cell, e)}
+                      onClick={(e) => handleDayToggle(cell.date)}
                       onMouseEnter={(e) => handleMouseEnter(cell, e)}
                       onMouseLeave={handleMouseLeave}
                       title=""
@@ -1777,7 +1027,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                               isSelected={selectedDates.has(cell.date)}
                               $isToday={cell.date === todayStr}
                               baseColor={baseColor}
-                              onClick={() => handleMiniDayClick(cell.date)}
+                              onClick={() => handleDayToggle(cell.date)}
                               title={cell.date}
                             />
                           );
@@ -1810,7 +1060,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                                 $isToday={cell.date === todayStr}
                                 baseColor={baseColor}
                                 $cellHeight={Math.max(cellHeight, 36)}
-                                onClick={(e) => handleDayClick(cell, e)}
+                                onClick={(e) => handleDayToggle(cell.date)}
                                 onMouseEnter={(e) => handleMouseEnter(cell, e)}
                                 onMouseLeave={handleMouseLeave}
                                 title=""
@@ -1834,7 +1084,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                             $isToday={cell.date === todayStr}
                             baseColor={baseColor}
                             $cellHeight={Math.max(cellHeight, 36)}
-                            onClick={(e) => handleDayClick(cell, e)}
+                            onClick={(e) => handleDayToggle(cell.date)}
                             onMouseEnter={(e) => handleMouseEnter(cell, e)}
                             onMouseLeave={handleMouseLeave}
                             title=""

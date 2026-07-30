@@ -1,6 +1,5 @@
-# Superpowers Documentation
+# 📂 Advanced AI Capabilities (`/docs/superpowers`)
 
-This directory contains documentation related to advanced capabilities ("superpowers"), automation scripts, and architectural plans for the calendar filter plugin.
+> **Agentic Workflows and Automations**
 
-## Subdirectories
-- `plans/`: Contains historical and ongoing architectural plans, such as automatic installer documentation.
+This directory houses advanced AI-driven workflows, agent configurations, and deployment plans designed to enhance the development lifecycle of the Calendar Filter plugin.

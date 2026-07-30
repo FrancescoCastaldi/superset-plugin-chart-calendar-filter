@@ -1,8 +1,9 @@
-# Docker
+# 📂 Docker Architecture (`/docker`)
 
-Questa cartella contiene i file di configurazione Docker per eseguire Apache Superset con il plugin *superset-plugin-chart-calendar-filter* preinstallato.
+> **Containerized Deployment & Local Stack orchestration**
 
-- `Dockerfile` — definisce l'immagine Docker personalizzata.
-- `docker-compose.yml` — orchestra il servizio Superset con tutte le dipendenze necessarie.
+This directory encapsulates the Docker Compose configuration and custom Dockerfiles required to spin up an ephemeral or permanent Apache Superset instance pre-loaded with the `superset-plugin-chart-calendar-filter`.
 
-Utilizzare questi file per avviare un'istanza locale di Superset pronta all'uso con il plugin del calendario.
+## Infrastructure Files
+- **`Dockerfile`**: Defines the custom image, overlaying the plugin onto the base Superset image.
+- **`docker-compose.yml`**: Orchestrates the multi-container stack (`superset`, `superset-worker`, `redis`, `postgres`) mapping the plugin via volume mounts or baked-in npm links.

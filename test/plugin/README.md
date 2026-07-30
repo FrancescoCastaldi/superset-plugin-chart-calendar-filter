@@ -1,7 +1,7 @@
-# Plugin Tests
+# 📂 Plugin Unit Tests (`/test/plugin`)
 
-This directory contains unit tests for the plugin registry logic and data pipelines.
+> **Integration Layer Verification**
 
-## Files
-- `buildQuery.test.ts`: Tests to verify the correct generation of Superset query contexts.
-- `transformProps.test.ts`: Tests to verify the correct transformation of backend data into React props.
+This directory contains Jest test suites validating the Superset data pipeline bridges.
+- **`buildQuery.test.ts`**: Asserts the correct generation of SQL query payloads and the prevention of nested `ORDER BY` anomalies.
+- **`transformProps.test.ts`**: Verifies the correct extraction and mapping of `chartProps` (including `formData` forwarding for Native Filters).
