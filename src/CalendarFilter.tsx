@@ -286,16 +286,52 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   // Month labels for dropdown
   const MONTH_LABELS = useMemo(() => {
     const formatter = new Intl.DateTimeFormat('it-IT', { month: 'long' });
-    return Array.from({ length: 12 }, (_, i) => ({
-      value: i + 1,
-      label: formatter.format(new Date(2000, i, 1)),
-    }));
+    return Array.from({ length: 12 }, (_, i) => {
+      const raw = formatter.format(new Date(2000, i, 1));
+      return {
+        value: i + 1,
+        label: raw.charAt(0).toUpperCase() + raw.slice(1),
+      };
+    });
   }, []);
+
+  // Dropdown selection change handlers (update view AND emit filter to chart)
+  const handleMonthSelectChange = useCallback((newMonth: number) => {
+    setViewMonth(newMonth);
+    const days = getDaysInMonth(viewYear, newMonth);
+    const monthDates: string[] = [];
+    for (let d = 1; d <= days; d++) {
+      monthDates.push(`${viewYear}-${String(newMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+    }
+    emitSelection(monthDates);
+  }, [viewYear, emitSelection]);
+
+  const handleYearSelectChange = useCallback((newYear: number) => {
+    setViewYear(newYear);
+    if (viewMode === 'year') {
+      const yearDates: string[] = [];
+      for (let m = 1; m <= 12; m++) {
+        const days = getDaysInMonth(newYear, m);
+        for (let d = 1; d <= days; d++) {
+          yearDates.push(`${newYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+        }
+      }
+      emitSelection(yearDates);
+    } else {
+      const days = getDaysInMonth(newYear, viewMonth);
+      const monthDates: string[] = [];
+      for (let d = 1; d <= days; d++) {
+        monthDates.push(`${newYear}-${String(viewMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+      }
+      emitSelection(monthDates);
+    }
+  }, [viewMode, viewMonth, emitSelection]);
 
   // Month label
   const monthLabel = useMemo(() => {
     const date = new Date(viewYear, viewMonth - 1, 1);
-    return date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    const raw = date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
   }, [viewYear, viewMonth]);
 
   // Selection badge text
@@ -431,22 +467,10 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                         ◀
                       </NavButton>
                     )}
-                    {showYearDropdown && (
-                      <YearSelect
-                        value={viewYear}
-                        onChange={e => setViewYear(Number(e.target.value))}
-                        aria-label="Seleziona anno"
-                        style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                      >
-                        {availableYears.map(y => (
-                          <option key={y} value={y}>{y}</option>
-                        ))}
-                      </YearSelect>
-                    )}
-                    {showYearDropdown && viewMode === 'month' && (
+                    {viewMode === 'month' && (
                       <MonthSelect
                         value={viewMonth}
-                        onChange={e => setViewMonth(Number(e.target.value))}
+                        onChange={e => handleMonthSelectChange(Number(e.target.value))}
                         aria-label="Seleziona mese"
                         style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
                       >
@@ -454,6 +478,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                           <option key={m.value} value={m.value}>{m.label}</option>
                         ))}
                       </MonthSelect>
+                    )}
+                    {showYearDropdown && (
+                      <YearSelect
+                        value={viewYear}
+                        onChange={e => handleYearSelectChange(Number(e.target.value))}
+                        aria-label="Seleziona anno"
+                        style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                      >
+                        {availableYears.map(y => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </YearSelect>
                     )}
                     {viewMode === 'month' && (
                       <NavButton
@@ -665,27 +701,27 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           >
             ◀
           </NavButton>
-          {showYearDropdown && (
-            <YearSelect
-              value={viewYear}
-              onChange={e => setViewYear(Number(e.target.value))}
-              aria-label="Seleziona anno"
-            >
-              {availableYears.map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </YearSelect>
-          )}
-          {showYearDropdown && viewMode === 'month' && (
+          {viewMode === 'month' && (
             <MonthSelect
               value={viewMonth}
-              onChange={e => setViewMonth(Number(e.target.value))}
+              onChange={e => handleMonthSelectChange(Number(e.target.value))}
               aria-label="Seleziona mese"
             >
               {MONTH_LABELS.map(m => (
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </MonthSelect>
+          )}
+          {showYearDropdown && (
+            <YearSelect
+              value={viewYear}
+              onChange={e => handleYearSelectChange(Number(e.target.value))}
+              aria-label="Seleziona anno"
+            >
+              {availableYears.map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </YearSelect>
           )}
           {enableOverview && (
             <ViewToggleButton
@@ -924,22 +960,10 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                       ◀
                     </NavButton>
                   )}
-                  {showYearDropdown && (
-                    <YearSelect
-                      value={viewYear}
-                      onChange={e => setViewYear(Number(e.target.value))}
-                      aria-label="Seleziona anno"
-                      style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {availableYears.map(y => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </YearSelect>
-                  )}
-                  {showYearDropdown && viewMode === 'month' && (
+                  {viewMode === 'month' && (
                     <MonthSelect
                       value={viewMonth}
-                      onChange={e => setViewMonth(Number(e.target.value))}
+                      onChange={e => handleMonthSelectChange(Number(e.target.value))}
                       aria-label="Seleziona mese"
                       style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
                     >
@@ -947,6 +971,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                         <option key={m.value} value={m.value}>{m.label}</option>
                       ))}
                     </MonthSelect>
+                  )}
+                  {showYearDropdown && (
+                    <YearSelect
+                      value={viewYear}
+                      onChange={e => handleYearSelectChange(Number(e.target.value))}
+                      aria-label="Seleziona anno"
+                      style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {availableYears.map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </YearSelect>
                   )}
                   {viewMode === 'month' && (
                     <NavButton

@@ -162,7 +162,7 @@ describe('CalendarFilter', () => {
     const prevButton = getByLabelText('Precedente');
     fireEvent.click(prevButton);
     // maxDate is 2026-12-01, so initial month is December. Previous is November.
-    expect(getByText('novembre 2026')).toBeTruthy();
+    expect(getByText(/novembre 2026/i)).toBeTruthy();
   });
 
   it('navigates to next month', () => {
@@ -170,12 +170,12 @@ describe('CalendarFilter', () => {
     // Initial state is December 2026 (maxDate).
     // Go to previous month (November) so Next button becomes enabled
     fireEvent.click(getByLabelText('Precedente'));
-    expect(getByText('novembre 2026')).toBeTruthy();
+    expect(getByText(/novembre 2026/i)).toBeTruthy();
     
     // Now click Next
     const nextButton = getByLabelText('Successivo');
     fireEvent.click(nextButton);
-    expect(getByText('dicembre 2026')).toBeTruthy();
+    expect(getByText(/dicembre 2026/i)).toBeTruthy();
   });
 
   it('shows selected dates from filterState', () => {
