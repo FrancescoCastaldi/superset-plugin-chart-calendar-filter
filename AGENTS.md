@@ -144,6 +144,7 @@ Build outputs:
 | AI Architecture & Development Map (`CODE_ARCHITECTURE_MAP.md`) | ✅ COMPLETED | 2026-07-30 |
 | Full Rebuild & Jest Suite Pass (44/44 tests) | ✅ COMPLETED | 2026-07-30 |
 | Available Years — include current year in dropdown even when dataset ends earlier | ✅ COMPLETED | 2026-07-30 |
+| MonthSelect dropdown alongside YearSelect in native filter modal + chart header + expand modal | ✅ COMPLETED | 2026-07-30 |
 
 ## 📌 Notes
 

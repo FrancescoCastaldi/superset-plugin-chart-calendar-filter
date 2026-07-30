@@ -54,7 +54,7 @@ Questo è il cuore dell'applicazione. È suddiviso nelle seguenti sezioni fondam
 - **`NativeFilterTriggerContainer` & `NativeFilterPillButton`**: Il pulsante pill responsive `[ 📅 Seleziona Date (0) ▼ ]` renderizzato nella Native Filter Bar.
 - **`CalendarHeader` / `HeaderLeft` / `HeaderCenter` / `HeaderRight`**: Layout flessibile dell'header (navigazione mese, selettore anno, pulsante oggi, vista toggle, badge selezioni).
 - **`NavButton` / `TodayButton` / `ViewToggleButton`**: Pulsanti con bordi sottili, ombre leggere ed effetti hover.
-- **`MonthTitle` / `SelectionBadge` / `ClearButton` / `YearSelect`**: Titolo del mese localizzato, badge conteggio selezioni e menu a tendina per l'anno.
+- **`MonthTitle` / `SelectionBadge` / `ClearButton` / `YearSelect` / `MonthSelect`**: Titolo del mese localizzato, badge conteggio selezioni, menu a tendina per l'anno e menu a tendina per il mese (localizzato in italiano, presente in native filter modal, chart header e expand modal).
 - **`CalendarGrid` / `DayHeader` / `WeekNumberCell`**: Griglia del calendario a 7 colonne (o 8 con i numeri di settimana ISO).
 - **`DayCell` / `DayNumber`**: La cella del singolo giorno.
   - Sfondo neutro/asettico `#ffffff` con bordo `#e2e8f0`.
@@ -66,7 +66,8 @@ Questo è il cuore dell'applicazione. È suddiviso nelle seguenti sezioni fondam
 - **`MacroBar` / `MacroButton`**: Barra delle scorciatoie rapide per selezioni macro (*Anno*, *Mese*, *Q1-Q4*, *Feriali*, *Azzera*).
 
 #### B. Logica dello Stato e Hook React (Linee 614–1114)
-- **`availableYears` (useMemo, riga 860)**: Calcola gli anni disponibili per il `YearSelect` dropdown.
+- **`MONTH_LABELS` (useMemo, riga ~1026)**: Array di 12 oggetti `{ value: 1-12, label: string }` con i nomi dei mesi localizzati in italiano tramite `Intl.DateTimeFormat('it-IT', { month: 'long' })`. Usato dal dropdown `MonthSelect`.
+- **`availableYears` (useMemo, riga 870)**: Calcola gli anni disponibili per il `YearSelect` dropdown.
   - Se non ci sono dati (`minDateBound`/`maxDateBound` nulli): mostra 5 anni intorno all'anno corrente (`[oggi-2, oggi-1, oggi, oggi+1, oggi+2]`).
   - Se i dati hanno un range: elenca tutti gli anni da `minY` a `maxY`, dove `maxY` è esteso almeno fino all'anno corrente (`today.getFullYear()`) per garantire che l'anno corrente sia sempre selezionabile anche se il dataset termina prima.
 - **`dataMap` (useMemo)**: Mappa i dati grezzi ricevuti da Superset, individua automaticamente la colonna data e la metrica, e calcola i valori min/max per le percentuali del tooltip.
@@ -165,5 +166,5 @@ Questo è il cuore dell'applicazione. È suddiviso nelle seguenti sezioni fondam
 | **Modificare il formato del filtro inviato alla dashboard** | `src/CalendarFilter.tsx` | Funzione `emitSelection` |
 | **Modificare la dimensione o l'altezza del pulsante Pill nella sidebar** | `src/CalendarFilter.tsx` | Styled-component `NativeFilterPillButton` |
 | **Modificare le dimensioni/offset della finestra modale** | `src/CalendarFilter.tsx` | Styled-components `ModalOverlay` e `ModalContent` |
-| **Modificare il parsing o la formattazione delle date** | `src/utils/dateUtils.ts` | `parseDateValue`, `formatDateKey`, `formatDateRangeBadge` |
+| **Aggiungere/togliere un selettore mese dropdown** | `src/CalendarFilter.tsx` | Componente `MonthSelect` e dati `MONTH_LABELS` | | **Modificare il parsing o la formattazione delle date** | `src/utils/dateUtils.ts` | `parseDateValue`, `formatDateKey`, `formatDateRangeBadge` |
 | **Attivare/Disattivare la build CJS/ESM/Types** | `package.json` | Sezione `scripts` (`build`, `build-cjs`, `build-esm`) |

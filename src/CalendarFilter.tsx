@@ -216,6 +216,16 @@ const YearSelect = styled.select`
   cursor: pointer;
 `;
 
+const MonthSelect = styled.select`
+  font-size: 11px;
+  padding: 3px 6px;
+  border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
+  border-radius: 4px;
+  background: white;
+  color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
+  cursor: pointer;
+`;
+
 const ViewToggleButton = styled.button`
   background: none;
   border: 1px solid ${({ theme }) => (theme?.colors?.secondary?.light2 ?? '#e8e8e8')};
@@ -1013,6 +1023,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     emitSelection([]);
   }, [emitSelection]);
 
+  // Month labels for dropdown
+  const MONTH_LABELS = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat('it-IT', { month: 'long' });
+    return Array.from({ length: 12 }, (_, i) => ({
+      value: i + 1,
+      label: formatter.format(new Date(2000, i, 1)),
+    }));
+  }, []);
+
   // Month label
   const monthLabel = useMemo(() => {
     const date = new Date(viewYear, viewMonth - 1, 1);
@@ -1185,6 +1204,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                           <option key={y} value={y}>{y}</option>
                         ))}
                       </YearSelect>
+                    )}
+                    {showYearDropdown && viewMode === 'month' && (
+                      <MonthSelect
+                        value={viewMonth}
+                        onChange={e => setViewMonth(Number(e.target.value))}
+                        aria-label="Seleziona mese"
+                        style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                      >
+                        {MONTH_LABELS.map(m => (
+                          <option key={m.value} value={m.value}>{m.label}</option>
+                        ))}
+                      </MonthSelect>
                     )}
                     {viewMode === 'month' && (
                       <NavButton
@@ -1394,6 +1425,17 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                 <option key={y} value={y}>{y}</option>
               ))}
             </YearSelect>
+          )}
+          {showYearDropdown && viewMode === 'month' && (
+            <MonthSelect
+              value={viewMonth}
+              onChange={e => setViewMonth(Number(e.target.value))}
+              aria-label="Seleziona mese"
+            >
+              {MONTH_LABELS.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </MonthSelect>
           )}
           {enableOverview && (
             <ViewToggleButton
@@ -1643,6 +1685,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                         <option key={y} value={y}>{y}</option>
                       ))}
                     </YearSelect>
+                  )}
+                  {showYearDropdown && viewMode === 'month' && (
+                    <MonthSelect
+                      value={viewMonth}
+                      onChange={e => setViewMonth(Number(e.target.value))}
+                      aria-label="Seleziona mese"
+                      style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {MONTH_LABELS.map(m => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </MonthSelect>
                   )}
                   {viewMode === 'month' && (
                     <NavButton
