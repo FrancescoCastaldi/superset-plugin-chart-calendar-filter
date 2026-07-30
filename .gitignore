@@ -27,6 +27,7 @@ opencode.jsonc
 .ai/
 
 # AI session/context notes
+CODE_ARCHITECTURE_MAP.md
 context.md
 *.context.md
 *.session.md

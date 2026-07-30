@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.5] — 2026-07-30
+
+### Added
+- **Toggle Vista Mensile / Annuale nel Native Filter Popover**: Aggiunta la possibilità di alternare liberamente tra la **Vista Mensile** (singolo mese dettagliato a celle interattive ad alta risoluzione) e la **Vista Annuale** (griglia 4x3 dei 12 mesi) all'interno del popover espanso del Native Filter.
+- **Documentazione Architetturale per AI (`CODE_ARCHITECTURE_MAP.md`)**: Creata mappa esaustiva del codice, paragrafo per paragrafo, per la guida di futuri sviluppi sia frontend che backend.
+
 ## [0.1.4] — 2026-07-28
 
 ### Added

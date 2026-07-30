@@ -360,11 +360,21 @@ describe('CalendarFilter', () => {
     expect(mockSetDataMask).toHaveBeenCalled();
   });
 
-  it('opens expandable modal view when Espandi button is clicked', () => {
-    const { getByText, getByRole } = render(<CalendarFilter {...defaultProps} />);
+  it('opens expandable modal view when Espandi button is clicked and toggles between month and year view', () => {
+    const { getByText, getByRole, getAllByText } = render(<CalendarFilter {...defaultProps} />);
     const espandiBtn = getByText('🖥️ Espandi');
     fireEvent.click(espandiBtn);
-    expect(getByText(/vista annuale 2026/i)).toBeTruthy();
+    expect(getAllByText(/vista mensile/i).length).toBeGreaterThanOrEqual(1);
     expect(getByRole('button', { name: /chiudi/i })).toBeTruthy();
+
+    // Click toggle to switch to Year view inside modal
+    const vistaAnnualeBtn = getByText('Vista Annuale');
+    fireEvent.click(vistaAnnualeBtn);
+    expect(getAllByText(/vista annuale/i).length).toBeGreaterThanOrEqual(1);
+
+    // Click toggle to switch back to Month view inside modal
+    const vistaMensileBtn = getByText('Vista Mensile');
+    fireEvent.click(vistaMensileBtn);
+    expect(getAllByText(/vista mensile/i).length).toBeGreaterThanOrEqual(1);
   });
 });

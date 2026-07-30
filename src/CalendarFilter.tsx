@@ -342,7 +342,7 @@ const TooltipContainer = styled.div<{ x: number; y: number }>`
   padding: 6px 10px;
   font-size: 11px;
   pointer-events: none;
-  z-index: 1000;
+  z-index: 1000000;
   white-space: nowrap;
   line-height: 1.5;
   font-family: ${({ theme }) => theme?.typography?.families?.sansSerif || 'sans-serif'};
@@ -1144,35 +1144,79 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <ModalOverlay onClick={() => setIsModalOpen(false)}>
             <ModalContent onClick={e => e.stopPropagation()}>
               <ModalHeader>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <ModalTitle>📅 Calendar Filter — Vista Annuale {viewYear}</ModalTitle>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <NavButton
-                      type="button"
-                      onClick={() => setViewYear(y => y - 1)}
-                      title="Anno precedente"
-                      style={{ padding: '4px 10px', fontSize: '12px' }}
-                    >
-                      ◀
-                    </NavButton>
-                    <YearSelect
-                      value={viewYear}
-                      onChange={e => setViewYear(Number(e.target.value))}
-                      aria-label="Seleziona anno"
-                      style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {availableYears.map(y => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </YearSelect>
-                    <NavButton
-                      type="button"
-                      onClick={() => setViewYear(y => y + 1)}
-                      title="Anno successivo"
-                      style={{ padding: '4px 10px', fontSize: '12px' }}
-                    >
-                      ▶
-                    </NavButton>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <ModalTitle>
+                    📅 Calendar Filter — {viewMode === 'year' ? `Vista Annuale ${viewYear}` : `Vista Mensile (${monthLabel})`}
+                  </ModalTitle>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    {viewMode === 'month' && (
+                      <NavButton
+                        type="button"
+                        onClick={goPrevMonth}
+                        disabled={isPrevDisabled}
+                        title="Mese precedente"
+                        style={{ padding: '4px 10px', fontSize: '12px' }}
+                      >
+                        ◀
+                      </NavButton>
+                    )}
+                    {viewMode === 'year' && (
+                      <NavButton
+                        type="button"
+                        onClick={() => setViewYear(y => y - 1)}
+                        disabled={isPrevDisabled}
+                        title="Anno precedente"
+                        style={{ padding: '4px 10px', fontSize: '12px' }}
+                      >
+                        ◀
+                      </NavButton>
+                    )}
+                    {showYearDropdown && (
+                      <YearSelect
+                        value={viewYear}
+                        onChange={e => setViewYear(Number(e.target.value))}
+                        aria-label="Seleziona anno"
+                        style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                      >
+                        {availableYears.map(y => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </YearSelect>
+                    )}
+                    {viewMode === 'month' && (
+                      <NavButton
+                        type="button"
+                        onClick={goNextMonth}
+                        disabled={isNextDisabled}
+                        title="Mese successivo"
+                        style={{ padding: '4px 10px', fontSize: '12px' }}
+                      >
+                        ▶
+                      </NavButton>
+                    )}
+                    {viewMode === 'year' && (
+                      <NavButton
+                        type="button"
+                        onClick={() => setViewYear(y => y + 1)}
+                        disabled={isNextDisabled}
+                        title="Anno successivo"
+                        style={{ padding: '4px 10px', fontSize: '12px' }}
+                      >
+                        ▶
+                      </NavButton>
+                    )}
+                    {enableOverview && (
+                      <ViewToggleButton
+                        type="button"
+                        onClick={() => setViewMode(viewMode === 'month' ? 'year' : 'month')}
+                        style={{ padding: '4px 10px', fontSize: '12px', fontWeight: 600, background: '#ffffff', border: '1px solid #cbd5e1', color: '#2563eb' }}
+                      >
+                        {viewMode === 'month' ? 'Vista Annuale' : 'Vista Mensile'}
+                      </ViewToggleButton>
+                    )}
+                    <TodayButton type="button" onClick={goToToday} style={{ padding: '4px 10px', fontSize: '12px' }}>
+                      Oggi
+                    </TodayButton>
                   </div>
                 </div>
                 <ModalCloseButton type="button" onClick={() => setIsModalOpen(false)}>
@@ -1199,34 +1243,113 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                   )}
                 </MacroBar>
               )}
-              <YearOverviewGrid style={{ flex: 1, padding: 16 }}>
-                {yearOverviewMonths.map(m => (
-                  <MiniMonth key={m.month}>
-                    <MiniMonthTitle>{m.label}</MiniMonthTitle>
-                    <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
-                      {dayLabels.map(d => (
-                        <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
-                      ))}
-                      {m.cells.map((cell, ci) => {
-                        if (!cell) return <div key={`modal-e-${m.month}-${ci}`} />;
-                        return (
-                          <MiniDayCell
-                            key={cell.date}
-                            intensity={intensityScale(cell.value)}
-                            isSelected={selectedDates.has(cell.date)}
-                            $isToday={cell.date === todayStr}
-                            baseColor={baseColor}
-                            onClick={() => handleMiniDayClick(cell.date)}
-                            title={cell.date}
-                          />
-                        );
-                      })}
-                    </MiniMonthGrid>
-                  </MiniMonth>
-                ))}
-              </YearOverviewGrid>
+              <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                {viewMode === 'year' ? (
+                  <YearOverviewGrid style={{ flex: 1 }}>
+                    {yearOverviewMonths.map(m => (
+                      <MiniMonth key={m.month}>
+                        <MiniMonthTitle>{m.label}</MiniMonthTitle>
+                        <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
+                          {dayLabels.map(d => (
+                            <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
+                          ))}
+                          {m.cells.map((cell, ci) => {
+                            if (!cell) return <div key={`modal-e-${m.month}-${ci}`} />;
+                            return (
+                              <MiniDayCell
+                                key={cell.date}
+                                intensity={intensityScale(cell.value)}
+                                isSelected={selectedDates.has(cell.date)}
+                                $isToday={cell.date === todayStr}
+                                baseColor={baseColor}
+                                onClick={() => handleMiniDayClick(cell.date)}
+                                title={cell.date}
+                              />
+                            );
+                          })}
+                        </MiniMonthGrid>
+                      </MiniMonth>
+                    ))}
+                  </YearOverviewGrid>
+                ) : (
+                  <CalendarGrid showWeekNumbers={showWeekNumbers} style={{ flex: 1, minHeight: '340px' }}>
+                    {showWeekNumbers && <div />}
+                    {dayLabels.map(day => (
+                      <DayHeader key={`modal-dh-${day}`}>{day}</DayHeader>
+                    ))}
+
+                    {showWeekNumbers
+                      ? weekRows.map((row, rowIdx) => (
+                          <React.Fragment key={`modal-row-${rowIdx}`}>
+                            <WeekNumberCell>{row.weekNumber}</WeekNumberCell>
+                            {row.cells.map((cell, cellIdx) => {
+                              if (!cell) {
+                                return <div key={`modal-e-${rowIdx}-${cellIdx}`} />;
+                              }
+                              return (
+                                <DayCell
+                                  key={`modal-${cell.date}`}
+                                  intensity={intensityScale(cell.value)}
+                                  isSelected={selectedDates.has(cell.date)}
+                                  isCurrentMonth
+                                  $isToday={cell.date === todayStr}
+                                  baseColor={baseColor}
+                                  $cellHeight={Math.max(cellHeight, 36)}
+                                  onClick={(e) => handleDayClick(cell, e)}
+                                  onMouseEnter={(e) => handleMouseEnter(cell, e)}
+                                  onMouseLeave={handleMouseLeave}
+                                  title=""
+                                >
+                                  <DayNumber>{cell.date.split('-')[2]}</DayNumber>
+                                </DayCell>
+                              );
+                            })}
+                          </React.Fragment>
+                        ))
+                      : calendarCells.map((cell, idx) => {
+                          if (!cell) {
+                            return <div key={`modal-empty-${idx}`} />;
+                          }
+                          return (
+                            <DayCell
+                              key={`modal-${cell.date}`}
+                              intensity={intensityScale(cell.value)}
+                              isSelected={selectedDates.has(cell.date)}
+                              isCurrentMonth
+                              $isToday={cell.date === todayStr}
+                              baseColor={baseColor}
+                              $cellHeight={Math.max(cellHeight, 36)}
+                              onClick={(e) => handleDayClick(cell, e)}
+                              onMouseEnter={(e) => handleMouseEnter(cell, e)}
+                              onMouseLeave={handleMouseLeave}
+                              title=""
+                            >
+                              <DayNumber>{cell.date.split('-')[2]}</DayNumber>
+                            </DayCell>
+                          );
+                        })}
+                  </CalendarGrid>
+                )}
+              </div>
             </ModalContent>
           </ModalOverlay>
+        )}
+        {tooltip && (
+          <TooltipContainer x={tooltip.x} y={tooltip.y}>
+            <TooltipTitle>{tooltip.date}</TooltipTitle>
+            <TooltipRow>
+              <TooltipLabel>Valore:</TooltipLabel>
+              <TooltipValue>{tooltip.value != null ? tooltip.value : 'N/D'}</TooltipValue>
+            </TooltipRow>
+            <TooltipRow>
+              <TooltipLabel>Massimo:</TooltipLabel>
+              <TooltipValue>{dataMap.max}</TooltipValue>
+            </TooltipRow>
+            <TooltipRow>
+              <TooltipLabel>% del max:</TooltipLabel>
+              <TooltipValue>{tooltip.percentage}%</TooltipValue>
+            </TooltipRow>
+          </TooltipContainer>
         )}
       </Styles>
     );
@@ -1479,35 +1602,79 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         <ModalOverlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={e => e.stopPropagation()}>
             <ModalHeader>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <ModalTitle>📅 Calendar Filter — Vista Annuale {viewYear}</ModalTitle>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <NavButton
-                    type="button"
-                    onClick={() => setViewYear(y => y - 1)}
-                    title="Anno precedente"
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
-                  >
-                    ◀
-                  </NavButton>
-                  <YearSelect
-                    value={viewYear}
-                    onChange={e => setViewYear(Number(e.target.value))}
-                    aria-label="Seleziona anno"
-                    style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {availableYears.map(y => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </YearSelect>
-                  <NavButton
-                    type="button"
-                    onClick={() => setViewYear(y => y + 1)}
-                    title="Anno successivo"
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
-                  >
-                    ▶
-                  </NavButton>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <ModalTitle>
+                  📅 Calendar Filter — {viewMode === 'year' ? `Vista Annuale ${viewYear}` : `Vista Mensile (${monthLabel})`}
+                </ModalTitle>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  {viewMode === 'month' && (
+                    <NavButton
+                      type="button"
+                      onClick={goPrevMonth}
+                      disabled={isPrevDisabled}
+                      title="Mese precedente"
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      ◀
+                    </NavButton>
+                  )}
+                  {viewMode === 'year' && (
+                    <NavButton
+                      type="button"
+                      onClick={() => setViewYear(y => y - 1)}
+                      disabled={isPrevDisabled}
+                      title="Anno precedente"
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      ◀
+                    </NavButton>
+                  )}
+                  {showYearDropdown && (
+                    <YearSelect
+                      value={viewYear}
+                      onChange={e => setViewYear(Number(e.target.value))}
+                      aria-label="Seleziona anno"
+                      style={{ padding: '4px 8px', fontSize: '13px', fontWeight: 600, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {availableYears.map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </YearSelect>
+                  )}
+                  {viewMode === 'month' && (
+                    <NavButton
+                      type="button"
+                      onClick={goNextMonth}
+                      disabled={isNextDisabled}
+                      title="Mese successivo"
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      ▶
+                    </NavButton>
+                  )}
+                  {viewMode === 'year' && (
+                    <NavButton
+                      type="button"
+                      onClick={() => setViewYear(y => y + 1)}
+                      disabled={isNextDisabled}
+                      title="Anno successivo"
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      ▶
+                    </NavButton>
+                  )}
+                  {enableOverview && (
+                    <ViewToggleButton
+                      type="button"
+                      onClick={() => setViewMode(viewMode === 'month' ? 'year' : 'month')}
+                      style={{ padding: '4px 10px', fontSize: '12px', fontWeight: 600, background: '#ffffff', border: '1px solid #cbd5e1', color: '#2563eb' }}
+                    >
+                      {viewMode === 'month' ? 'Vista Annuale' : 'Vista Mensile'}
+                    </ViewToggleButton>
+                  )}
+                  <TodayButton type="button" onClick={goToToday} style={{ padding: '4px 10px', fontSize: '12px' }}>
+                    Oggi
+                  </TodayButton>
                 </div>
               </div>
               <ModalCloseButton type="button" onClick={() => setIsModalOpen(false)}>
@@ -1534,32 +1701,94 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                 )}
               </MacroBar>
             )}
-            <YearOverviewGrid style={{ flex: 1, padding: 16 }}>
-              {yearOverviewMonths.map(m => (
-                <MiniMonth key={m.month}>
-                  <MiniMonthTitle>{m.label}</MiniMonthTitle>
-                  <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
-                    {dayLabels.map(d => (
-                      <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
-                    ))}
-                    {m.cells.map((cell, ci) => {
-                      if (!cell) return <div key={`modal-e-${m.month}-${ci}`} />;
-                      return (
-                        <MiniDayCell
-                          key={cell.date}
-                          intensity={intensityScale(cell.value)}
-                          isSelected={selectedDates.has(cell.date)}
-                          $isToday={cell.date === todayStr}
-                          baseColor={baseColor}
-                          onClick={() => handleMiniDayClick(cell.date)}
-                          title={cell.date}
-                        />
-                      );
-                    })}
-                  </MiniMonthGrid>
-                </MiniMonth>
-              ))}
-            </YearOverviewGrid>
+            <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              {viewMode === 'year' ? (
+                <YearOverviewGrid style={{ flex: 1 }}>
+                  {yearOverviewMonths.map(m => (
+                    <MiniMonth key={m.month}>
+                      <MiniMonthTitle>{m.label}</MiniMonthTitle>
+                      <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
+                        {dayLabels.map(d => (
+                          <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
+                        ))}
+                        {m.cells.map((cell, ci) => {
+                          if (!cell) return <div key={`modal-e-${m.month}-${ci}`} />;
+                          return (
+                            <MiniDayCell
+                              key={cell.date}
+                              intensity={intensityScale(cell.value)}
+                              isSelected={selectedDates.has(cell.date)}
+                              $isToday={cell.date === todayStr}
+                              baseColor={baseColor}
+                              onClick={() => handleMiniDayClick(cell.date)}
+                              title={cell.date}
+                            />
+                          );
+                        })}
+                      </MiniMonthGrid>
+                    </MiniMonth>
+                  ))}
+                </YearOverviewGrid>
+              ) : (
+                <CalendarGrid showWeekNumbers={showWeekNumbers} style={{ flex: 1, minHeight: '340px' }}>
+                  {showWeekNumbers && <div />}
+                  {dayLabels.map(day => (
+                    <DayHeader key={`modal-dh-${day}`}>{day}</DayHeader>
+                  ))}
+
+                  {showWeekNumbers
+                    ? weekRows.map((row, rowIdx) => (
+                        <React.Fragment key={`modal-row-${rowIdx}`}>
+                          <WeekNumberCell>{row.weekNumber}</WeekNumberCell>
+                          {row.cells.map((cell, cellIdx) => {
+                            if (!cell) {
+                              return <div key={`modal-e-${rowIdx}-${cellIdx}`} />;
+                            }
+                            return (
+                              <DayCell
+                                key={`modal-${cell.date}`}
+                                intensity={intensityScale(cell.value)}
+                                isSelected={selectedDates.has(cell.date)}
+                                isCurrentMonth
+                                $isToday={cell.date === todayStr}
+                                baseColor={baseColor}
+                                $cellHeight={Math.max(cellHeight, 36)}
+                                onClick={(e) => handleDayClick(cell, e)}
+                                onMouseEnter={(e) => handleMouseEnter(cell, e)}
+                                onMouseLeave={handleMouseLeave}
+                                title=""
+                              >
+                                <DayNumber>{cell.date.split('-')[2]}</DayNumber>
+                              </DayCell>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))
+                    : calendarCells.map((cell, idx) => {
+                        if (!cell) {
+                          return <div key={`modal-empty-${idx}`} />;
+                        }
+                        return (
+                          <DayCell
+                            key={`modal-${cell.date}`}
+                            intensity={intensityScale(cell.value)}
+                            isSelected={selectedDates.has(cell.date)}
+                            isCurrentMonth
+                            $isToday={cell.date === todayStr}
+                            baseColor={baseColor}
+                            $cellHeight={Math.max(cellHeight, 36)}
+                            onClick={(e) => handleDayClick(cell, e)}
+                            onMouseEnter={(e) => handleMouseEnter(cell, e)}
+                            onMouseLeave={handleMouseLeave}
+                            title=""
+                          >
+                            <DayNumber>{cell.date.split('-')[2]}</DayNumber>
+                          </DayCell>
+                        );
+                      })}
+                </CalendarGrid>
+              )}
+            </div>
           </ModalContent>
         </ModalOverlay>
       )}
