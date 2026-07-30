@@ -51,6 +51,7 @@
     "build-cjs": "esbuild src/index.ts --outdir=lib --format=cjs --packages=external --sourcemap",
     "build-esm": "esbuild src/index.ts --outdir=esm --format=esm --packages=external --sourcemap",
     "build-clean": "rimraf {lib,esm} && npm run build",
+    "demo:build": "esbuild demo/demo-wrapper.tsx --bundle --outfile=demo/demo-bundle.js --format=iife --global-name=CalendarFilterDemo --define:process.env.NODE_ENV=\\\"production\\\"",
     "dev": "esbuild src/index.ts --outdir=esm --format=esm --packages=external --watch",
     "clean": "rimraf {lib,esm}",
     "prebuild": "npm run clean",
