@@ -863,7 +863,10 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       return [y - 2, y - 1, y, y + 1, y + 2];
     }
     const minY = parseDateValue(minDateBound)?.getFullYear() ?? viewYear;
-    const maxY = parseDateValue(maxDateBound)?.getFullYear() ?? viewYear;
+    const maxY = Math.max(
+      parseDateValue(maxDateBound)?.getFullYear() ?? viewYear,
+      today.getFullYear()
+    );
     const years: number[] = [];
     for (let y = minY; y <= maxY; y++) years.push(y);
     return years;
