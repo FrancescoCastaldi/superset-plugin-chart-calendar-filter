@@ -6,6 +6,9 @@
 - **Toggle Vista Mensile / Annuale nel Native Filter Popover**: Aggiunta la possibilità di alternare liberamente tra la **Vista Mensile** (singolo mese dettagliato a celle interattive ad alta risoluzione) e la **Vista Annuale** (griglia 4x3 dei 12 mesi) all'interno del popover espanso del Native Filter.
 - **Documentazione Architetturale per AI (`CODE_ARCHITECTURE_MAP.md`)**: Creata mappa esaustiva del codice, paragrafo per paragrafo, per la guida di futuri sviluppi sia frontend che backend.
 
+### Fixed
+- **Anno corrente sempre incluso nel dropdown anni**: Il selettore anno `availableYears` ora estende il range superiore fino all'anno corrente (`today.getFullYear()`) anche quando il dataset termina prima, garantendo che l'anno corrente sia sempre selezionabile.
+
 ## [0.1.4] — 2026-07-28
 
 ### Added
