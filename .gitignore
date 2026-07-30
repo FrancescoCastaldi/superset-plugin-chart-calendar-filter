@@ -4,6 +4,9 @@ esm/
 tsconfig.tsbuildinfo
 *.tsbuildinfo
 dist/
+npm-debug.log*
+yarn-error.log*
+.yarn/
 .DS_Store
 *.log
 

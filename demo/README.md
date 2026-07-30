@@ -1,11 +1,25 @@
-# 📂 Standalone Demo (`/demo`)
+# Standalone Demo (demo/)
 
-> **Isolated Testing & Presentation Environment**
+Isolated testing and presentation environment for the Calendar Filter plugin, decoupled from Apache Superset.
 
-This directory contains a self-contained, standalone demonstration of the Calendar Filter plugin. It enables rapid prototyping, isolated UI testing, and presentation of the component completely decoupled from the Apache Superset core engine.
+## Contents
 
-## Infrastructure
-- **`demo-wrapper.tsx`**: React wrapper injecting mock datasets and simulating the `setDataMask` Superset hook.
-- **`server.js`**: Lightweight HTTP server to serve the bundle locally.
-- **`index.html`**: Entry point for the isolated DOM.
-- **`demo-bundle.js`**: Pre-compiled esbuild bundle.
+- **demo-wrapper.tsx** -- React wrapper component that injects mock data and simulates the Superset `setDataMask` hook.
+- **demo-bundle.js** -- Pre-compiled esbuild IIFE bundle (~1.2 MB) containing the full plugin and wrapper.
+- **index.html** -- Host page that loads the bundle and mounts the demo component.
+
+## Usage
+
+Build the demo bundle:
+
+```
+npm run demo:build
+```
+
+Open `index.html` in a browser, or serve the directory with any static file server:
+
+```
+npx serve demo/
+```
+
+The demo renders the calendar heatmap with sample data covering a three-year range (2025-2027), allowing visual inspection of all features (selection, year/month navigation, macro shortcuts, sweep selection, accessibility) outside of a Superset dashboard context.

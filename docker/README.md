@@ -1,9 +1,18 @@
-# 📂 Docker Architecture (`/docker`)
+# Docker (docker/)
 
-> **Containerized Deployment & Local Stack orchestration**
+Containerized deployment and local stack orchestration for running the Calendar Filter plugin with Apache Superset.
 
-This directory encapsulates the Docker Compose configuration and custom Dockerfiles required to spin up an ephemeral or permanent Apache Superset instance pre-loaded with the `superset-plugin-chart-calendar-filter`.
+## Contents
 
-## Infrastructure Files
-- **`Dockerfile`**: Defines the custom image, overlaying the plugin onto the base Superset image.
-- **`docker-compose.yml`**: Orchestrates the multi-container stack (`superset`, `superset-worker`, `redis`, `postgres`) mapping the plugin via volume mounts or baked-in npm links.
+- **Dockerfile** -- Multi-stage build image. Uses `node:20-bookworm-slim` to build the plugin and produce a `.tgz` tarball in `/dist`. Copies the tarball into the Superset image and installs it.
+- **docker-compose.yml** -- Development overlay that mounts the plugin source directory into Superset containers and sets `DEV_MODE=false`. Orchestrates the full stack: `superset`, `superset-worker`, `redis`, and `postgres`.
+
+## Usage
+
+Start the full stack:
+
+```
+docker compose -f docker/docker-compose.yml up -d
+```
+
+The plugin is automatically linked and available in the Superset chart picker under "Filters and controls" as `Calendar Filter`.

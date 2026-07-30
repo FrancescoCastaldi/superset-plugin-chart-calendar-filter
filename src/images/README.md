@@ -1,6 +1,7 @@
-# 📂 Static Assets (`/src/images`)
+# Static Assets (src/images/)
 
-> **Image and Graphic Resources**
+Static graphical assets used by the plugin.
 
-This directory stores static graphical assets utilized within the plugin.
-- **`thumbnail.png`**: The 100x100 preview image displayed in the Apache Superset chart picker interface when adding a new visualization.
+## Files
+
+- **thumbnail.png** -- 100x100 pixel preview image displayed in the Apache Superset chart picker when adding a new visualization.

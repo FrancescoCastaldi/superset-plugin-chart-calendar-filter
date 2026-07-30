@@ -1,11 +1,13 @@
-# 📂 Superset Integration Layer (`/src/plugin`)
+# Superset Integration Layer (src/plugin/)
 
-> **Chart Registration & Pipeline Contracts**
+Bridges the React component with the Apache Superset ecosystem.
 
-This directory encapsulates the integration logic required to interface the React component with the Apache Superset ecosystem.
+## Files
 
-## Key Modules
-- **`index.ts`**: Defines the `ChartPlugin` class, registering the module, its metadata (`category: Filters and controls`), and operational behaviors.
-- **`buildQuery.ts`**: The query builder responsible for forging the SQL payload dispatched to the Superset Flask backend.
-- **`controlPanel.ts`**: Configures the UI form controls available in the Superset Explore view.
-- **`transformProps.ts`**: The transformation pipeline that maps raw `chartProps` into specific React props injected into the `CalendarFilter` component.
+- **index.ts** -- ChartPlugin class registration. Defines module metadata, sets category to `Filters and controls`, and registers behaviors for both InteractiveChart and NativeFilter.
+
+- **buildQuery.ts** -- SQL query builder. Constructs the query payload sent to the Superset Flask backend. Strips ORDER BY clauses to prevent nested sorting conflicts.
+
+- **controlPanel.ts** -- Form controls definition for the Superset Explore view. Configures color scheme, filter type (native/chart), default value mode (today/month/year), macro shortcuts, cell density, and localization options.
+
+- **transformProps.ts** -- Data transformation pipeline. Maps raw `ChartProps` into `CalendarFilterProps` consumed by the React component. Handles formData forwarding for Native Filter integration.

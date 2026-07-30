@@ -1,5 +1,6 @@
-# 📂 Advanced AI Capabilities (`/docs/superpowers`)
+# Superpowers AI Workflows (`docs/superpowers/`)
 
-> **Agentic Workflows and Automations**
+This directory hosts AI-driven workflow configurations, agent definitions, and deployment plans used to accelerate development of the Calendar Filter plugin.
 
-This directory houses advanced AI-driven workflows, agent configurations, and deployment plans designed to enhance the development lifecycle of the Calendar Filter plugin.
+Contents:
+- `plans/` -- Historical implementation plans created by AI agents.

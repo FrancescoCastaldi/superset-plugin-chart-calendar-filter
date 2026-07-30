@@ -1,5 +1,5 @@
-# 📂 UI Visual Assets (`/docs/screenshots`)
+# Screenshots (`docs/screenshots/`)
 
-> **Application Rendering Previews**
+This directory stores PNG screenshots of the plugin integrated into Apache Superset dashboards and native filter modals.
 
-This directory stores high-resolution screenshots capturing the plugin's integration into Apache Superset dashboards and native filter modals. These assets are utilized in `README.md` and Confluence presentations.
+These assets are referenced from `README.md`, `CONFLUENCE_PRESENTATION.md`, and other project documentation.

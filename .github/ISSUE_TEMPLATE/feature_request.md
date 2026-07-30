@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest an idea for this plugin
 title: ''
 labels: enhancement
 assignees: ''
@@ -8,16 +8,16 @@ assignees: ''
 
 ## Problem
 
-Is your feature request related to a problem? Please describe.
+A clear description of the problem or limitation this feature request addresses. For example: "I find it difficult to [...]"
 
-## Solution
+## Proposed Solution
 
-Describe the solution you'd like.
+A clear description of the solution you would like to see implemented.
 
-## Alternatives
+## Alternatives Considered
 
-What alternatives have you considered?
+Describe any alternative solutions or workarounds you have considered.
 
-## Additional context
+## Additional Context
 
-Add any other context or screenshots.
+Add any other context, references, or screenshots that support this feature request.

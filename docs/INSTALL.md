@@ -1,10 +1,10 @@
-# Install in an existing Apache Superset
+# Installation Guide
 
-This guide explains how to add the **Calendar Filter** plugin to a Superset checkout you already have on disk.
+This guide explains how to add the Calendar Filter plugin to an existing Apache Superset checkout.
 
-## 🚀 Quick Start (Automated 1-Command Installer for Beginners)
+## Quick Start (Automated Installer)
 
-Run the Python installer from the plugin folder:
+Run the Python installer from the plugin root:
 
 ```bash
 python install.py --superset-path /path/to/superset-6.1.0
@@ -12,15 +12,15 @@ python install.py --superset-path /path/to/superset-6.1.0
 
 This single command automatically:
 1. Adds `"superset-plugin-chart-calendar-filter"` to `superset-frontend/package.json`.
-2. Registers `SupersetPluginChartCalendarFilter` under **"Filters and controls"** in `MainPreset.ts`.
+2. Registers `SupersetPluginChartCalendarFilter` under "Filters and controls" in `MainPreset.ts`.
 3. Applies TypeScript type-checking compatibility fixes (`AceEditorProvider.tsx`).
-4. Prepares `superset-frontend` for build/dev-server execution.
+4. Prepares `superset-frontend` for build or dev-server execution.
 
 ---
 
-## Manual install
+## Manual Install
 
-### 1. Build the plugin
+### 1. Build the Plugin
 
 From the plugin root:
 
@@ -32,7 +32,7 @@ npm run build
 
 This produces `lib/` (CommonJS), `esm/` (ES Modules), and TypeScript declarations, and runs the full test suite.
 
-### 2. Install the plugin into Superset
+### 2. Install the Plugin into Superset
 
 From your Superset frontend directory:
 
@@ -41,17 +41,17 @@ cd superset-frontend
 npm install --save /absolute/path/to/superset-plugin-chart-calendar-filter
 ```
 
-Use the absolute path to the plugin root (the folder that contains `package.json`). On Windows PowerShell you can obtain it with `Resolve-Path ..\..\superset-plugin-chart-calendar-filter`.
+Use the absolute path to the plugin root (the folder containing `package.json`). On Windows PowerShell, obtain it with `Resolve-Path ..\..\superset-plugin-chart-calendar-filter`.
 
-### 3. Register the plugin
+### 3. Register the Plugin
 
-Open `superset-frontend/src/visualizations/presets/MainPreset.ts` (it may be `MainPreset.js` in older Superset versions) and add:
+Open `superset-frontend/src/visualizations/presets/MainPreset.ts` (may be `MainPreset.js` in older Superset versions) and add:
 
 ```ts
 import { SupersetPluginChartCalendarFilter } from 'superset-plugin-chart-calendar-filter';
 ```
 
-Then, inside the preset constructor's `plugins:` array, add the plugin entry alongside the other `new XxxPlugin().configure({ ... })` lines:
+Inside the preset constructor's `plugins:` array, add the plugin entry:
 
 ```ts
 new SupersetPluginChartCalendarFilter().configure({
@@ -59,9 +59,7 @@ new SupersetPluginChartCalendarFilter().configure({
 }),
 ```
 
-The exact location does not matter as long as the entry is inside the `plugins:` array.
-
-### 4. Rebuild the frontend
+### 4. Rebuild the Frontend
 
 From `superset-frontend/`:
 
@@ -75,13 +73,15 @@ For a production build:
 npm run build
 ```
 
-### 5. Restart the backend
+### 5. Restart the Backend
 
-Restart the Flask backend (`superset run` or your dev server). The **Calendar Filter** chart will now appear in the chart picker under **Other**.
+Restart the Flask backend (`superset run` or your dev server). The Calendar Filter chart will appear in the chart picker under "Other".
 
-## 🤖 Automatic Installer (Quick Start)
+---
 
-The plugin includes a cross-platform installer script that automates the manual steps above.
+## Automatic Installer (Alternative)
+
+The plugin includes a cross-platform installer script.
 
 ### Windows PowerShell
 
@@ -95,26 +95,28 @@ The plugin includes a cross-platform installer script that automates the manual 
 ./scripts/install-to-superset.sh --superset-root /path/to/superset
 ```
 
-### With Docker and verification
+### With Docker and Verification
 
 ```powershell
 .\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset -Docker -Test
 ```
 
-### Installer parameters
+### Installer Parameters
 
 | Windows | Linux / macOS | Description |
 |---|---|---|
-| `-SupersetRoot` | `--superset-root` | Path to your Superset checkout. **Required.** |
+| `-SupersetRoot` | `--superset-root` | Path to your Superset checkout. Required. |
 | `-SkipBuild` | `--skip-build` | Skip the plugin build if you already have `lib/` and `esm/`. |
 | `-Link` | `--link` | Use `npm link` instead of a `file:` dependency for development. |
 | `-Docker` | `--docker` | Also configure the Docker Compose override for Superset. |
 | `-Test` | `--test` | Run build verification after installation. |
 | `-Help` | `--help` | Show the script usage and exit. |
 
-> **Tip:** Use `-Link` (or `--link`) when you are actively changing plugin code; Superset will pick up rebuilds automatically.
+Use `-Link` (or `--link`) when actively changing plugin code; Superset picks up rebuilds automatically.
 
-## Development mode with npm link
+---
+
+## Development Mode with npm link
 
 If you are actively changing the plugin source, use `npm link` so Superset picks up rebuilds automatically:
 
@@ -128,11 +130,13 @@ npm link superset-plugin-chart-calendar-filter
 
 Then register the plugin in `MainPreset.ts` as shown above and run `npm run dev-server`.
 
+---
+
 ## Troubleshooting
 
-- **Chart does not appear in the picker** -- double-check that the `key` string is exactly `superset-plugin-chart-calendar-filter` in both `MainPreset` and the plugin, then restart the frontend.
+- **Chart does not appear in the picker** -- verify that the `key` string is exactly `superset-plugin-chart-calendar-filter` in both `MainPreset` and the plugin, then restart the frontend.
 - **Build errors** -- ensure you are using Node.js 16+ and that Superset's peer dependencies are installed.
-- **Registration already present** -- the installer is idempotent; if you run it twice it will detect the plugin and skip the patch.
+- **Registration already present** -- the installer is idempotent; running it twice detects the plugin and skips the patch.
 - **Peer dependency conflicts** -- Superset 6.1 resolves some peer ranges differently than npm 7+. If you see `ERESOLVE` errors, set npm to use legacy peer deps:
 
   ```bash
@@ -140,6 +144,8 @@ Then register the plugin in `MainPreset.ts` as shown above and run `npm run dev-
   ```
 
   This is also the default when using the Docker Compose override.
+
+---
 
 ## Docker Compose
 
@@ -162,7 +168,7 @@ docker compose -f docker-compose.yml -f ../Calendar-Filter-Superset/docker-compo
 
 This mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, so the npm `file:` dependency resolves correctly.
 
-### Override file alternative
+### Override File Alternative
 
 For a simpler setup, copy the `docker-compose.yml` from the plugin into your Superset root and use it as an override:
 
@@ -173,10 +179,10 @@ docker compose -f docker-compose.yml -f docker-compose.calendar-filter.yml up -d
 
 Or merge the services block into your own `docker-compose.override.yml`.
 
-### Environment variables
+### Environment Variables
 
 The add-on sets:
-- `DEV_MODE=false` — skips slow UV editable reinstalls on the backend (packages are already in the Docker image)
-- `NPM_CONFIG_legacy_peer_deps=true` — fixes npm ERESOLVE on Superset 6.1 frontend
+- `DEV_MODE=false` -- skips slow UV editable reinstalls on the backend (packages are already in the Docker image)
+- `NPM_CONFIG_legacy_peer_deps=true` -- fixes npm ERESOLVE on Superset 6.1 frontend
 
-> **Windows note**: Docker Desktop needs file sharing access to the Calendar-Filter-Superset folder (Docker Settings > Resources > File Sharing > Add Folder).
+> Windows note: Docker Desktop needs file sharing access to the Calendar-Filter-Superset folder (Docker Settings > Resources > File Sharing > Add Folder).

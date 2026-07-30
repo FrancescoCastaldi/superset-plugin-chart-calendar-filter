@@ -1,7 +1,29 @@
-# 📂 Automation Scripts (`/scripts`)
+# Automation Scripts (scripts/)
 
-> **CI/CD & Local Installation Automation**
+Utility scripts for plugin lifecycle automation, including local installation, publishing, and dashboard integration.
 
-This directory contains utility scripts engineered to automate the plugin lifecycle. 
-- **`install-to-superset`** (PowerShell and Bash): Zero-touch installers that link and register the plugin directly into a local Apache Superset checkout.
-- **`publish`**: Deployment scripts to package and release the plugin to the npm registry.
+## Contents
+
+### Installation
+
+- **install.py** -- Zero-touch cross-platform installer (Python). Detects the OS, finds the local Superset checkout, symlinks the plugin, rebuilds the frontend, and registers the chart.
+- **install-to-superset.ps1** -- PowerShell installer for Windows environments.
+- **install-to-superset.sh** -- Bash installer for Linux and macOS environments.
+
+### Publishing
+
+- **publish.ps1** -- PowerShell script to build, version, and publish the plugin to the npm registry.
+- **publish.sh** -- Bash equivalent for POSIX environments.
+
+### Dashboard Integration
+
+- **attach_to_dashboard_8.py** -- Python script that attaches the plugin chart slice to Dashboard ID 8 via the Superset REST API.
+- **inject_native_filter.py** -- Python script that registers the plugin as a dashboard native filter on Dashboard ID 8.
+
+## Usage
+
+```
+python scripts/install.py
+```
+
+Run any script from the repository root. Each script includes inline documentation and error handling for common failure modes (missing dependencies, network issues, permissions).

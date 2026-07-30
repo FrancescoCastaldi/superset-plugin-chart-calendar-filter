@@ -1,6 +1,6 @@
 # Calendar Filter - Superset Chart Plugin
 
-> An interactive, selectable calendar heatmap chart for **Apache Superset 6.1.0** that doubles as a **dashboard cross-filter**. Click dates, filter your dashboard.
+Interactive calendar heatmap chart for Apache Superset 6.1.0 that acts as a dashboard cross-filter and native filter. Click dates to filter your dashboard.
 
 [![Superset Version](https://img.shields.io/badge/Superset-6.1.0-blue)](https://superset.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
@@ -11,60 +11,39 @@
 
 ---
 
-<p align="center">
-  <img src="docs/screenshots/sales_dashboard_calendar.png" alt="Calendar Filter - Native Filter & Dashboard View" width="800" />
-</p>
-<p align="center">
-  <img src="docs/screenshots/calendar_filter_screenshot.png" alt="Calendar Filter - Annual View Modal" width="800" />
-</p>
+## Install
 
----
+### Docker Compose (add-on to existing Superset deployment)
 
-## Install in an existing Superset
-
-Add the **Calendar Filter** chart to a Superset checkout you already have on disk.
-
-### Method 1: Docker Compose (if you run Superset via Docker)
-
-If you run Superset via Docker Compose (from the official [Superset repo](https://github.com/apache/superset), checked out at 6.1.0), use the plugin's `docker-compose.yml` as an add-on:
+If you run Superset via Docker Compose (official Superset repo, checked out at 6.1.0), use the plugin's `docker-compose.yml` as an add-on:
 
 ```bash
-# 1. Build the plugin first (from the plugin root)
 cd superset-plugin-chart-calendar-filter
 npm install --legacy-peer-deps
 npm run build
-
-# 2. Launch Superset with the plugin add-on (from your Superset root)
 cd /path/to/superset
 docker compose -f docker-compose.yml -f ../Calendar-Filter-Superset/docker-compose.yml up -d
 ```
 
-The add‑on mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, and sets `DEV_MODE=false` to skip slow UV reinstalls.  
-For a full explanation see the [Docker Compose section](docs/INSTALL.md#docker-compose) in the installation guide.
+The add-on mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, and sets `DEV_MODE=false` to skip slow UV reinstalls. See [Docker Compose section](docs/INSTALL.md#docker-compose) for details.
 
-### Method 2: One-command install (recommended for local setup)
+### One-command install (recommended for local setup)
 
-Run the installer script from the plugin root. It will auto-detect the Superset checkout next to the plugin (or you can pass the path explicitly):
+Run the installer script from the plugin root. It auto-detects the Superset checkout next to the plugin or accepts an explicit path.
 
 **Linux / macOS:**
 ```bash
 ./scripts/install-to-superset.sh
-# or with an explicit Superset path
 ./scripts/install-to-superset.sh /path/to/superset
 ```
 
 **Windows (PowerShell):**
 ```powershell
 .\scripts\install-to-superset.ps1
-# or with an explicit Superset path
 .\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset
 ```
 
-The script auto-detects the Superset checkout in this order: argument, `SUPERSET_HOME`, `../superset`, `../superset-6.1.0`, `./superset`.
-
-It builds the plugin if `lib/` is missing (skip with `--skip-build` / `-SkipBuild`), installs it via `npm install <plugin-path>`, and registers it in `MainPreset.ts`/`MainPreset.js` idempotently. A backup `MainPreset.ts.bak` is created before editing.
-
-For development with hot reload, use the `--link` / `-Link` flag:
+The script auto-detects the Superset checkout in this order: argument, `SUPERSET_HOME`, `../superset`, `../superset-6.1.0`, `./superset`. It builds the plugin if `lib/` is missing (skip with `--skip-build`/`-SkipBuild`), installs it via `npm install <plugin-path>`, and registers it in `MainPreset.ts`/`MainPreset.js` idempotently. A backup `MainPreset.ts.bak` is created before editing. For development with hot reload, use the `--link`/`-Link` flag:
 
 ```bash
 ./scripts/install-to-superset.sh --link
@@ -75,66 +54,53 @@ After the script finishes, rebuild the frontend:
 ```bash
 cd superset-frontend
 npm run dev-server   # development
-# or
 npm run build        # production
 ```
 
-Then restart the Flask backend.
-
-For detailed manual steps, see [INSTALL.md](docs/INSTALL.md).
+Restart the Flask backend. For manual steps, see [INSTALL.md](docs/INSTALL.md).
 
 ---
 
 ## Features
 
-### Month View - Heatmap at a Glance
+### Month View
 Color-coded day cells show metric intensity. Navigate between months, jump to any year, or return to today with one click.
 
 | Control | Description |
 |---|---|
 | < / > | Previous / Next month |
-| Year dropdown | Jump to any year in your data range |
+| Year dropdown | Jump to any year in the data range |
 | Today | Return to current month |
 | Year / Month | Toggle between month and year overview |
 
-### Year Overview - All 12 Months
+### Year Overview
 See the full year as a 4x3 grid of mini-calendars. Each mini-calendar is interactive - dates are clickable.
 
-<p align="center">
-  <img src="docs/screenshots/calendar_filter_screenshot.png" alt="Calendar Filter - Year overview" width="800" />
-</p>
-
-### Interactive Selection & Cross-Filter
-- **Single click** - toggle a date on/off
-- **Shift-click** - select a contiguous date range
-- **Clear all** - reset selection with one button
-- **Auto cross-filter** - emits `__time_range IN [...]` to filter all dashboard charts
-
-<p align="center">
-  <img src="demo/screenshot-calendar-full.png" alt="Calendar Filter - Date selection" width="800" />
-</p>
+### Interactive Selection and Cross-Filter
+- Single click - toggle a date on/off
+- Shift-click - select a contiguous date range
+- Clear all - reset selection with one button
+- Auto cross-filter - emits `IN` filter to all dashboard charts
 
 ### Display Options
 | Feature | Description |
 |---|---|
-| **Color palettes** | 6 palettes: Superset Default, Greens, Blues, Oranges, Reds, Purples |
-| **Legend** | Gradient bar with min-max value range |
-| **Week numbers** | ISO 8601 week numbers on each week row |
-| **First day of week** | Configurable Sunday or Monday start |
-| **Rich tooltip** | Hover shows date, metric value, and % of max |
-| **Empty state** | Graceful "No data available" message |
+| Color palettes | 6 palettes: Superset Default, Greens, Blues, Oranges, Reds, Purples |
+| Legend | Gradient bar with min-max value range |
+| Week numbers | ISO 8601 week numbers on each week row |
+| First day of week | Configurable Sunday or Monday start |
+| Rich tooltip | Hover shows date, metric value, and % of max |
+| Empty state | "No data available" message when no data |
 
 ---
 
-## Installation
-
-See [Install in an existing Superset](#install-in-an-existing-superset) above, or [INSTALL.md](docs/INSTALL.md) for the full manual steps.
+## Build
 
 ### Prerequisites
 - Apache Superset 6.1.0
 - Node.js 16+
 
-### Build the plugin
+### Commands
 
 ```bash
 cd superset-plugin-chart-calendar-filter
@@ -142,20 +108,20 @@ npm install --legacy-peer-deps
 npm run build
 ```
 
-This produces:
+Outputs:
 - `lib/` - CommonJS
 - `esm/` - ES Modules
 - TypeScript declarations
-- Runs the full test suite (27 tests)
+- Runs the full test suite (44 tests)
 
 ---
 
 ## Usage
 
-1. Add a **Calendar Filter** chart to your dashboard
-2. Configure the **date column** (e.g. `ds`, `__timestamp`)
-3. Select a **metric** to color the calendar cells
-4. Apply optional **adhoc filters**
+1. Add a Calendar Filter chart to your dashboard
+2. Configure the date column (e.g. `ds`, `__timestamp`)
+3. Select a metric to color the calendar cells
+4. Apply optional adhoc filters
 5. Click any date to cross-filter other dashboard charts
 
 ### Chart Controls
@@ -198,7 +164,7 @@ setDataMask({
 # Watch mode - rebuilds on every change
 npm run dev
 
-# Run tests (27 tests across 4 suites)
+# Run tests (44 tests across 5 suites)
 npm test
 
 # Full clean build
@@ -209,19 +175,20 @@ npm run build-clean
 
 | Suite | File | Tests |
 |---|---|---|
-| Component | `test/CalendarFilter.test.tsx` | 21 |
+| Component | `test/CalendarFilter.test.tsx` | 27 |
 | Plugin registration | `test/index.test.ts` | 1 |
 | Build query | `test/plugin/buildQuery.test.ts` | 3 |
 | Transform props | `test/plugin/transformProps.test.ts` | 2 |
 
-### Quick Demo (standalone)
+### Quick Demo
 
-A self-contained HTML demo is available in the `demo/` directory:
+A self-contained HTML demo is available in `demo/`:
 
 ```bash
-npx esbuild demo/demo-wrapper.tsx --bundle --global-name=CalendarFilterDemo --outfile=demo/demo-bundle.js --banner:js="var production = true;" --define:process.env.NODE_ENV='"production"' --loader:.js=jsx
-# Then serve demo/index.html with any HTTP server
+npx esbuild demo/demo-wrapper.tsx --bundle --global-name=CalendarFilterDemo --outfile=demo/demo-bundle.js --loader:.tsx=tsx --loader:.js=jsx
 ```
+
+Serve `demo/index.html` with any HTTP server.
 
 ---
 
@@ -229,32 +196,28 @@ npx esbuild demo/demo-wrapper.tsx --bundle --global-name=CalendarFilterDemo --ou
 
 ```
 superset-plugin-chart-calendar-filter/
-├── src/
-│   ├── index.ts                 # Plugin entry point
-│   ├── CalendarFilter.tsx        # Main React component
-│   ├── types.ts                  # TypeScript interfaces
-│   ├── images/thumbnail.png      # Chart picker thumbnail
-│   └── plugin/
-│       ├── index.ts              # ChartPlugin registration
-│       ├── buildQuery.ts         # Query builder
-│       ├── controlPanel.ts       # Form controls
-│       └── transformProps.ts     # Data transformation
-├── test/
-│   ├── CalendarFilter.test.tsx   # 21 component tests
-│   ├── index.test.ts             # Plugin registration test
-│   ├── __mocks__/                # Test mocks
-│   └── plugin/                   # Plugin unit tests
-├── demo/                         # Standalone demo
-│   ├── demo-wrapper.tsx
-│   ├── demo-bundle.js
-│   ├── index.html
-│   └── screenshot*.png           # Demo screenshots
-├── types/external.d.ts
-├── package.json
-├── tsconfig.json
-├── babel.config.js
-├── jest.config.js
-└── AGENTS.md
+  src/
+    index.ts                    # Plugin entry point
+    CalendarFilter.tsx          # Main React component
+    types.ts                    # TypeScript interfaces
+    images/thumbnail.png        # Chart picker thumbnail
+    plugin/
+      index.ts                  # ChartPlugin registration
+      buildQuery.ts             # Query builder
+      controlPanel.ts           # Form controls
+      transformProps.ts         # Data transformation
+  test/
+    CalendarFilter.test.tsx     # 27 component tests
+    index.test.ts               # Plugin registration test
+    __mocks__/                  # Test mocks
+    plugin/                     # Plugin unit tests
+  demo/                         # Standalone demo
+  types/external.d.ts
+  package.json
+  tsconfig.json
+  babel.config.js
+  jest.config.js
+  AGENTS.md
 ```
 
 ---
@@ -265,10 +228,4 @@ superset-plugin-chart-calendar-filter/
 
 ---
 
-<p align="center">
-  Built for <a href="https://superset.apache.org/">Apache Superset</a>
-  •
-  <a href="https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues">Report a bug</a>
-  •
-  <a href="https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues">Request a feature</a>
-</p>
+Built for [Apache Superset](https://superset.apache.org/) -- [Report a bug](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues) -- [Request a feature](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues)

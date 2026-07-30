@@ -1,7 +1,9 @@
-# 📂 Utilities (`/src/utils`)
+# Utilities (src/utils/)
 
-> **Temporal Computations & Formatting**
+Stateless pure functions isolated from React components.
 
-This directory provides stateless utility functions isolated from React components.
+## Files
 
-- **`dateUtils.ts`**: Highly specialized, timezone-safe algorithms handling date parsing, layout matrices, and string formatting, mitigating `+1/-1 day` drift caused by browser UTC conversions.
+- **dateUtils.ts** -- Timezone-safe date manipulation functions. Includes `parseDateValue`, `formatDateKey`, `getDatesBetween`, `getISOWeekNumber`, `getDaysInMonth`, `formatDateRangeBadge`, and calendar grid layout helpers. Mitigates +1/-1 day drift from browser UTC conversions.
+
+- **themeUtils.ts** -- Color utilities. Exports `COLOR_PALETTES` (6 palette definitions matching Superset color schemes) and `getBaseColor` for gradient scale construction.

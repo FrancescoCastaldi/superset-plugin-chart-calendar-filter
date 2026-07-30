@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug to help us improve
+about: Report a bug to help improve the plugin
 title: ''
 labels: bug
 assignees: ''
@@ -10,28 +10,34 @@ assignees: ''
 
 A clear and concise description of the bug.
 
-## To reproduce
+## Steps to Reproduce
 
-Steps to reproduce the behavior:
+Steps to reproduce the issue:
+
 1. Go to '...'
 2. Click on '...'
-3. See error
+3. Scroll down to '...'
+4. See error
 
-## Expected behavior
+## Expected Behavior
 
 A clear description of what you expected to happen.
 
-## Screenshots
+## Actual Behavior
 
-If applicable, add screenshots.
+A clear description of what actually happened.
 
 ## Environment
 
 - Superset version: 6.1.0
-- Plugin version: 0.1.0
-- Browser: [e.g. Chrome 120]
-- OS: [e.g. Windows 11]
+- Plugin version: [e.g. 0.1.5]
+- Browser: [e.g. Chrome 120, Firefox 120]
+- OS: [e.g. Windows 11, macOS 14]
 
-## Additional context
+## Screenshots
 
-Add any other context about the problem here.
+If applicable, add screenshots to help explain the problem.
+
+## Additional Context
+
+Add any other context about the problem here, such as error messages from the browser console or Superset logs.

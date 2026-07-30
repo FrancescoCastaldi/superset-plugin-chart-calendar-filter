@@ -1,5 +1,5 @@
-# 📂 UI State Snapshots (`/docs/snapshots`)
+# UI State Snapshots (`docs/snapshots/`)
 
-> **Ephemeral Render Logs**
+This directory stores temporary UI rendering snapshots captured during automated visual validation and AI-assisted debugging sessions.
 
-This directory is designated for storing temporary UI rendering logs or Markdown-formatted structural snapshots utilized during automated AI visual or layout validation.
+Files in this directory are ephemeral and excluded from version control via `.gitignore`.

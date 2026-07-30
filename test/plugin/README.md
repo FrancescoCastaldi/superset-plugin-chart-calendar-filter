@@ -1,7 +1,9 @@
-# 📂 Plugin Unit Tests (`/test/plugin`)
+# Plugin Unit Tests (test/plugin/)
 
-> **Integration Layer Verification**
+Jest test suites for the Superset integration layer.
 
-This directory contains Jest test suites validating the Superset data pipeline bridges.
-- **`buildQuery.test.ts`**: Asserts the correct generation of SQL query payloads and the prevention of nested `ORDER BY` anomalies.
-- **`transformProps.test.ts`**: Verifies the correct extraction and mapping of `chartProps` (including `formData` forwarding for Native Filters).
+## Files
+
+- **buildQuery.test.ts** -- Validates SQL query payload generation. Ensures correct metric and groupby construction. Confirms ORDER BY clauses are stripped to prevent nested sorting conflicts.
+
+- **transformProps.test.ts** -- Verifies ChartProps to CalendarFilterProps mapping. Tests formData forwarding for Native Filter integration and correct data transformation pipeline behavior.

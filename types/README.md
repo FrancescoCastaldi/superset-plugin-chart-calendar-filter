@@ -1,5 +1,7 @@
-# 📂 TypeScript Definitions (`/types`)
+# TypeScript Definitions (types/)
 
-> **External Module Declarations**
+Ambient type declaration files for external modules without native typing.
 
-This directory contains ambient TypeScript declarations (`*.d.ts`) for external modules that lack native typing. For instance, `external.d.ts` exposes the `@apache-superset/core/translation` module, ensuring type-safe compilation and strict semantic enforcement across the project.
+## Files
+
+- **external.d.ts** -- Declares the `@apache-superset/core/translation` module. Exports `t` function type for type-safe compilation of localization calls across the project.

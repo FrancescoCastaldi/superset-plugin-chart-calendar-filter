@@ -1,7 +1,9 @@
 # GitHub Workflows
 
-This directory contains the GitHub Actions CI/CD pipeline configurations for the project.
+This directory contains GitHub Actions CI/CD pipeline configurations for superset-plugin-chart-calendar-filter.
 
 ## Files
-- `ci.yml`: The main continuous integration workflow that builds and tests the plugin on every push and pull request.
-- `codeql.yml`: CodeQL analysis workflow for security scanning and code quality checks.
+
+- `ci.yml` : Main continuous integration workflow. Builds and tests the plugin on every push and pull request using Node 20 and 22. Publishes to npm when a tag is pushed.
+- `codeql.yml` : CodeQL security analysis workflow. Runs static analysis on every push to default branch and on a weekly schedule.
+- `release.yml` : Release workflow for automated npm publishing and GitHub Release creation.

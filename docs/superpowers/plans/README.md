@@ -1,5 +1,6 @@
-# 📂 Action Plans (`/docs/superpowers/plans`)
+# Implementation Plans (`docs/superpowers/plans/`)
 
-> **Executed AI Architectural Plans**
+This directory stores historical implementation plans produced by AI agents. These artifacts serve as reference blueprints for complex architectural changes and automation deployments.
 
-This directory stores historical implementation plans crafted by AI agents (such as the `2026-07-23-automatic-installer.md`). These artifacts serve as reference blueprints for complex architectural shifts or zero-touch automation deployments.
+Files:
+- `2026-07-23-automatic-installer.md` -- Plan for the zero-touch automatic installer.

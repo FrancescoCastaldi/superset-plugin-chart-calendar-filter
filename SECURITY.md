@@ -2,15 +2,15 @@
 
 ## Supported Versions
 
-Currently, only the latest release of the Calendar Filter plugin is supported with security updates.
+Only the latest release of the Calendar Filter plugin is supported with security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1   | :x:                |
+| Version | Supported |
+| ------- | --------- |
+| 0.1.x   | Supported |
+| < 0.1   | Not supported |
 
 ## Reporting a Vulnerability
 
-Please report any security vulnerabilities by opening an issue on our GitHub repository with the `security` label, or by sending a direct message to the maintainers. We take all security vulnerabilities seriously and will work to patch them in a timely manner.
+Report security vulnerabilities by opening an issue on the GitHub repository with the `security` label, or by sending a direct message to the maintainers. All security vulnerabilities are taken seriously and will be patched in a timely manner.
 
 Do not disclose the vulnerability publicly until a patch has been released.

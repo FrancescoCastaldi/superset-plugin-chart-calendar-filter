@@ -1,5 +1,9 @@
-# 📂 Historical Context (`/docs/context`)
+# Session Context (`docs/context/`)
 
-> **Chronological Development Logs**
+This directory stores persistent logs of AI development sessions, architectural decisions, and project management records.
 
-This directory contains persistent historical logs of AI development sessions, architectural alignments, and project management briefs (`COMMESSA.md`, `SESSION-CONTEXT.md`). These artifacts ensure structural continuity across asynchronous development phases.
+Files:
+- `SESSION-CONTEXT.md` -- Current session state, task history, and resume information.
+- `COMMESSA.md` -- Project briefs and architectural alignment notes.
+
+These artifacts ensure continuity across asynchronous development phases.
