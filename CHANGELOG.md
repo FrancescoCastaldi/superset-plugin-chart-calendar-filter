@@ -3,42 +3,40 @@
 ## [0.1.5] — 2026-07-30
 
 ### Added
-- **Toggle Vista Mensile / Annuale nel Native Filter Popover**: Aggiunta la possibilità di alternare liberamente tra la **Vista Mensile** (singolo mese dettagliato a celle interattive ad alta risoluzione) e la **Vista Annuale** (griglia 4x3 dei 12 mesi) all'interno del popover espanso del Native Filter.
-- **Documentazione Architetturale per AI (`CODE_ARCHITECTURE_MAP.md`)**: Creata mappa esaustiva del codice, paragrafo per paragrafo, per la guida di futuri sviluppi sia frontend che backend.
-
-### Added
-- **MonthSelect dropdown accanto a YearSelect**: Aggiunto un menu a tendina per la selezione rapida del mese (`MonthSelect`) affiancato al selettore anno in tutte e 3 le viste: native filter modal, chart header e expand modal. I mesi sono localizzati in italiano.
+- **Monthly / Yearly View Toggle in Native Filter Popover**: Added the ability to freely switch between the **Monthly View** (single detailed month with high-resolution interactive cells) and the **Yearly View** (4x3 grid of 12 months) within the expanded Native Filter popover.
+- **Architectural Documentation for AI (`CODE_ARCHITECTURE_MAP.md`)**: Created a comprehensive code map, paragraph by paragraph, to guide future frontend and backend developments.
+- **MonthSelect dropdown alongside YearSelect**: Added a quick month selection dropdown (`MonthSelect`) alongside the year selector in all 3 views: native filter modal, chart header, and expand modal. Months are localized in Italian.
 
 ### Fixed
-- **Anno corrente sempre incluso nel dropdown anni**: Il selettore anno `availableYears` ora estende il range superiore fino all'anno corrente (`today.getFullYear()`) anche quando il dataset termina prima, garantendo che l'anno corrente sia sempre selezionabile.
+- **Current year always included in years dropdown**: The `availableYears` selector now extends its upper range to the current year (`today.getFullYear()`) even when the dataset ends earlier, ensuring the current year is always selectable.
 
 ## [0.1.4] — 2026-07-28
 
 ### Added
-- **Selettore Anno Dinamico nel Modal**: aggiunti i pulsanti di navigazione anno (`◀`, `▶`) ed il menu a tendina di selezione anno (`<YearSelect>`) nell'header della finestra modale (Native Filter e Chart), consentendo la selezione e navigazione diretta tra qualsiasi anno (2024, 2025, 2026, 2027, ecc.).
+- **Dynamic Year Selector in Modal**: Added year navigation buttons (`◀`, `▶`) and a year selection dropdown (`<YearSelect>`) in the header of the modal window (Native Filter and Chart), allowing direct selection and navigation to any year (2024, 2025, 2026, 2027, etc.).
 
 ### Changed
-- **Modal Vista Annuale — Layout Rettangolare & Posizionamento**: regolata l'origine del modal (`padding-top: 210px`) per posizionarlo perfettamente al di sotto delle barre di intestazione/schede della dashboard Superset; allargato il contenitore a `width: 96%` e `max-width: 1350px` per una visualizzazione panoramica rettangolare a 12 mesi.
+- **Yearly View Modal — Rectangular Layout & Positioning**: Adjusted the modal origin (`padding-top: 210px`) to position it perfectly below the Superset dashboard header/tabs; expanded the container to `width: 96%` and `max-width: 1350px` for a 12-month rectangular panoramic view.
 
 ### Fixed
-- **Webpack Stub Modules (0 error build)**: creati stub completi in `/app/superset-frontend/node_modules/` per `@deck.gl/widgets` (export sia prefissati `_` che standard), `@react-spring/web` (`animated`, `a`, `useTransition`, `useSpring`, ecc.), e `@fontsource/inter` (`100-900.css`). Il webpack-dev-server di Superset 6.1.0 compila ora con **0 errori**.
+- **Webpack Stub Modules (0 error build)**: Created complete stubs in `/app/superset-frontend/node_modules/` for `@deck.gl/widgets` (both `_` prefixed and standard exports), `@react-spring/web` (`animated`, `a`, `useTransition`, `useSpring`, etc.), and `@fontsource/inter` (`100-900.css`). The Superset 6.1.0 webpack-dev-server now compiles with **0 errors**.
 
 ## [0.1.3] — 2026-07-28
 
 ### Added
-- **Native Filter Evolution (`Behavior.NativeFilter`)**: registrazione del plugin nel registro Native Filters di Apache Superset 6.1.0 in architettura ibrida per l'utilizzo sia come Native Filter nella barra laterale che come Chart interattivo.
-- **Dual View Layout (Mini Inline + Modal 12 Mesi)**: mini calendario compatto a 1 mese per la barra filtri laterale affiancato dal pulsante `🖥️ Espandi` per l'apertura di un modal popover ad alta risoluzione a 12 mesi.
-- **Formato Filtro Emesso Configurabile**: scelta nel pannello di controllo tra intervallo temporale nativo (`time_range`) e lista adhoc di date discrete (clausola `IN` su colonna).
-- **Barra Scorciatoie Macro Filtri**: pulsanti rapidi per *🎯 Anno [YYYY]*, *📅 Mese Corrente*, *📊 Q1-Q4*, *💼 Feriali (Lun-Ven)* e *❌ Azzera*.
-- **Valori di Default Configurabili**: selezione iniziale del filtro personalizzabile da pannello (*Nessun filtro*, *Oggi*, *Mese Corrente*, *Anno Corrente*, *Intervallo Personalizzato*).
-- **Italian Localization**: traduzione completa in italiano di tutti i componenti UI (giorni della settimana, mesi, pulsanti *Oggi*, *Azzera*, *Anno/Mese*, *Espandi Modal*, e tooltip).
-- **Test Unitari (44/44)**: estesa la suite di test Jest a 44 test unitari passati con successo.
+- **Native Filter Evolution (`Behavior.NativeFilter`)**: Registered the plugin in the Apache Superset 6.1.0 Native Filters registry using a hybrid architecture, allowing it to be used both as a Native Filter in the sidebar and as an interactive Chart.
+- **Dual View Layout (Mini Inline + 12-Month Modal)**: Compact 1-month mini calendar for the sidebar filter alongside an `🖥️ Expand` button to open a high-resolution 12-month modal popover.
+- **Configurable Emitted Filter Format**: Added control panel option to choose between native time range (`time_range`) and an ad-hoc list of discrete dates (`IN` clause on column).
+- **Macro Filters Shortcuts Bar**: Quick buttons for *🎯 Year [YYYY]*, *📅 Current Month*, *📊 Q1-Q4*, *💼 Weekdays (Mon-Fri)*, and *❌ Clear*.
+- **Configurable Default Values**: Customizable initial filter selection from the panel (*No filter*, *Today*, *Current Month*, *Current Year*, *Custom Range*).
+- **Italian Localization**: Full Italian translation of all UI components (weekdays, months, *Today*, *Clear*, *Year/Month*, *Expand Modal* buttons, and tooltips).
+- **Unit Tests (44/44)**: Expanded Jest test suite to 44 successfully passing unit tests.
 
 ### Changed
-- **Aseptic Plain Cell Styling**: rimosso lo sfondo gradiente/heatmap condizionato dall'intensità dei dati. Le caselle non selezionate ora hanno uno sfondo bianco neutro (`#ffffff`) con bordo discreto (`1px solid #e2e8f0`).
+- **Aseptic Plain Cell Styling**: Removed data-intensity conditional background gradient/heatmap. Unselected cells now have a neutral white background (`#ffffff`) with a discrete border (`1px solid #e2e8f0`).
 
 ### Fixed
-- **Nested Query OrderBy Stripping**: rimosso l'inserimento di clausole `ORDER BY` in `buildQuery.ts` per prevenire errori SQL su sottoquery annidate in Apache Superset.
+- **Nested Query OrderBy Stripping**: Removed `ORDER BY` clause insertion in `buildQuery.ts` to prevent SQL errors on nested subqueries in Apache Superset.
 
 ## [0.1.2] — 2026-07-27
 
