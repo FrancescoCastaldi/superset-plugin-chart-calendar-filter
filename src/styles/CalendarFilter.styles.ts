@@ -250,7 +250,8 @@ export const DayCell = styled.div<DayCellProps>`
     if (isSelected) return `${baseColor}35`;
     return '#ffffff';
   }};
-  border: 1px solid ${({ isSelected, baseColor }) => (isSelected ? baseColor : '#e2e8f0')};
+  border: 1px solid ${({ isSelected, baseColor }) =>
+    isSelected ? baseColor : '#e2e8f0'};
 
   ${({ isSelected, baseColor }) =>
     isSelected
@@ -413,7 +414,8 @@ export const MiniDayCell = styled.div<MiniDayCellProps>`
     if (isSelected) return `${baseColor}35`;
     return '#ffffff';
   }};
-  border: 1px solid ${({ isSelected, baseColor }) => (isSelected ? baseColor : '#e2e8f0')};
+  border: 1px solid ${({ isSelected, baseColor }) =>
+    isSelected ? baseColor : '#e2e8f0'};
 
   ${({ isSelected, baseColor }) =>
     isSelected

@@ -37,7 +37,9 @@ export default function transformProps(chartProps: ChartProps) {
   const { hooks, filterState } = chartProps;
   const { setDataMask = () => {} } = hooks || {};
   const data = (queriesData[0]?.data ?? []) as TimeseriesDataRecord[];
-  const [dateColumn] = formData.groupby ?? [];
+  // In Native Filter mode `groupby` is empty: prefer the explicit date_column control
+  const [groupByDateColumn] = formData.groupby ?? [];
+  const dateColumn = formData.date_column ?? groupByDateColumn;
 
   return {
     width,

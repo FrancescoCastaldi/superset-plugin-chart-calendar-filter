@@ -146,6 +146,23 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           {
+            name: 'date_column',
+            config: {
+              type: 'SelectControl',
+              label: t('Data Column'),
+              clearable: true,
+              mapStateToProps: (state: any) => ({
+                options: (state.datasource?.columns ?? [])
+                  .filter((c: any) => c.filterable || c.is_dttm)
+                  .map((c: any) => [c.column_name, c.column_name]),
+              }),
+              renderTrigger: true,
+              description: t('Colonna data su cui emettere il filtro. Obbligatoria in modalità Native Filter: senza di essa il filtro punta a __timestamp e le chart non vengono filtrate.'),
+            },
+          },
+        ],
+        [
+          {
             name: 'filter_type_mode',
             config: {
               type: 'SelectControl',

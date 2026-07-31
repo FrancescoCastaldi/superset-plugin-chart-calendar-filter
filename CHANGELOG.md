@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.6] - 2026-07-31
+
+### Added
+- Date Column control (`date_column`) in the Native Filter Settings section: lets the user select the target date column for the emitted filter. Required in Native Filter mode — without it the plugin falls back to `__timestamp` and the dashboard charts are not filtered (fixes the non-working native filter on dashboards).
+
+### Fixed
+- Native filter not filtering dashboards: the emitted filter pointed to `__timestamp` (a non-existent column) because no target date column reached the plugin in Native Filter mode; the new `date_column` control fixes it. The filter is also applied to the real dataset column (`order_date`) via the dashboard filter configuration.
+
+### Changed
+- Calendar cells keep the flat neutral style (white background, no data-intensity heatmap): days are highlighted only when selected, never by the underlying records. `DayCell`/`MiniDayCell` ignore the `intensity` prop as in 0.1.3.
+
 ## [0.1.5] - 2026-07-30
 
 ### Added

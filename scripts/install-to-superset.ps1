@@ -258,7 +258,13 @@ try {
         if ($LASTEXITCODE -ne 0) { throw "npm link in superset-frontend failed" }
     } else {
         Write-Host ">> Installing plugin via npm install (file dependency)..."
-        npm install --legacy-peer-deps --save $PluginRoot
+        # file: deps are symlinked by default; on Windows symlinks/junctions cannot
+        # cross volumes (npm error EISDIR). INSTALL_LINKS packs the plugin instead.
+        # NOTE: do NOT add --legacy-peer-deps here: it makes npm skip peer
+        # dependency auto-install (react-ace et al.) and prune them from the
+        # lockfile, breaking the Superset frontend webpack build.
+        $env:NPM_CONFIG_INSTALL_LINKS = 'true'
+        npm install --save $PluginRoot
         if ($LASTEXITCODE -ne 0) { throw "npm install failed" }
     }
 } catch {
@@ -309,6 +315,65 @@ if ($Docker) {
                 $services = @('superset', 'superset-node', 'superset-worker', 'superset-worker-beat')
             }
 
+            # npm records the file: dependency in package.json with a host
+            # relative spec when possible (same drive), otherwise an absolute
+            # Windows path. The Linux container needs a resolvable spec:
+            #  - relative spec -> mount the plugin at the normalized equivalent
+            #    of that relative path inside /app/superset-frontend
+            #  - absolute spec -> rewrite to file:/Calendar-Filter-Superset and
+            #    mount there (a best-effort host junction keeps host npm working)
+            $pkgJsonPath = Join-Path $FE 'package.json'
+            $npmSpec = $null
+            if (Test-Path $pkgJsonPath) {
+                $specRe = [regex]('"superset-plugin-chart-calendar-filter"\s*:\s*"file:([^"]+)"')
+                $m = $specRe.Match([System.IO.File]::ReadAllText($pkgJsonPath))
+                if ($m.Success) { $npmSpec = $m.Groups[1].Value }
+            }
+
+            $mountTargets = @('/Calendar-Filter-Superset')
+            if ($npmSpec) {
+                if ($npmSpec -match '^[A-Za-z]:[\\/]') {
+                    # Absolute host path (cross-drive install): rewrite the spec
+                    # to the container mount point.
+                    foreach ($pkgFile in @($pkgJsonPath, (Join-Path $FE 'package-lock.json'))) {
+                        if (-not (Test-Path $pkgFile)) { continue }
+                        $content = [System.IO.File]::ReadAllText($pkgFile)
+                        if ($content.Contains('file:' + $npmSpec)) {
+                            $content = $content.Replace('file:' + $npmSpec, 'file:/Calendar-Filter-Superset')
+                            [System.IO.File]::WriteAllText($pkgFile, $content, (New-Object System.Text.UTF8Encoding($false)))
+                            Write-Host "   Rewrote file: spec to file:/Calendar-Filter-Superset in $(Split-Path $pkgFile -Leaf)"
+                        }
+                    }
+                    # Keep host-side npm resolvable: junction at the drive root
+                    $targetJunction = "C:\Calendar-Filter-Superset"
+                    if (-not (Test-Path $targetJunction)) {
+                        cmd /c mklink /J "$targetJunction" "$PluginRoot" 2>$null | Out-Null
+                        if (Test-Path $targetJunction) {
+                            Write-Host "   Created junction $targetJunction -> $PluginRoot"
+                        } else {
+                            Write-Warning "Could not create junction $targetJunction; host npm may fail resolving the rewritten spec"
+                        }
+                    }
+                } else {
+                    # Relative spec (same drive): npm resolves it relative to
+                    # /app/superset-frontend inside the container; mount the
+                    # plugin at the normalized equivalent of that path.
+                    $containerPluginPath = (Join-Path '/app/superset-frontend' $npmSpec) -replace '[\\/]+', '/'
+                    $parts = $containerPluginPath.Split('/') | Where-Object { $_ -ne '' -and $_ -ne '.' }
+                    $norm = @()
+                    foreach ($pt in $parts) {
+                        if ($pt -eq '..') {
+                            if ($norm.Count -ge 2) { $norm = $norm[0..($norm.Count - 2)] } else { $norm = @() }
+                        } else {
+                            $norm += $pt
+                        }
+                    }
+                    $relTarget = '/' + ($norm -join '/')
+                    $mountTargets += $relTarget
+                    Write-Host "   Container mount target for file: spec: $relTarget"
+                }
+            }
+
             $sb = New-Object System.Text.StringBuilder
             [void]$sb.AppendLine("# ---------------------------------------------------------------------------")
             [void]$sb.AppendLine("# Auto-generated Docker Compose override for the Calendar Filter plugin.")
@@ -320,13 +385,21 @@ if ($Docker) {
             [void]$sb.AppendLine("services:")
 
             foreach ($svc in $services) {
-                $envKey = if ($svc -like '*node*') { 'NPM_CONFIG_legacy_peer_deps' } else { 'DEV_MODE' }
-                $envVal = if ($svc -like '*node*') { '"true"' } else { '"false"' }
                 [void]$sb.AppendLine("  $($svc):")
                 [void]$sb.AppendLine("    volumes:")
-                [void]$sb.AppendLine("      - ${PluginRootUnix}:/Calendar-Filter-Superset:delegated")
+                foreach ($mountTarget in $mountTargets) {
+                    [void]$sb.AppendLine("      - ${PluginRootUnix}:${mountTarget}:delegated")
+                }
                 [void]$sb.AppendLine("    environment:")
-                [void]$sb.AppendLine("      ${envKey}: $envVal")
+                if ($svc -like '*node*') {
+                    # npm would try to symlink the file: dep; on bind mounts that
+                    # can fail, so pack a copy instead.
+                    # NOTE: legacy_peer_deps is deliberately NOT set here: it
+                    # would break peer auto-install (react-ace etc.) in webpack.
+                    [void]$sb.AppendLine("      NPM_CONFIG_install_links: 'true'")
+                } else {
+                    [void]$sb.AppendLine("      DEV_MODE: 'false'")
+                }
             }
 
             Set-Content -Path $OverrideFile -Value $sb.ToString() -Encoding utf8 -Force
