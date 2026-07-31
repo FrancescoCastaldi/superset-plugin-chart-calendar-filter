@@ -180,9 +180,12 @@ npm run build-clean
 | Suite | File | Tests |
 |---|---|---|
 | Component | `test/CalendarFilter.test.tsx` | 27 |
+| Date utils | `test/utils/dateUtils.test.ts` | 12 |
 | Plugin registration | `test/index.test.ts` | 1 |
-| Build query | `test/plugin/buildQuery.test.ts` | 3 |
-| Transform props | `test/plugin/transformProps.test.ts` | 2 |
+| Build query | `test/plugin/buildQuery.test.ts` | 1 |
+| Transform props | `test/plugin/transformProps.test.ts` | 3 |
+
+**Total: 44 tests across 5 suites**
 
 ### Quick Demo
 
@@ -205,16 +208,25 @@ superset-plugin-chart-calendar-filter/
     CalendarFilter.tsx          # Main React component
     types.ts                    # TypeScript interfaces
     images/thumbnail.png        # Chart picker thumbnail
+    hooks/
+      useCalendarData.ts        # Data aggregation for the calendar grid
+      useSelectionMask.ts       # Selection mask + date column fallback
     plugin/
       index.ts                  # ChartPlugin registration
       buildQuery.ts             # Query builder
       controlPanel.ts           # Form controls
       transformProps.ts         # Data transformation
+    styles/
+      CalendarFilter.styles.ts  # Emotion styles (flat cells, selection tint)
+    utils/
+      dateUtils.ts              # Date helpers (month grid, ranges)
+      themeUtils.ts             # Theme null-safe access
   test/
     CalendarFilter.test.tsx     # 27 component tests
     index.test.ts               # Plugin registration test
     __mocks__/                  # Test mocks
     plugin/                     # Plugin unit tests
+    utils/                      # dateUtils unit tests (12)
   demo/                         # Standalone demo
   types/external.d.ts
   package.json

@@ -1,6 +1,6 @@
 # Documentation Index (`docs/`)
 
-Project documentation for `superset-plugin-chart-calendar-filter` v0.1.5 -- an Apache Superset 6.1.0 calendar heatmap plugin with cross-filter and native filter capabilities.
+Project documentation for `superset-plugin-chart-calendar-filter` v0.1.6 -- an Apache Superset 6.1.0 calendar plugin with cross-filter and native filter capabilities.
 
 ## Directory Structure
 
