@@ -64,7 +64,7 @@ Restart the Flask backend. For manual steps, see [INSTALL.md](docs/INSTALL.md).
 ## Features
 
 ### Month View
-Color-coded day cells show metric intensity. Navigate between months, jump to any year, or return to today with one click.
+Neutral day cells stay white and flat — days are highlighted **only when selected**, never by the underlying records (no intensity heatmap). Navigate between months, jump to any year, or return to today with one click.
 
 | Control | Description |
 |---|---|
@@ -119,10 +119,12 @@ Outputs:
 ## Usage
 
 1. Add a Calendar Filter chart to your dashboard
-2. Configure the date column (e.g. `ds`, `__timestamp`)
-3. Select a metric to color the calendar cells
+2. Configure the date column (e.g. `ds`, `order_date`)
+3. Select a metric (shown in the hover tooltip and selection badge)
 4. Apply optional adhoc filters
 5. Click any date to cross-filter other dashboard charts
+
+As a **dashboard Native Filter**, set the `date_column` control (in *Native Filter Settings*) to the dataset's date column — without it the plugin falls back to `__timestamp` and the charts are not filtered.
 
 ### Chart Controls
 
@@ -134,17 +136,19 @@ Outputs:
 | `first_day_of_week` | Select | `0` (Sunday) | Start week on Sunday or Monday |
 | `show_year_dropdown` | Checkbox | `true` | Year selector dropdown |
 | `enable_overview` | Checkbox | `true` | Year overview toggle |
+| `date_column` | Select | *empty* | Target date column for the emitted cross-filter (in **Native Filter Settings**; falls back to the first `groupby` column in chart mode) |
+| `cell_density` | Select | `compact` | Cell density: `compact` or `comfortable` |
 
 ---
 
 ## Cross-Filter API
 
-When dates are selected, the plugin emits cross-filters using the `__time_range` column:
+When dates are selected, the plugin emits cross-filters on the **configured date column** — `date_column` in Native Filter mode, otherwise the first `groupby` column (legacy fallback `__timestamp`):
 
 ```ts
 setDataMask({
   extraFormData: {
-    filters: [{ col: '__time_range', op: 'IN', val: ['2024-01-01', '2024-01-15'] }],
+    filters: [{ col: 'order_date', op: 'IN', val: ['2024-01-01', '2024-01-15'] }],
   },
   filterState: {
     value: ['2024-01-01', '2024-01-15'],

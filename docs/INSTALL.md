@@ -186,3 +186,21 @@ The add-on sets:
 - `NPM_CONFIG_legacy_peer_deps=true` -- fixes npm ERESOLVE on Superset 6.1 frontend
 
 > Windows note: Docker Desktop needs file sharing access to the Calendar-Filter-Superset folder (Docker Settings > Resources > File Sharing > Add Folder).
+
+### Docker development notes (avoiding stale plugin builds)
+
+Inside the container (`superset-node`), the `file:` dependency is installed as a **copy** (not a symlink) and the container entrypoint re-runs `npm install` at boot, which overwrites your rebuilt plugin with a stale copy.
+
+Workaround used in development:
+
+1. Build the plugin: `npm run build` (writes `esm/`, `lib/`, `types/`).
+2. Copy the outputs into the container's `node_modules`:
+
+   ```bash
+   docker exec <superset-node-container> sh -c "cd /app/superset-frontend/node_modules/superset-plugin-chart-calendar-filter && rm -rf esm lib types package.json && cp -r /Calendar-Filter-Superset/esm ./esm && cp -r /Calendar-Filter-Superset/lib ./lib && cp -r /Calendar-Filter-Superset/types ./types && cp /Calendar-Filter-Superset/package.json ./package.json && rm -rf /app/superset-frontend/node_modules/.cache"
+   ```
+
+3. Restart the container with `docker restart` (NOT `docker compose up -d` — recreating the container restores `node_modules` from the image layer and reverts the copy).
+4. Wait for the full webpack compile (~6-10 min with a cleared cache) and verify the served chunk: `ls -t /app/superset/static/assets/ | grep calendar | grep -v legacy | head -1`.
+
+To prevent the boot-time `npm install` from clobbering the copy, set `BUILD_SUPERSET_FRONTEND_IN_DOCKER: false` in the compose file and start the frontend directly, e.g. `command: ["sh", "-c", "cd /app/superset-frontend && npm run dev-server"]`.
