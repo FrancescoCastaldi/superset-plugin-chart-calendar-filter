@@ -203,38 +203,52 @@ Serve `demo/index.html` with any HTTP server.
 
 ```
 superset-plugin-chart-calendar-filter/
-  src/
-    index.ts                    # Plugin entry point
-    CalendarFilter.tsx          # Main React component
-    types.ts                    # TypeScript interfaces
-    images/thumbnail.png        # Chart picker thumbnail
-    hooks/
-      useCalendarData.ts        # Data aggregation for the calendar grid
-      useSelectionMask.ts       # Selection mask + date column fallback
-    plugin/
-      index.ts                  # ChartPlugin registration
-      buildQuery.ts             # Query builder
-      controlPanel.ts           # Form controls
-      transformProps.ts         # Data transformation
-    styles/
-      CalendarFilter.styles.ts  # Emotion styles (flat cells, selection tint)
-    utils/
-      dateUtils.ts              # Date helpers (month grid, ranges)
-      themeUtils.ts             # Theme null-safe access
-  test/
-    CalendarFilter.test.tsx     # 27 component tests
-    index.test.ts               # Plugin registration test
-    __mocks__/                  # Test mocks
-    plugin/                     # Plugin unit tests
-    utils/                      # dateUtils unit tests (12)
-  demo/                         # Standalone demo
-  types/external.d.ts
-  package.json
-  tsconfig.json
-  babel.config.js
-  jest.config.js
-  AGENTS.md
+├── src/                            # Plugin source (TypeScript + React)
+│   ├── index.ts                    # Plugin entry point — exports SupersetPluginChartCalendarFilter
+│   ├── CalendarFilter.tsx          # Main React component
+│   ├── types.ts                    # TypeScript interfaces
+│   ├── hooks/
+│   │   ├── useCalendarData.ts      # Data aggregation for the calendar grid
+│   │   └── useSelectionMask.ts     # Selection mask + date column fallback
+│   ├── plugin/
+│   │   ├── index.ts                # ChartPlugin registration + ChartMetadata
+│   │   ├── buildQuery.ts           # Query builder (groupby, metrics)
+│   │   ├── controlPanel.ts         # Form controls (incl. date_column for native filters)
+│   │   └── transformProps.ts       # Data transformation pipeline
+│   ├── styles/
+│   │   └── CalendarFilter.styles.ts  # Emotion styles (flat cells, selection tint)
+│   ├── utils/
+│   │   ├── dateUtils.ts            # Date helpers (month grid, ranges)
+│   │   └── themeUtils.ts           # Theme null-safe access
+│   └── images/
+│       └── thumbnail.png           # 100x100 chart picker thumbnail
+├── test/                           # Jest test suites
+│   ├── CalendarFilter.test.tsx     # 27 component tests
+│   ├── index.test.ts               # Plugin registration test
+│   ├── plugin/                     # buildQuery + transformProps unit tests
+│   ├── utils/                      # dateUtils unit tests (12)
+│   └── __mocks__/                  # Superset / emotion mocks
+├── demo/                           # Standalone HTML demo (esbuild bundle + server.js)
+├── docker/                         # Docker Compose add-on + Dockerfile
+├── scripts/                        # Installer / publisher (PowerShell + bash)
+├── docs/                           # Docs index, INSTALL.md, screenshots
+├── types/
+│   └── external.d.ts               # Module declarations for @apache-superset/core
+├── .github/
+│   └── workflows/ci.yml            # GitHub Actions CI
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── LICENSE
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── babel.config.js
+├── jest.config.js
+└── run-demo.bat
 ```
+
+> Build outputs (`lib/`, `esm/`, `tsconfig.tsbuildinfo`) and local agent files (`AGENTS.md`, `SESSION-CONTEXT.md`) are **gitignored** and not part of the repository.
 
 ---
 
