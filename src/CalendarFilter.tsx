@@ -22,12 +22,12 @@ import { Global } from '@emotion/react';
 import {
   Styles, NativeFilterTriggerContainer, NativeFilterPillButton, CalendarHeader, HeaderLeft, HeaderCenter, HeaderRight,
   NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton,
-  CalendarGrid, DayHeader, WeekNumberCell, DayCell, DayNumber,
-  EmptyState, EmptyIcon, YearOverviewGrid, MiniMonth, MiniMonthTitle, MiniMonthGrid,
-  MiniDayHeader, MiniWeekNum, MiniDayCell, ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton,
+  EmptyState, EmptyIcon, ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton,
 } from './styles/CalendarFilter.styles';
 import MacroShortcuts from './components/MacroShortcuts';
 import CalendarTooltip from './components/CalendarTooltip';
+import MonthGrid from './components/MonthGrid';
+import YearOverview from './components/YearOverview';
 import { useCalendarData } from './hooks/useCalendarData';
 import { useSelectionMask } from './hooks/useSelectionMask';
 
@@ -459,102 +459,44 @@ export default function CalendarFilter(props: CalendarFilterProps) {
               )}
               <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                 {viewMode === 'year' ? (
-                  <YearOverviewGrid style={{ flex: 1 }}>
-                    {yearOverviewMonths.map(m => (
-                      <MiniMonth key={m.month}>
-                        <MiniMonthTitle>{m.label}</MiniMonthTitle>
-                        <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
-                          {dayLabels.map(d => (
-                            <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
-                          ))}
-                          {m.cells.map((cell, ci) => {
-                            if (!cell) return <div key={`modal-e-${m.month}-${ci}`} />;
-                            return (
-                              <MiniDayCell
-                                key={cell.date}
-                                intensity={intensityScale(cell.value)}
-                                isSelected={selectedDates.has(cell.date)}
-                                $isToday={cell.date === todayStr}
-                                baseColor={baseColor}
-                                onClick={() => handleDayToggle(cell.date)}
-                                onMouseDown={() => handleDragStart(cell.date)}
-                                onMouseEnter={() => handleDragEnter(cell.date)}
-                                onMouseUp={handleDragEnd}
-                                tabIndex={0}
-                                onKeyDown={e => e.key === 'Enter' && handleDayToggle(cell.date)}
-                                title={cell.date}
-                              />
-                            );
-                          })}
-                        </MiniMonthGrid>
-                      </MiniMonth>
-                    ))}
-                  </YearOverviewGrid>
+                  <YearOverview
+                    months={yearOverviewMonths}
+                    dayLabels={dayLabels}
+                    gridWeekNumbers={showWeekNumbers}
+                    showWeekRows={false}
+                    baseColor={baseColor}
+                    intensityScale={intensityScale}
+                    selectedDates={selectedDates}
+                    todayStr={todayStr}
+                    keyPrefix="modal"
+                    style={{ flex: 1 }}
+                    onDayClick={handleDayToggle}
+                    onDayMouseDown={handleDragStart}
+                    onDayMouseUp={handleDragEnd}
+                    onDayDragEnter={handleDragEnter}
+                    interactive
+                  />
                 ) : (
-                  <CalendarGrid showWeekNumbers={showWeekNumbers} style={{ flex: 1, minHeight: '340px' }}>
-                    {showWeekNumbers && <div />}
-                    {dayLabels.map(day => (
-                      <DayHeader key={`modal-dh-${day}`}>{day}</DayHeader>
-                    ))}
-
-                    {showWeekNumbers
-                      ? weekRows.map((row, rowIdx) => (
-                          <React.Fragment key={`modal-row-${rowIdx}`}>
-                            <WeekNumberCell>{row.weekNumber}</WeekNumberCell>
-                            {row.cells.map((cell, cellIdx) => {
-                              if (!cell) {
-                                return <div key={`modal-e-${rowIdx}-${cellIdx}`} />;
-                              }
-                              return (
-                                <DayCell
-                                  key={`modal-${cell.date}`}
-                                  intensity={intensityScale(cell.value)}
-                                  isSelected={selectedDates.has(cell.date)}
-                                  isCurrentMonth
-                                  $isToday={cell.date === todayStr}
-                                  baseColor={baseColor}
-                                  $cellHeight={Math.max(cellHeight, 36)}
-                                  onClick={(e) => handleDayToggle(cell.date)}
-                                  onMouseDown={() => handleDragStart(cell.date)}
-                                  onMouseUp={handleDragEnd}
-                                  tabIndex={0}
-                                  onKeyDown={e => e.key === 'Enter' && handleDayToggle(cell.date)}
-                                  onMouseEnter={(e) => {
-                                    handleDragEnter(cell.date);
-                                    handleMouseEnter(cell, e);
-                                  }}
-                                  onMouseLeave={handleMouseLeave}
-                                  title=""
-                                >
-                                  <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-                                </DayCell>
-                              );
-                            })}
-                          </React.Fragment>
-                        ))
-                      : calendarCells.map((cell, idx) => {
-                          if (!cell) {
-                            return <div key={`modal-empty-${idx}`} />;
-                          }
-                          return (
-                            <DayCell
-                              key={`modal-${cell.date}`}
-                              intensity={intensityScale(cell.value)}
-                              isSelected={selectedDates.has(cell.date)}
-                              isCurrentMonth
-                              $isToday={cell.date === todayStr}
-                              baseColor={baseColor}
-                              $cellHeight={Math.max(cellHeight, 36)}
-                              onClick={(e) => handleDayToggle(cell.date)}
-                              onMouseEnter={(e) => handleMouseEnter(cell, e)}
-                              onMouseLeave={handleMouseLeave}
-                              title=""
-                            >
-                              <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-                            </DayCell>
-                          );
-                        })}
-                  </CalendarGrid>
+                  <MonthGrid
+                    cells={calendarCells}
+                    weekRows={weekRows}
+                    dayLabels={dayLabels}
+                    showWeekNumbers={showWeekNumbers}
+                    cellHeight={Math.max(cellHeight, 36)}
+                    baseColor={baseColor}
+                    intensityScale={intensityScale}
+                    selectedDates={selectedDates}
+                    todayStr={todayStr}
+                    keyPrefix="modal"
+                    style={{ flex: 1, minHeight: '340px' }}
+                    onDayClick={handleDayToggle}
+                    onDayHover={handleMouseEnter}
+                    onDayLeave={handleMouseLeave}
+                    onDayMouseDown={handleDragStart}
+                    onDayMouseUp={handleDragEnd}
+                    onDayDragEnter={handleDragEnter}
+                    interactive
+                  />
                 )}
               </div>
             </ModalContent>
@@ -675,110 +617,36 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
       {/* Calendar / Year Overview */}
       {viewMode === 'year' ? (
-        <YearOverviewGrid>
-          {yearOverviewMonths.map(m => (
-            <MiniMonth key={m.month}>
-              <MiniMonthTitle>{m.label}</MiniMonthTitle>
-              <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
-                {dayLabels.map(d => (
-                  <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
-                ))}
-                {showWeekNumbers && m.weekRows.map((wr, wi) => (
-                  <React.Fragment key={`wr-${wi}`}>
-                    <MiniWeekNum>{wr.weekNumber}</MiniWeekNum>
-                    {wr.cells.map((cell, ci) => {
-                      if (!cell) return <div key={`e-${wi}-${ci}`} />;
-                      return (
-                        <MiniDayCell
-                          key={cell.date}
-                          intensity={intensityScale(cell.value)}
-                          isSelected={selectedDates.has(cell.date)}
-                          $isToday={cell.date === todayStr}
-                          baseColor={baseColor}
-                          onClick={() => handleDayToggle(cell.date)}
-                          title={`${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`}
-                        />
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
-                {(!showWeekNumbers) && m.cells.map((cell, ci) => {
-                  if (!cell) return <div key={`e-${m.month}-${ci}`} />;
-                  return (
-                    <MiniDayCell
-                      key={cell.date}
-                      intensity={intensityScale(cell.value)}
-                      isSelected={selectedDates.has(cell.date)}
-                      $isToday={cell.date === todayStr}
-                      baseColor={baseColor}
-                      onClick={() => handleDayToggle(cell.date)}
-                      title={`${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`}
-                    />
-                  );
-                })}
-              </MiniMonthGrid>
-            </MiniMonth>
-          ))}
-        </YearOverviewGrid>
+        <YearOverview
+          months={yearOverviewMonths}
+          dayLabels={dayLabels}
+          gridWeekNumbers={showWeekNumbers}
+          showWeekRows={showWeekNumbers}
+          baseColor={baseColor}
+          intensityScale={intensityScale}
+          selectedDates={selectedDates}
+          todayStr={todayStr}
+          keyPrefix=""
+          titleWithValue
+          onDayClick={handleDayToggle}
+        />
       ) : (
         <>
-          <CalendarGrid showWeekNumbers={showWeekNumbers}>
-            {showWeekNumbers && <div />}
-            {dayLabels.map(day => (
-              <DayHeader key={day}>{day}</DayHeader>
-            ))}
-
-            {showWeekNumbers
-              ? weekRows.map((row, rowIdx) => (
-                  <React.Fragment key={`row-${rowIdx}`}>
-                    <WeekNumberCell>{row.weekNumber}</WeekNumberCell>
-                    {row.cells.map((cell, cellIdx) => {
-                      if (!cell) {
-                        return <div key={`e-${rowIdx}-${cellIdx}`} />;
-                      }
-                      return (
-                        <DayCell
-                          key={cell.date}
-                          intensity={intensityScale(cell.value)}
-                          isSelected={selectedDates.has(cell.date)}
-                          isCurrentMonth
-                          $isToday={cell.date === todayStr}
-                          baseColor={baseColor}
-                          $cellHeight={cellHeight}
-                          onClick={(e) => handleDayToggle(cell.date)}
-                          onMouseEnter={(e) => handleMouseEnter(cell, e)}
-                          onMouseLeave={handleMouseLeave}
-                          title=""
-                        >
-                          <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-                        </DayCell>
-                      );
-                    })}
-                  </React.Fragment>
-                ))
-              : calendarCells.map((cell, idx) => {
-                  if (!cell) {
-                    return <div key={`empty-${idx}`} />;
-                  }
-                  return (
-                    <DayCell
-                      key={cell.date}
-                      intensity={intensityScale(cell.value)}
-                      isSelected={selectedDates.has(cell.date)}
-                      isCurrentMonth
-                      $isToday={cell.date === todayStr}
-                      baseColor={baseColor}
-                      $cellHeight={cellHeight}
-                      onClick={(e) => handleDayToggle(cell.date)}
-                      onMouseEnter={(e) => handleMouseEnter(cell, e)}
-                      onMouseLeave={handleMouseLeave}
-                      title=""
-                    >
-                      <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-                    </DayCell>
-                  );
-                })}
-          </CalendarGrid>
+          <MonthGrid
+            cells={calendarCells}
+            weekRows={weekRows}
+            dayLabels={dayLabels}
+            showWeekNumbers={showWeekNumbers}
+            cellHeight={cellHeight}
+            baseColor={baseColor}
+            intensityScale={intensityScale}
+            selectedDates={selectedDates}
+            todayStr={todayStr}
+            keyPrefix=""
+            onDayClick={handleDayToggle}
+            onDayHover={handleMouseEnter}
+            onDayLeave={handleMouseLeave}
+          />
 
           {/* Tooltip */}
           {tooltip && (
@@ -896,90 +764,36 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             )}
             <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               {viewMode === 'year' ? (
-                <YearOverviewGrid style={{ flex: 1 }}>
-                  {yearOverviewMonths.map(m => (
-                    <MiniMonth key={m.month}>
-                      <MiniMonthTitle>{m.label}</MiniMonthTitle>
-                      <MiniMonthGrid showWeekNumbers={showWeekNumbers}>
-                        {dayLabels.map(d => (
-                          <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
-                        ))}
-                        {m.cells.map((cell, ci) => {
-                          if (!cell) return <div key={`modal-e-${m.month}-${ci}`} />;
-                          return (
-                            <MiniDayCell
-                              key={cell.date}
-                              intensity={intensityScale(cell.value)}
-                              isSelected={selectedDates.has(cell.date)}
-                              $isToday={cell.date === todayStr}
-                              baseColor={baseColor}
-                              onClick={() => handleDayToggle(cell.date)}
-                              title={cell.date}
-                            />
-                          );
-                        })}
-                      </MiniMonthGrid>
-                    </MiniMonth>
-                  ))}
-                </YearOverviewGrid>
+                <YearOverview
+                  months={yearOverviewMonths}
+                  dayLabels={dayLabels}
+                  gridWeekNumbers={showWeekNumbers}
+                  showWeekRows={false}
+                  baseColor={baseColor}
+                  intensityScale={intensityScale}
+                  selectedDates={selectedDates}
+                  todayStr={todayStr}
+                  keyPrefix="modal"
+                  style={{ flex: 1 }}
+                  onDayClick={handleDayToggle}
+                />
               ) : (
-                <CalendarGrid showWeekNumbers={showWeekNumbers} style={{ flex: 1, minHeight: '340px' }}>
-                  {showWeekNumbers && <div />}
-                  {dayLabels.map(day => (
-                    <DayHeader key={`modal-dh-${day}`}>{day}</DayHeader>
-                  ))}
-
-                  {showWeekNumbers
-                    ? weekRows.map((row, rowIdx) => (
-                        <React.Fragment key={`modal-row-${rowIdx}`}>
-                          <WeekNumberCell>{row.weekNumber}</WeekNumberCell>
-                          {row.cells.map((cell, cellIdx) => {
-                            if (!cell) {
-                              return <div key={`modal-e-${rowIdx}-${cellIdx}`} />;
-                            }
-                            return (
-                              <DayCell
-                                key={`modal-${cell.date}`}
-                                intensity={intensityScale(cell.value)}
-                                isSelected={selectedDates.has(cell.date)}
-                                isCurrentMonth
-                                $isToday={cell.date === todayStr}
-                                baseColor={baseColor}
-                                $cellHeight={Math.max(cellHeight, 36)}
-                                onClick={(e) => handleDayToggle(cell.date)}
-                                onMouseEnter={(e) => handleMouseEnter(cell, e)}
-                                onMouseLeave={handleMouseLeave}
-                                title=""
-                              >
-                                <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-                              </DayCell>
-                            );
-                          })}
-                        </React.Fragment>
-                      ))
-                    : calendarCells.map((cell, idx) => {
-                        if (!cell) {
-                          return <div key={`modal-empty-${idx}`} />;
-                        }
-                        return (
-                          <DayCell
-                            key={`modal-${cell.date}`}
-                            intensity={intensityScale(cell.value)}
-                            isSelected={selectedDates.has(cell.date)}
-                            isCurrentMonth
-                            $isToday={cell.date === todayStr}
-                            baseColor={baseColor}
-                            $cellHeight={Math.max(cellHeight, 36)}
-                            onClick={(e) => handleDayToggle(cell.date)}
-                            onMouseEnter={(e) => handleMouseEnter(cell, e)}
-                            onMouseLeave={handleMouseLeave}
-                            title=""
-                          >
-                            <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-                          </DayCell>
-                        );
-                      })}
-                </CalendarGrid>
+                <MonthGrid
+                  cells={calendarCells}
+                  weekRows={weekRows}
+                  dayLabels={dayLabels}
+                  showWeekNumbers={showWeekNumbers}
+                  cellHeight={Math.max(cellHeight, 36)}
+                  baseColor={baseColor}
+                  intensityScale={intensityScale}
+                  selectedDates={selectedDates}
+                  todayStr={todayStr}
+                  keyPrefix="modal"
+                  style={{ flex: 1, minHeight: '340px' }}
+                  onDayClick={handleDayToggle}
+                  onDayHover={handleMouseEnter}
+                  onDayLeave={handleMouseLeave}
+                />
               )}
             </div>
           </ModalContent>
