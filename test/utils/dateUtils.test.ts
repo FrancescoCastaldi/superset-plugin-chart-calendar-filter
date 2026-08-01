@@ -20,6 +20,9 @@
 import {
   parseDateValue,
   formatDateKey,
+  formatDateParts,
+  getDatesInMonth,
+  getDatesInYear,
   getFirstDayOfMonth,
   getDaysInMonth,
   getISOWeekNumber,
@@ -60,6 +63,33 @@ describe('dateUtils', () => {
     it('formats date object to YYYY-MM-DD', () => {
       const d = new Date(2026, 2, 5);
       expect(formatDateKey(d)).toBe('2026-03-05');
+    });
+  });
+
+  describe('formatDateParts', () => {
+    it('pads month and day to two digits', () => {
+      expect(formatDateParts(2026, 3, 5)).toBe('2026-03-05');
+      expect(formatDateParts(2026, 11, 25)).toBe('2026-11-25');
+      expect(formatDateParts(2026, 1, 1)).toBe('2026-01-01');
+    });
+  });
+
+  describe('getDatesInMonth', () => {
+    it('returns every date key in the month', () => {
+      expect(getDatesInMonth(2026, 2)).toHaveLength(28);
+      expect(getDatesInMonth(2024, 2)).toHaveLength(29); // leap year
+      expect(getDatesInMonth(2026, 3)).toHaveLength(31);
+      expect(getDatesInMonth(2026, 3)[0]).toBe('2026-03-01');
+      expect(getDatesInMonth(2026, 3)[30]).toBe('2026-03-31');
+    });
+  });
+
+  describe('getDatesInYear', () => {
+    it('returns every date key in the year', () => {
+      expect(getDatesInYear(2026)).toHaveLength(365);
+      expect(getDatesInYear(2024)).toHaveLength(366); // leap year
+      expect(getDatesInYear(2026)[0]).toBe('2026-01-01');
+      expect(getDatesInYear(2026)[364]).toBe('2026-12-31');
     });
   });
 

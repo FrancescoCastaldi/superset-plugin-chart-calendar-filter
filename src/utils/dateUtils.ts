@@ -72,6 +72,30 @@ export function getISOWeekNumber(d: Date): number {
   return 1 + Math.round((firstThursday - temp.valueOf()) / 604800000);
 }
 
+/** Format year/month/day numbers to a YYYY-MM-DD date key */
+export function formatDateParts(year: number, month: number, day: number): string {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+/** All date keys (YYYY-MM-DD) in a month, from the 1st to the last day */
+export function getDatesInMonth(year: number, month: number): string[] {
+  const days = getDaysInMonth(year, month);
+  const dates: string[] = [];
+  for (let d = 1; d <= days; d++) {
+    dates.push(formatDateParts(year, month, d));
+  }
+  return dates;
+}
+
+/** All date keys (YYYY-MM-DD) in a year, from Jan 1st to Dec 31st */
+export function getDatesInYear(year: number): string[] {
+  const dates: string[] = [];
+  for (let m = 1; m <= 12; m++) {
+    dates.push(...getDatesInMonth(year, m));
+  }
+  return dates;
+}
+
 /** Check if two dates represent the same year, month, and day */
 export function isSameDay(d1: Date, d2: Date): boolean {
   return (
