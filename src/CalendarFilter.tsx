@@ -22,11 +22,12 @@ import { Global } from '@emotion/react';
 import {
   Styles, NativeFilterTriggerContainer, NativeFilterPillButton, CalendarHeader, HeaderLeft, HeaderCenter, HeaderRight,
   NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton,
-  CalendarGrid, DayHeader, WeekNumberCell, DayCell, DayNumber, TooltipContainer, TooltipTitle, TooltipRow,
-  TooltipLabel, TooltipValue, EmptyState, EmptyIcon, YearOverviewGrid, MiniMonth, MiniMonthTitle, MiniMonthGrid,
+  CalendarGrid, DayHeader, WeekNumberCell, DayCell, DayNumber,
+  EmptyState, EmptyIcon, YearOverviewGrid, MiniMonth, MiniMonthTitle, MiniMonthGrid,
   MiniDayHeader, MiniWeekNum, MiniDayCell, ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton,
-  MacroBar, MacroButton
 } from './styles/CalendarFilter.styles';
+import MacroShortcuts from './components/MacroShortcuts';
+import CalendarTooltip from './components/CalendarTooltip';
 import { useCalendarData } from './hooks/useCalendarData';
 import { useSelectionMask } from './hooks/useSelectionMask';
 
@@ -446,24 +447,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                 </ModalCloseButton>
               </ModalHeader>
               {showMacroShortcuts && (
-                <MacroBar>
-                  <MacroButton type="button" onClick={selectEntireYear}>
-                    🎯 Anno {viewYear}
-                  </MacroButton>
-                  <MacroButton type="button" onClick={selectCurrentMonth}>
-                    📅 Mese Corrente
-                  </MacroButton>
-                  <MacroButton type="button" onClick={() => selectQuarter(1)}>📊 Q1</MacroButton>
-                  <MacroButton type="button" onClick={() => selectQuarter(2)}>📊 Q2</MacroButton>
-                  <MacroButton type="button" onClick={() => selectQuarter(3)}>📊 Q3</MacroButton>
-                  <MacroButton type="button" onClick={() => selectQuarter(4)}>📊 Q4</MacroButton>
-                  <MacroButton type="button" onClick={selectWeekdays}>💼 Feriali</MacroButton>
-                  {selectedDates.size > 0 && (
-                    <MacroButton type="button" onClick={clearSelection} style={{ color: '#e74c3c', borderColor: '#f5c6cb' }}>
-                      ❌ Azzera ({selectedDates.size})
-                    </MacroButton>
-                  )}
-                </MacroBar>
+                <MacroShortcuts
+                  viewYear={viewYear}
+                  selectedCount={selectedDates.size}
+                  onSelectYear={selectEntireYear}
+                  onSelectCurrentMonth={selectCurrentMonth}
+                  onSelectQuarter={selectQuarter}
+                  onSelectWeekdays={selectWeekdays}
+                  onClear={clearSelection}
+                />
               )}
               <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                 {viewMode === 'year' ? (
@@ -569,21 +561,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           </ModalOverlay>
         )}
         {tooltip && (
-          <TooltipContainer x={tooltip.x} y={tooltip.y}>
-            <TooltipTitle>{tooltip.date}</TooltipTitle>
-            <TooltipRow>
-              <TooltipLabel>Valore:</TooltipLabel>
-              <TooltipValue>{tooltip.value != null ? tooltip.value : 'N/D'}</TooltipValue>
-            </TooltipRow>
-            <TooltipRow>
-              <TooltipLabel>Massimo:</TooltipLabel>
-              <TooltipValue>{dataMap.max}</TooltipValue>
-            </TooltipRow>
-            <TooltipRow>
-              <TooltipLabel>% del max:</TooltipLabel>
-              <TooltipValue>{tooltip.percentage}%</TooltipValue>
-            </TooltipRow>
-          </TooltipContainer>
+          <CalendarTooltip tooltip={tooltip} maxValue={dataMap.max} />
         )}
       </Styles>
     );
@@ -684,34 +662,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
       {/* Macro Filter Shortcuts */}
       {showMacroShortcuts && (
-        <MacroBar>
-          <MacroButton type="button" onClick={selectEntireYear}>
-            🎯 Anno {viewYear}
-          </MacroButton>
-          <MacroButton type="button" onClick={selectCurrentMonth}>
-            📅 Mese Corrente
-          </MacroButton>
-          <MacroButton type="button" onClick={() => selectQuarter(1)}>
-            📊 Q1
-          </MacroButton>
-          <MacroButton type="button" onClick={() => selectQuarter(2)}>
-            📊 Q2
-          </MacroButton>
-          <MacroButton type="button" onClick={() => selectQuarter(3)}>
-            📊 Q3
-          </MacroButton>
-          <MacroButton type="button" onClick={() => selectQuarter(4)}>
-            📊 Q4
-          </MacroButton>
-          <MacroButton type="button" onClick={selectWeekdays}>
-            💼 Feriali
-          </MacroButton>
-          {selectedDates.size > 0 && (
-            <MacroButton type="button" onClick={clearSelection} style={{ color: '#e74c3c', borderColor: '#f5c6cb' }}>
-              ❌ Azzera ({selectedDates.size})
-            </MacroButton>
-          )}
-        </MacroBar>
+        <MacroShortcuts
+          viewYear={viewYear}
+          selectedCount={selectedDates.size}
+          onSelectYear={selectEntireYear}
+          onSelectCurrentMonth={selectCurrentMonth}
+          onSelectQuarter={selectQuarter}
+          onSelectWeekdays={selectWeekdays}
+          onClear={clearSelection}
+        />
       )}
 
       {/* Calendar / Year Overview */}
@@ -823,21 +782,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
           {/* Tooltip */}
           {tooltip && (
-            <TooltipContainer x={tooltip.x} y={tooltip.y}>
-              <TooltipTitle>{tooltip.date}</TooltipTitle>
-              <TooltipRow>
-                <TooltipLabel>Valore:</TooltipLabel>
-                <TooltipValue>{tooltip.value?.toLocaleString() ?? 'N/D'}</TooltipValue>
-              </TooltipRow>
-              <TooltipRow>
-                <TooltipLabel>Massimo:</TooltipLabel>
-                <TooltipValue>{dataMap.max.toLocaleString()}</TooltipValue>
-              </TooltipRow>
-              <TooltipRow>
-                <TooltipLabel>% del max:</TooltipLabel>
-                <TooltipValue>{tooltip.percentage}%</TooltipValue>
-              </TooltipRow>
-            </TooltipContainer>
+            <CalendarTooltip tooltip={tooltip} maxValue={dataMap.max} formatNumbers />
           )}
         </>
       )}
@@ -939,24 +884,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
               </ModalCloseButton>
             </ModalHeader>
             {showMacroShortcuts && (
-              <MacroBar>
-                <MacroButton type="button" onClick={selectEntireYear}>
-                  🎯 Anno {viewYear}
-                </MacroButton>
-                <MacroButton type="button" onClick={selectCurrentMonth}>
-                  📅 Mese Corrente
-                </MacroButton>
-                <MacroButton type="button" onClick={() => selectQuarter(1)}>📊 Q1</MacroButton>
-                <MacroButton type="button" onClick={() => selectQuarter(2)}>📊 Q2</MacroButton>
-                <MacroButton type="button" onClick={() => selectQuarter(3)}>📊 Q3</MacroButton>
-                <MacroButton type="button" onClick={() => selectQuarter(4)}>📊 Q4</MacroButton>
-                <MacroButton type="button" onClick={selectWeekdays}>💼 Feriali</MacroButton>
-                {selectedDates.size > 0 && (
-                  <MacroButton type="button" onClick={clearSelection} style={{ color: '#e74c3c', borderColor: '#f5c6cb' }}>
-                    ❌ Azzera ({selectedDates.size})
-                  </MacroButton>
-                )}
-              </MacroBar>
+              <MacroShortcuts
+                viewYear={viewYear}
+                selectedCount={selectedDates.size}
+                onSelectYear={selectEntireYear}
+                onSelectCurrentMonth={selectCurrentMonth}
+                onSelectQuarter={selectQuarter}
+                onSelectWeekdays={selectWeekdays}
+                onClear={clearSelection}
+              />
             )}
             <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               {viewMode === 'year' ? (
