@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.7] - 2026-08-01
+
+### Added
+- Universal drop-in installer (`install-calendar-filter.bat`) for Windows: place in Superset root, double-click to auto-discover plugin, build if needed, install as file dependency, register in MainPreset, and optionally generate Docker Compose override. Supports `SUPERSET_PLUGIN_PATH` environment variable for explicit plugin location.
+- Technical documentation for the installer (`INSTALLER.md`).
+- GitHub Actions CI fixes: cross-platform `copy-images` script (Node.js `fs.cpSync` instead of PowerShell), Node 22 matrix only (Node 20 deprecated), upgraded `actions/checkout@v4` and `actions/setup-node@v4` in release workflow.
+
+### Fixed
+- CI pipeline now passes on Ubuntu runners (exit code 127 from `powershell: not found` resolved).
+- Release workflow uses modern action versions and Node 22.
+
 ## [0.1.6] - 2026-07-31
 
 ### Added

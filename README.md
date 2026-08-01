@@ -13,6 +13,17 @@ Interactive calendar heatmap chart for Apache Superset 6.1.0 that acts as a dash
 
 ## Install
 
+### Universal Drop-in Installer (Windows - Recommended)
+
+Copy `install-calendar-filter.bat` from the plugin repository into your **Superset root directory** (where `docker-compose.yml` and `superset-frontend/` live), then double-click:
+
+```cmd
+cd <superset-root>
+install-calendar-filter.bat
+```
+
+The installer auto-discovers the plugin source (via `SUPERSET_PLUGIN_PATH` env var or standard locations), builds if needed, installs as a file dependency, registers the chart in `MainPreset.ts/js`, and optionally creates a Docker Compose override. See [INSTALLER.md](INSTALLER.md) for full documentation.
+
 ### Docker Compose (add-on to existing Superset deployment)
 
 If you run Superset via Docker Compose (official Superset repo, checked out at 6.1.0), use the plugin's `docker-compose.yml` as an add-on:

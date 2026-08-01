@@ -4,6 +4,19 @@ This guide explains how to add the Calendar Filter plugin to an existing Apache 
 
 ## Quick Start (Automated Installer)
 
+### Universal Drop-in Installer (Windows - Recommended)
+
+Copy `install-calendar-filter.bat` from the plugin repository into your **Superset root directory** (where `docker-compose.yml` and `superset-frontend/` live), then double-click:
+
+```cmd
+cd <superset-root>
+install-calendar-filter.bat
+```
+
+The installer auto-discovers the plugin source (via `SUPERSET_PLUGIN_PATH` env var or standard locations), builds if needed, installs as a file dependency, registers the chart in `MainPreset.ts/js`, and optionally creates a Docker Compose override. See [INSTALLER.md](../INSTALLER.md) for full documentation.
+
+### Python Installer (Cross-platform)
+
 Run the Python installer from the plugin root:
 
 ```bash

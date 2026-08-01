@@ -1,6 +1,6 @@
 # Documentation Index (`docs/`)
 
-Project documentation for `superset-plugin-chart-calendar-filter` v0.1.6 -- an Apache Superset 6.1.0 calendar plugin with cross-filter and native filter capabilities.
+Project documentation for `superset-plugin-chart-calendar-filter` v0.1.7 -- an Apache Superset 6.1.0 calendar plugin with cross-filter and native filter capabilities.
 
 ## Directory Structure
 
@@ -27,3 +27,4 @@ Project documentation for `superset-plugin-chart-calendar-filter` v0.1.6 -- an A
 - [Technical Overview](CONFLUENCE_PRESENTATION.md)
 - [AI Session Context](context/README.md)
 - [Screenshot Assets](screenshots/README.md)
+- [Universal Installer Documentation](../INSTALLER.md)
