@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import { formatDateKey, getDaysInMonth, getDatesBetween } from '../utils/dateUtils';
+import { formatDateKey, getDatesInMonth, getDatesInYear, getDatesBetween } from '../utils/dateUtils';
 import { FilterTypeMode, DefaultValueMode } from '../types';
 
 export function useSelectionMask(
@@ -78,21 +78,9 @@ export function useSelectionMask(
     if (defaultValueMode === 'today') {
       emitSelection([todayFormatted]);
     } else if (defaultValueMode === 'current_month') {
-      const days = getDaysInMonth(currentY, currentM);
-      const monthDates: string[] = [];
-      for (let d = 1; d <= days; d++) {
-        monthDates.push(`${currentY}-${String(currentM).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-      }
-      emitSelection(monthDates);
+      emitSelection(getDatesInMonth(currentY, currentM));
     } else if (defaultValueMode === 'current_year') {
-      const yearDates: string[] = [];
-      for (let m = 1; m <= 12; m++) {
-        const days = getDaysInMonth(currentY, m);
-        for (let d = 1; d <= days; d++) {
-          yearDates.push(`${currentY}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-        }
-      }
-      emitSelection(yearDates);
+      emitSelection(getDatesInYear(currentY));
     } else if (defaultValueMode === 'custom' && customDefaultStartDate && customDefaultEndDate) {
       emitSelection(getDatesBetween(customDefaultStartDate, customDefaultEndDate));
     }
