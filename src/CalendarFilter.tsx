@@ -41,11 +41,10 @@ import {
   formatDateParts,
   getDatesInMonth,
   getDatesInYear,
-  getFirstDayOfMonth,
   getDaysInMonth,
-  getISOWeekNumber,
   formatDateRangeBadge as formatSelectionRange,
 } from './utils/dateUtils';
+import { buildMonthCells, buildWeekRows } from './utils/calendarGrid';
 
 
 
@@ -185,48 +184,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   }, [maxDateBound, viewYear, viewMonth, viewMode]);
 
   // Generate calendar grid
-  const calendarCells = useMemo(() => {
-    const daysInMonth = getDaysInMonth(viewYear, viewMonth);
-    const firstDay = getFirstDayOfMonth(viewYear, viewMonth, firstDayOfWeek);
-    const totalCells = Math.ceil((daysInMonth + firstDay) / 7) * 7;
-
-    const cells: (CalendarDay | null)[] = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      cells.push(null);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = formatDateParts(viewYear, viewMonth, day);
-      const value = dataMap.map.get(dateStr) ?? null;
-      cells.push({
-        date: dateStr,
-        value,
-        hasData: value !== null,
-      });
-    }
-
-    while (cells.length < totalCells) {
-      cells.push(null);
-    }
-
-    return cells;
-  }, [viewYear, viewMonth, dataMap, firstDayOfWeek]);
+  const calendarCells = useMemo(
+    () => buildMonthCells(viewYear, viewMonth, firstDayOfWeek, dataMap.map),
+    [viewYear, viewMonth, dataMap, firstDayOfWeek],
+  );
 
   // Build week rows for week numbers
   const weekRows = useMemo(() => {
     if (!showWeekNumbers) return [];
-    const rows: { weekNumber: number; cells: (CalendarDay | null)[]; startIndex: number; endIndex: number }[] = [];
-    for (let i = 0; i < calendarCells.length; i += 7) {
-      const weekCells = calendarCells.slice(i, i + 7);
-      const firstRealCell = weekCells.find(c => c !== null);
-      let weekNumber = 1;
-      if (firstRealCell) {
-        weekNumber = getISOWeekNumber(parseDateValue(firstRealCell.date) || new Date());
-      }
-      rows.push({ weekNumber, cells: weekCells, startIndex: i, endIndex: i + 6 });
-    }
-    return rows;
+    return buildWeekRows(calendarCells);
   }, [calendarCells, showWeekNumbers]);
 
 
@@ -344,29 +310,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     const months: { month: number; label: string; cells: (CalendarDay | null)[]; weekRows: { weekNumber: number; cells: (CalendarDay | null)[] }[] }[] = [];
 
     for (let m = 1; m <= 12; m++) {
-      const daysInMonth = getDaysInMonth(viewYear, m);
-      const firstDay = getFirstDayOfMonth(viewYear, m, firstDayOfWeek);
-      const totalCells = Math.ceil((daysInMonth + firstDay) / 7) * 7;
-      const cells: (CalendarDay | null)[] = [];
-
-      for (let i = 0; i < firstDay; i++) cells.push(null);
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = formatDateParts(viewYear, m, day);
-        const value = dataMap.map.get(dateStr) ?? null;
-        cells.push({ date: dateStr, value, hasData: value !== null });
-      }
-      while (cells.length < totalCells) cells.push(null);
-
-      const wRows: { weekNumber: number; cells: (CalendarDay | null)[] }[] = [];
-      if (showWeekNumbers) {
-        for (let i = 0; i < cells.length; i += 7) {
-          const weekCells = cells.slice(i, i + 7);
-          const firstReal = weekCells.find(c => c !== null);
-          let wn = 1;
-          if (firstReal) wn = getISOWeekNumber(parseDateValue(firstReal.date) || new Date());
-          wRows.push({ weekNumber: wn, cells: weekCells });
-        }
-      }
+      const cells = buildMonthCells(viewYear, m, firstDayOfWeek, dataMap.map);
+      const wRows = showWeekNumbers ? buildWeekRows(cells) : [];
 
       const label = new Date(viewYear, m - 1, 1).toLocaleDateString('it-IT', { month: 'short' });
       months.push({ month: m, label, cells, weekRows: wRows });
