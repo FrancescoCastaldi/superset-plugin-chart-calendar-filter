@@ -26,7 +26,6 @@ import {
   getFirstDayOfMonth,
   getDaysInMonth,
   getISOWeekNumber,
-  isSameDay,
   formatDateRangeBadge,
 } from '../../src/utils/dateUtils';
 
@@ -112,16 +111,6 @@ describe('dateUtils', () => {
     it('returns correct ISO week number', () => {
       const d = new Date(2026, 0, 1); // 2026-01-01 is Thursday -> Week 1
       expect(getISOWeekNumber(d)).toBe(1);
-    });
-  });
-
-  describe('isSameDay', () => {
-    it('compares dates accurately', () => {
-      const d1 = new Date(2026, 2, 15);
-      const d2 = new Date(2026, 2, 15);
-      const d3 = new Date(2026, 2, 16);
-      expect(isSameDay(d1, d2)).toBe(true);
-      expect(isSameDay(d1, d3)).toBe(false);
     });
   });
 

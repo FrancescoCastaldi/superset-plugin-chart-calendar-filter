@@ -287,9 +287,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
       const viewportX = rect.left + rect.width / 2;
       const viewportY = rect.top;
-      const pct = dataMap.max > dataMap.min
-        ? ((cell.value ?? 0) - dataMap.min) / (dataMap.max - dataMap.min) * 100
-        : 0;
+      const pct = intensityScale(cell.value) * 100;
 
       setTooltip({
         date: cell.date,
@@ -299,7 +297,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         y: viewportY,
       });
     },
-    [dataMap],
+    [intensityScale],
   );
 
   const handleMouseLeave = useCallback(() => {

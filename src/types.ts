@@ -69,33 +69,6 @@ export interface CalendarDay {
   hasData: boolean;
 }
 
-/** Calendar month data for rendering */
-export interface CalendarMonth {
-  /** Year (e.g. 2024) */
-  year: number;
-  /** Month (1-12) */
-  month: number;
-  /** Display label */
-  label: string;
-  /** Days in the month grid (including padding for week alignment) */
-  days: CalendarDay[];
-  /** Number of leading empty cells for first day of month */
-  startPadding: number;
-  /** Total cells including padding */
-  totalCells: number;
-}
-
-/** Week info for a row in the calendar grid */
-export interface WeekRow {
-  /** ISO week number */
-  weekNumber: number;
-  /** Days in this week row (may include null padding) */
-  cells: (CalendarDay | null)[];
-  /** Indices for shift-click range selection */
-  startIndex: number;
-  endIndex: number;
-}
-
 /** Tooltip data shown on hover */
 export interface TooltipData {
   date: string;

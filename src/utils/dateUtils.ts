@@ -97,14 +97,6 @@ export function getDatesInYear(year: number): string[] {
 }
 
 /** Check if two dates represent the same year, month, and day */
-export function isSameDay(d1: Date, d2: Date): boolean {
-  return (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
-  );
-}
-
 /** Format selected date keys into a readable badge string (e.g. "12-15 Mar 2026" or "3 selezionati") */
 export function formatDateRangeBadge(dates: string[]): string {
   if (dates.length === 0) return '';
