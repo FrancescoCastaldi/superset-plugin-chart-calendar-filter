@@ -38,6 +38,9 @@ import {
 import {
   parseDateValue,
   formatDateKey,
+  formatDateParts,
+  getDatesInMonth,
+  getDatesInYear,
   getFirstDayOfMonth,
   getDaysInMonth,
   getISOWeekNumber,
@@ -128,26 +131,12 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
   // Macro Filter Actions
   const selectEntireYear = useCallback(() => {
-    const yearDates: string[] = [];
-    for (let m = 1; m <= 12; m++) {
-      const days = getDaysInMonth(viewYear, m);
-      for (let d = 1; d <= days; d++) {
-        yearDates.push(`${viewYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-      }
-    }
-    emitSelection(yearDates);
+    emitSelection(getDatesInYear(viewYear));
   }, [viewYear, emitSelection]);
 
   const selectCurrentMonth = useCallback(() => {
     const now = new Date();
-    const y = now.getFullYear();
-    const m = now.getMonth() + 1;
-    const days = getDaysInMonth(y, m);
-    const monthDates: string[] = [];
-    for (let d = 1; d <= days; d++) {
-      monthDates.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-    }
-    emitSelection(monthDates);
+    emitSelection(getDatesInMonth(now.getFullYear(), now.getMonth() + 1));
   }, [emitSelection]);
 
   const selectQuarter = useCallback(
@@ -156,10 +145,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const endMonth = startMonth + 2;
       const qDates: string[] = [];
       for (let m = startMonth; m <= endMonth; m++) {
-        const days = getDaysInMonth(viewYear, m);
-        for (let d = 1; d <= days; d++) {
-          qDates.push(`${viewYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-        }
+        qDates.push(...getDatesInMonth(viewYear, m));
       }
       emitSelection(qDates);
     },
@@ -173,7 +159,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const dt = new Date(viewYear, viewMonth - 1, d);
       const dayOfWeek = dt.getDay(); // 0 = Sun, 6 = Sat
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        weekdays.push(`${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+        weekdays.push(formatDateParts(viewYear, viewMonth, d));
       }
     }
     emitSelection(weekdays);
@@ -185,7 +171,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     if (viewMode === 'year') {
       return viewYear <= (parseDateValue(minDateBound)?.getFullYear() ?? viewYear);
     }
-    const firstOfMonth = `${viewYear}-${String(viewMonth).padStart(2, '0')}-01`;
+    const firstOfMonth = formatDateParts(viewYear, viewMonth, 1);
     return firstOfMonth <= minDateBound;
   }, [minDateBound, viewYear, viewMonth, viewMode]);
 
@@ -194,7 +180,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     if (viewMode === 'year') {
       return viewYear >= (parseDateValue(maxDateBound)?.getFullYear() ?? viewYear);
     }
-    const lastOfMonth = `${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(getDaysInMonth(viewYear, viewMonth)).padStart(2, '0')}`;
+    const lastOfMonth = formatDateParts(viewYear, viewMonth, getDaysInMonth(viewYear, viewMonth));
     return lastOfMonth >= maxDateBound;
   }, [maxDateBound, viewYear, viewMonth, viewMode]);
 
@@ -211,7 +197,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dateStr = formatDateParts(viewYear, viewMonth, day);
       const value = dataMap.map.get(dateStr) ?? null;
       cells.push({
         date: dateStr,
@@ -298,32 +284,15 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   // Dropdown selection change handlers (update view AND emit filter to chart)
   const handleMonthSelectChange = useCallback((newMonth: number) => {
     setViewMonth(newMonth);
-    const days = getDaysInMonth(viewYear, newMonth);
-    const monthDates: string[] = [];
-    for (let d = 1; d <= days; d++) {
-      monthDates.push(`${viewYear}-${String(newMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-    }
-    emitSelection(monthDates);
+    emitSelection(getDatesInMonth(viewYear, newMonth));
   }, [viewYear, emitSelection]);
 
   const handleYearSelectChange = useCallback((newYear: number) => {
     setViewYear(newYear);
     if (viewMode === 'year') {
-      const yearDates: string[] = [];
-      for (let m = 1; m <= 12; m++) {
-        const days = getDaysInMonth(newYear, m);
-        for (let d = 1; d <= days; d++) {
-          yearDates.push(`${newYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-        }
-      }
-      emitSelection(yearDates);
+      emitSelection(getDatesInYear(newYear));
     } else {
-      const days = getDaysInMonth(newYear, viewMonth);
-      const monthDates: string[] = [];
-      for (let d = 1; d <= days; d++) {
-        monthDates.push(`${newYear}-${String(viewMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-      }
-      emitSelection(monthDates);
+      emitSelection(getDatesInMonth(newYear, viewMonth));
     }
   }, [viewMode, viewMonth, emitSelection]);
 
@@ -382,7 +351,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
       for (let i = 0; i < firstDay; i++) cells.push(null);
       for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${viewYear}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateStr = formatDateParts(viewYear, m, day);
         const value = dataMap.map.get(dateStr) ?? null;
         cells.push({ date: dateStr, value, hasData: value !== null });
       }
