@@ -1,7 +1,7 @@
 {
   "name": "superset-plugin-chart-calendar-filter",
-  "version": "0.1.5",
-  "description": "Calendar Filter Plugin for Apache Superset â€” interactive calendar heatmap with dashboard cross-filtering",
+  "version": "0.1.7",
+  "description": "Calendar Filter Plugin for Apache Superset — interactive calendar heatmap with dashboard cross-filtering",
   "sideEffects": false,
   "main": "lib/index.js",
   "module": "esm/index.js",

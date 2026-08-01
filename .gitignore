@@ -72,3 +72,7 @@ coverage/
 *.tmp
 *.temp
 temp/
+
+# build artifacts
+demo/demo-bundle.js
+*.tgz
