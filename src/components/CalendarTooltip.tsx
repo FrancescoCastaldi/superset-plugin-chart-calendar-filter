@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import {
   TooltipContainer,
   TooltipTitle,
@@ -34,7 +34,7 @@ interface CalendarTooltipProps {
 }
 
 /** Hover tooltip showing date, value, max, and percentage of max */
-export default function CalendarTooltip({
+const CalendarTooltip = memo(function CalendarTooltip({
   tooltip,
   maxValue,
   formatNumbers = false,
@@ -63,4 +63,6 @@ export default function CalendarTooltip({
       </TooltipRow>
     </TooltipContainer>
   );
-}
+});
+
+export default CalendarTooltip;

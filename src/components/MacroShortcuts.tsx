@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import { MacroBar, MacroButton } from '../styles/CalendarFilter.styles';
 
 interface MacroShortcutsProps {
@@ -30,7 +30,7 @@ interface MacroShortcutsProps {
 }
 
 /** Macro filter shortcut bar (year, current month, quarters, weekdays, clear) */
-export default function MacroShortcuts({
+const MacroShortcuts = memo(function MacroShortcuts({
   viewYear,
   selectedCount,
   onSelectYear,
@@ -69,4 +69,6 @@ export default function MacroShortcuts({
       )}
     </MacroBar>
   );
-}
+});
+
+export default MacroShortcuts;

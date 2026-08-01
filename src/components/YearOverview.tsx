@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import {
   YearOverviewGrid,
   MiniMonth,
@@ -59,7 +59,7 @@ interface YearOverviewProps {
 }
 
 /** Year overview grid with 12 mini month calendars */
-export default function YearOverview({
+const YearOverview = memo(function YearOverview({
   months,
   dayLabels,
   gridWeekNumbers,
@@ -131,4 +131,6 @@ export default function YearOverview({
       ))}
     </YearOverviewGrid>
   );
-}
+});
+
+export default YearOverview;

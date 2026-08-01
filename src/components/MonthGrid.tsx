@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import {
   CalendarGrid,
   DayHeader,
@@ -54,7 +54,7 @@ interface MonthGridProps {
 }
 
 /** Full month grid with day cells, optional week numbers, hover and selection handlers */
-export default function MonthGrid({
+const MonthGrid = memo(function MonthGrid({
   cells,
   weekRows,
   dayLabels,
@@ -128,4 +128,6 @@ export default function MonthGrid({
           )}
     </CalendarGrid>
   );
-}
+});
+
+export default MonthGrid;

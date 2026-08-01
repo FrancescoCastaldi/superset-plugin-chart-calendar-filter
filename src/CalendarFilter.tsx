@@ -306,7 +306,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
   // Year Overview
   const yearOverviewMonths = useMemo(() => {
-    if (viewMode !== 'year' && !isModalOpen) return [];
     const months: { month: number; label: string; cells: (CalendarDay | null)[]; weekRows: { weekNumber: number; cells: (CalendarDay | null)[] }[] }[] = [];
 
     for (let m = 1; m <= 12; m++) {
@@ -318,7 +317,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     }
 
     return months;
-  }, [viewYear, viewMode, isModalOpen, dataMap, firstDayOfWeek, showWeekNumbers]);
+  }, [viewYear, dataMap, firstDayOfWeek, showWeekNumbers]); // Removed viewMode, isModalOpen - compute always, filter at render
 
   
 

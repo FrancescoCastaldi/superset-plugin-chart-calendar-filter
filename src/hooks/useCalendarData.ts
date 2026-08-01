@@ -58,40 +58,37 @@ export function useCalendarData(
     return { map, min, max, hasData: map.size > 0, minDate, maxDate };
   }, [data, dateColumn]);
 
-  // Parse min/max dates for navigation constraints
-  const { minDateBound, maxDateBound } = useMemo(() => {
-    if (!dataMap.minDate || !dataMap.maxDate) {
-      return { minDateBound: null, maxDateBound: null };
-    }
-    return { minDateBound: dataMap.minDate, maxDateBound: dataMap.maxDate };
-  }, [dataMap.minDate, dataMap.maxDate]);
+  // Use dataMap.minDate/dataMap.maxDate directly - no need for separate memo
+  const minDateBound = dataMap.minDate;
+  const maxDateBound = dataMap.maxDate;
 
-  // Available years for dropdown
+  // Available years for dropdown - FIXED: removed unnecessary viewYear dependency
   const availableYears = useMemo(() => {
     if (!minDateBound || !maxDateBound) {
       const y = today.getFullYear();
       return [y - 2, y - 1, y, y + 1, y + 2];
     }
-    const minY = parseDateValue(minDateBound)?.getFullYear() ?? viewYear;
+    const minY = parseDateValue(minDateBound)?.getFullYear() ?? today.getFullYear();
     const maxY = Math.max(
-      parseDateValue(maxDateBound)?.getFullYear() ?? viewYear,
+      parseDateValue(maxDateBound)?.getFullYear() ?? today.getFullYear(),
       today.getFullYear()
     );
     const years: number[] = [];
     for (let y = minY; y <= maxY; y++) years.push(y);
     return years;
-  }, [minDateBound, maxDateBound, today, viewYear]);
+  }, [minDateBound, maxDateBound, today]); // viewYear removed - years don't depend on current view
 
-  // Color scale
+  // Color scale - stable function reference
   const { intensityScale, baseColor } = useMemo(() => {
     const base = getBaseColor(colorScheme);
     const range = dataMap.max - dataMap.min;
+    const scale = (val: number | null): number => {
+      if (val == null || range === 0) return 0;
+      return (val - dataMap.min) / range;
+    };
     return {
       baseColor: base,
-      intensityScale: (val: number | null): number => {
-        if (val == null || range === 0) return 0;
-        return (val - dataMap.min) / range;
-      },
+      intensityScale: scale,
     };
   }, [colorScheme, dataMap.min, dataMap.max]);
 
