@@ -7,7 +7,7 @@ Interactive calendar heatmap chart for Apache Superset 6.1.0 that acts as a dash
 [![Build](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.1-blue)
 ![React](https://img.shields.io/badge/React-17-61dafb)
-![Tests](https://img.shields.io/badge/Tests-44%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen)
 
 ---
 
@@ -191,12 +191,13 @@ npm run build-clean
 | Suite | File | Tests |
 |---|---|---|
 | Component | `test/CalendarFilter.test.tsx` | 27 |
-| Date utils | `test/utils/dateUtils.test.ts` | 12 |
+| Date utils | `test/utils/dateUtils.test.ts` | 11 |
+| Calendar grid | `test/utils/calendarGrid.test.ts` | 5 |
 | Plugin registration | `test/index.test.ts` | 1 |
 | Build query | `test/plugin/buildQuery.test.ts` | 1 |
 | Transform props | `test/plugin/transformProps.test.ts` | 3 |
 
-**Total: 44 tests across 5 suites**
+**Total: 51 tests across 6 suites**
 
 ### Quick Demo
 

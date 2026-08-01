@@ -43,7 +43,7 @@ npm install --legacy-peer-deps
 npm run build
 ```
 
-This produces `lib/` (CommonJS), `esm/` (ES Modules), and TypeScript declarations, and runs the full test suite.
+This produces `lib/` (CommonJS), `esm/` (ES Modules), and TypeScript declarations, and runs the full test suite (51 tests).
 
 ### 2. Install the Plugin into Superset
 

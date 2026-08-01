@@ -10,6 +10,11 @@
 ### Fixed
 - CI pipeline now passes on Ubuntu runners (exit code 127 from `powershell: not found` resolved).
 - Release workflow uses modern action versions and Node 22.
+- **Removed duplicate npm publish job** from CI workflow (conflicted with semantic-release in release.yml).
+- **Added `permissions: contents: write`** to release workflow for semantic-release to push tags and create GitHub releases.
+- **Fixed package.json description encoding** (mojibake `â€"` → proper em dash `—`).
+- **Aligned package.json version** to 0.1.7 (was 0.1.5, now matches CHANGELOG).
+- **Stopped tracking `demo/demo-bundle.js`** build artifact (1.2 MB) in git; added to `.gitignore`.
 
 ## [0.1.6] - 2026-07-31
 
