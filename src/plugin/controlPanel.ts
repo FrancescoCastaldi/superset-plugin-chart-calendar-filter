@@ -32,7 +32,18 @@ const config: ControlPanelConfig = {
       expanded: true,
       controlSetRows: [
         ['metric'],
-        ['groupby'],
+        [
+          {
+            name: 'groupby',
+            config: {
+              ...sharedControls.groupby,
+              label: t('Column'),
+              description: t('The column to use for calendar aggregation'),
+              multi: false,
+              validators: [validateNonEmpty],
+            },
+          },
+        ],
         ['adhoc_filters'],
       ],
     },
