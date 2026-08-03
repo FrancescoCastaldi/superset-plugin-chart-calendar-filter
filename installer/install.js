@@ -291,6 +291,20 @@ function installDependency(frontendDir) {
   const relPath = `file:${path.relative(frontendDir, pluginDir).replace(/\\/g, '/')}`;
   pkg.dependencies = pkg.dependencies || {};
   pkg.dependencies['superset-plugin-chart-calendar-filter'] = relPath;
+  
+  // Inject core peer dependencies that are occasionally lost in Docker fresh lockfile builds
+  const missingDeps = {
+    "@fontsource/inter": "^5.2.6",
+    "lodash.isequal": "^4.5.0",
+    "lodash.get": "^4.4.2",
+    "diff-match-patch": "^1.0.5"
+  };
+
+  for (const [dep, ver] of Object.entries(missingDeps)) {
+    if (!pkg.dependencies[dep]) {
+      pkg.dependencies[dep] = ver;
+    }
+  }
 
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
   UI.success(`Registered local dependency: "superset-plugin-chart-calendar-filter": "${relPath}"`);
@@ -478,8 +492,25 @@ function finishInstallation(frontendDir, usingDocker, installRun) {
 
 function applyDockerOverride() {
   const overridePath = path.join(supersetDir, 'docker-compose.override.yml');
+  const frontendDir = path.join(supersetDir, 'superset-frontend');
   const pluginUnixPath = pluginDir.replace(/\\/g, '/');
-  const volumeMount = `${pluginUnixPath}:/Calendar-Filter-Superset:delegated`;
+  
+  // Dynamically resolve where npm install inside Docker expects to find the plugin
+  // based on the relative path in package.json and /app/superset-frontend path.
+  const relPath = path.relative(frontendDir, pluginDir).replace(/\\/g, '/');
+  const parts = relPath.split('/');
+  let current = ['app', 'superset-frontend'];
+  for (const part of parts) {
+    if (part === '..') {
+      if (current.length > 0) current.pop();
+    } else if (part === '.' || !part) {
+      // do nothing
+    } else {
+      current.push(part);
+    }
+  }
+  const dockerPluginPath = '/' + current.join('/');
+  const volumeMount = `${pluginUnixPath}:${dockerPluginPath}:delegated`;
 
   let content = '';
   if (fs.existsSync(overridePath)) {
