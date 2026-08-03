@@ -11,64 +11,33 @@ Interactive calendar heatmap chart for Apache Superset 6.1.0 that acts as a dash
 
 ---
 
-## Install
+### Install
 
-### Universal Drop-in Installer (Windows - Recommended)
+Run the cross-platform Node.js installer from the `installer/` directory:
 
-Copy `install-calendar-filter.bat` from the plugin repository into your **Superset root directory** (where `docker-compose.yml` and `superset-frontend/` live), then double-click:
+**Windows (double-click):**
+Double-click `installer/install.bat`
 
-```cmd
-cd <superset-root>
-install-calendar-filter.bat
-```
-
-The installer auto-discovers the plugin source (via `SUPERSET_PLUGIN_PATH` env var or standard locations), builds if needed, installs as a file dependency, registers the chart in `MainPreset.ts/js`, and optionally creates a Docker Compose override. See [INSTALLER.md](INSTALLER.md) for full documentation.
-
-### Docker Compose (add-on to existing Superset deployment)
-
-If you run Superset via Docker Compose (official Superset repo, checked out at 6.1.0), use the plugin's `docker-compose.yml` as an add-on:
-
+**Command line:**
 ```bash
-cd superset-plugin-chart-calendar-filter
-npm install --legacy-peer-deps
-npm run build
-cd /path/to/superset
-docker compose -f docker-compose.yml -f ../Calendar-Filter-Superset/docker-compose.yml up -d
+node installer/install.js [path/to/superset-root]
 ```
 
-The add-on mounts the plugin into the `superset`, `superset-node`, `superset-worker`, and `superset-worker-beat` containers at `/Calendar-Filter-Superset`, and sets `DEV_MODE=false` to skip slow UV reinstalls. See [Docker Compose section](docs/INSTALL.md#docker-compose) for details.
+The installer auto-discovers your Apache Superset repository, builds the plugin, registers it as a dependency in `superset-frontend/package.json`, patches `MainPreset.ts/js` to register the chart, and prompts you to apply optional workarounds (Docker compose overrides, AceEditor fixes, and native filter whitelisting). See [INSTALLER.md](installer/INSTALLER.md) for full documentation.
 
-### One-command install (recommended for local setup)
+### Development Mode
 
-Run the installer script from the plugin root. It auto-detects the Superset checkout next to the plugin or accepts an explicit path.
+For active development, run `npm run dev` in the plugin directory to automatically rebuild on changes.
 
-**Linux / macOS:**
-```bash
-./scripts/install-to-superset.sh
-./scripts/install-to-superset.sh /path/to/superset
-```
-
-**Windows (PowerShell):**
-```powershell
-.\scripts\install-to-superset.ps1
-.\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset
-```
-
-The script auto-detects the Superset checkout in this order: argument, `SUPERSET_HOME`, `../superset`, `../superset-6.1.0`, `./superset`. It builds the plugin if `lib/` is missing (skip with `--skip-build`/`-SkipBuild`), installs it via `npm install <plugin-path>`, and registers it in `MainPreset.ts`/`MainPreset.js` idempotently. A backup `MainPreset.ts.bak` is created before editing. For development with hot reload, use the `--link`/`-Link` flag:
-
-```bash
-./scripts/install-to-superset.sh --link
-```
-
-After the script finishes, rebuild the frontend:
+To run the dev server or compile:
 
 ```bash
 cd superset-frontend
-npm run dev-server   # development
-npm run build        # production
+npm run dev-server   # Start webpack dev server (hot reload)
+npm run build        # Production build
 ```
 
-Restart the Flask backend. For manual steps, see [INSTALL.md](docs/INSTALL.md).
+Then start/restart the Flask backend. For manual steps, see [INSTALL.md](docs/INSTALL.md).
 
 ---
 

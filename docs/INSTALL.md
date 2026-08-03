@@ -4,30 +4,20 @@ This guide explains how to add the Calendar Filter plugin to an existing Apache 
 
 ## Quick Start (Automated Installer)
 
-### Universal Drop-in Installer (Windows - Recommended)
-
-Copy `install-calendar-filter.bat` from the plugin repository into your **Superset root directory** (where `docker-compose.yml` and `superset-frontend/` live), then double-click:
-
-```cmd
-cd <superset-root>
-install-calendar-filter.bat
-```
-
-The installer auto-discovers the plugin source (via `SUPERSET_PLUGIN_PATH` env var or standard locations), builds if needed, installs as a file dependency, registers the chart in `MainPreset.ts/js`, and optionally creates a Docker Compose override. See [INSTALLER.md](../INSTALLER.md) for full documentation.
-
-### Python Installer (Cross-platform)
-
-Run the Python installer from the plugin root:
+Run the cross-platform Node.js installer from the plugin repository root:
 
 ```bash
-python install.py --superset-path /path/to/superset-6.1.0
+node install.js [path/to/superset]
 ```
 
-This single command automatically:
-1. Adds `"superset-plugin-chart-calendar-filter"` to `superset-frontend/package.json`.
-2. Registers `SupersetPluginChartCalendarFilter` under "Filters and controls" in `MainPreset.ts`.
-3. Applies TypeScript type-checking compatibility fixes (`AceEditorProvider.tsx`).
-4. Prepares `superset-frontend` for build or dev-server execution.
+This command automatically:
+1. Discovers your Apache Superset installation directory.
+2. Builds the plugin if needed.
+3. Installs `superset-plugin-chart-calendar-filter` as a local dependency in `superset-frontend/package.json`.
+4. Registers the chart in `MainPreset.ts` / `MainPreset.js`.
+5. Prompts you to configure optional workarounds (Docker compose overrides, AceEditor fixes, and native filter whitelisting).
+
+For detailed documentation, see [INSTALLER.md](../INSTALLER.md).
 
 ---
 
@@ -92,40 +82,13 @@ Restart the Flask backend (`superset run` or your dev server). The Calendar Filt
 
 ---
 
-## Automatic Installer (Alternative)
+## Automated Installer Command Reference
 
-The plugin includes a cross-platform installer script.
-
-### Windows PowerShell
-
-```powershell
-.\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset
-```
-
-### Linux / macOS
+The `install.js` installer can be run directly with a path parameter to bypass interactive path prompts:
 
 ```bash
-./scripts/install-to-superset.sh --superset-root /path/to/superset
+node install.js /path/to/superset
 ```
-
-### With Docker and Verification
-
-```powershell
-.\scripts\install-to-superset.ps1 -SupersetRoot C:\path\to\superset -Docker -Test
-```
-
-### Installer Parameters
-
-| Windows | Linux / macOS | Description |
-|---|---|---|
-| `-SupersetRoot` | `--superset-root` | Path to your Superset checkout. Required. |
-| `-SkipBuild` | `--skip-build` | Skip the plugin build if you already have `lib/` and `esm/`. |
-| `-Link` | `--link` | Use `npm link` instead of a `file:` dependency for development. |
-| `-Docker` | `--docker` | Also configure the Docker Compose override for Superset. |
-| `-Test` | `--test` | Run build verification after installation. |
-| `-Help` | `--help` | Show the script usage and exit. |
-
-Use `-Link` (or `--link`) when actively changing plugin code; Superset picks up rebuilds automatically.
 
 ---
 
