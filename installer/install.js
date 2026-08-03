@@ -92,7 +92,9 @@ if (isRunningInPluginRepo) {
 }
 
 function promptPluginPath() {
-  rl.question('Could not locate Calendar-Filter-Superset repository. Please enter its absolute path: ', (answer) => {
+  console.log('\n[INFO] The installer is running from a copied folder inside Apache Superset.');
+  console.log('       To complete the installation, we need to locate the original plugin repository.');
+  rl.question('Please enter the absolute path to the "Calendar-Filter-Superset" plugin repository: ', (answer) => {
     if (!answer.trim()) {
       console.error('[ERROR] Path cannot be empty.');
       promptPluginPath();
@@ -110,7 +112,7 @@ function promptPluginPath() {
         }
       } catch (e) {}
     }
-    console.error('[ERROR] Invalid plugin path (must contain package.json for the plugin).');
+    console.error('[ERROR] Invalid plugin path (must contain the original package.json with name "superset-plugin-chart-calendar-filter").');
     promptPluginPath();
   });
 }
@@ -145,7 +147,7 @@ function discoverSuperset() {
 }
 
 function promptSupersetPath() {
-  rl.question('Enter the absolute path to your Apache Superset repository: ', (answer) => {
+  rl.question('Please enter the absolute path to your target Apache Superset repository: ', (answer) => {
     if (!answer.trim()) {
       console.error('[ERROR] Path cannot be empty.');
       promptSupersetPath();
