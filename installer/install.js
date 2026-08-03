@@ -305,7 +305,7 @@ function promptAdvancedSteps(frontendDir) {
             console.log(`\n     [NPM] Running 'npm install --legacy-peer-deps' in ${frontendDir}...`);
             console.log('           This might take 1-3 minutes. Please wait.');
             try {
-              execSync('npm install --legacy-peer-deps', { cwd: frontendDir, stdio: 'inherit' });
+              execSync('npm install --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
               console.log('     [OK] npm install completed successfully.\n');
             } catch (err) {
               console.log('     [WARN] npm install encountered errors. You might need to check your package config manually.\n');
