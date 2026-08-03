@@ -12,9 +12,55 @@ const path = require('path');
 const readline = require('readline');
 const { execSync } = require('child_process');
 
-console.log('================================================================');
-console.log('  Calendar Filter Chart Plugin - Streamlined Installer');
-console.log('================================================================\n');
+// ANSI Terminal Colors
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  dim: '\x1b[2m',
+  cyan: '\x1b[36m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+  blue: '\x1b[94m',
+  magenta: '\x1b[35m'
+};
+
+const UI = {
+  banner: () => {
+    console.clear();
+    console.log(`${colors.cyan}${colors.bright}====================================================================`);
+    console.log('    📅   CALENDAR FILTER CHART PLUGIN FOR APACHE SUPERSET   📅');
+    console.log('====================================================================');
+    console.log('       _____      _                _             ');
+    console.log('      /  __ \\    | |              | |            ');
+    console.log('      | /  \\/ ___| |  _ __  _   _ | | ___  _   _ ');
+    console.log('      | |    / _ \\ | | \'_ \\| | | || |/ _ \\| | | |');
+    console.log('      | \\__/\\  __/ | | | | | |_| || |  __/| |_| |');
+    console.log('       \\____/\\___|_| |_| |_|\\__,_||_|\\___| \\__,_|');
+    console.log('                                                 ');
+    console.log('                🚀  STREAMLINED AUTO-INSTALLER  🚀');
+    console.log(`====================================================================${colors.reset}\n`);
+  },
+  step: (num, title) => {
+    console.log(`\n${colors.cyan}${colors.bright}▶ Step ${num}: ${title}${colors.reset}`);
+    console.log(`${colors.dim}--------------------------------------------------------------------${colors.reset}`);
+  },
+  success: (msg) => {
+    console.log(`  ${colors.green}✔ ${msg}${colors.reset}`);
+  },
+  info: (msg) => {
+    console.log(`  ${colors.blue}ℹ ${msg}${colors.reset}`);
+  },
+  warn: (msg) => {
+    console.log(`  ${colors.yellow}⚠ ${msg}${colors.reset}`);
+  },
+  error: (msg) => {
+    console.log(`  ${colors.red}✘ ${msg}${colors.reset}`);
+  }
+};
+
+// Print the banner immediately
+UI.banner();
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -34,14 +80,14 @@ if (fs.existsSync(localPackageJsonPath)) {
     if (pkg.name === 'superset-plugin-chart-calendar-filter') {
       isRunningInPluginRepo = true;
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 if (isRunningInPluginRepo) {
   // Mode 1: Running from the plugin repository
   pluginDir = path.resolve(__dirname, '..');
-  console.log('[INFO] Running from plugin repository.');
-  
+  UI.info('Running directly from the plugin repository.');
+
   // Command line argument for Superset path
   const args = process.argv.slice(2);
   if (args.length > 0) {
@@ -52,25 +98,58 @@ if (isRunningInPluginRepo) {
   }
 } else {
   // Mode 2: Running from Superset repository (copied installer folder)
-  console.log('[INFO] Running from Superset repository (copied installer).');
+  UI.info('Running from a copied folder inside the Apache Superset repository.');
   if (pluginDirName === 'installer') {
     supersetDir = path.resolve(__dirname, '..');
   } else {
     supersetDir = __dirname;
   }
+
+  // Dynamically search for the plugin repository
+  const home = process.env.USERPROFILE || process.env.HOME || '';
+  const pluginNames = ['Calendar-Filter-Superset', 'superset-plugin-chart-calendar-filter'];
   
-  // Search for the plugin repository in standard locations
-  const searchPaths = [
-    process.env.SUPERSET_PLUGIN_PATH,
-    path.resolve(supersetDir, '..', 'Calendar-Filter-Superset'),
-    path.resolve(supersetDir, '..', 'superset-plugin-chart-calendar-filter'),
-    path.join(process.env.USERPROFILE || '', 'OneDrive - mapsengineering.com', 'Calendar-Filter-Superset'),
-    path.join(process.env.USERPROFILE || '', 'Documents', 'Calendar-Filter-Superset'),
-    path.join(process.env.USERPROFILE || '', 'Projects', 'Calendar-Filter-Superset'),
-    'C:\\Projects\\Calendar-Filter-Superset',
-    'D:\\Projects\\Calendar-Filter-Superset'
+  // Build search roots dynamically:
+  // 1. Sibling folders next to Superset root
+  // 2. Common project/dev folders inside user's home
+  // 3. Desktop / Downloads (common clone targets)
+  const searchRoots = [
+    path.resolve(supersetDir, '..'),            // sibling to Superset
+    home,                                       // home root
+    path.join(home, 'Desktop'),
+    path.join(home, 'Documents'),
+    path.join(home, 'Downloads'),
+    path.join(home, 'Projects'),
+    path.join(home, 'repos'),
+    path.join(home, 'dev'),
+    path.join(home, 'src'),
+    path.join(home, 'code'),
+    path.join(home, 'git'),
   ].filter(Boolean);
   
+  // Also scan all OneDrive-like directories in home (OneDrive, OneDrive - CompanyName, etc.)
+  if (home && fs.existsSync(home)) {
+    try {
+      const homeDirs = fs.readdirSync(home);
+      for (const d of homeDirs) {
+        if (d.toLowerCase().startsWith('onedrive')) {
+          searchRoots.push(path.join(home, d));
+        }
+      }
+    } catch (e) {}
+  }
+  
+  // Build full candidate paths
+  const searchPaths = [];
+  if (process.env.SUPERSET_PLUGIN_PATH) {
+    searchPaths.push(process.env.SUPERSET_PLUGIN_PATH);
+  }
+  for (const root of searchRoots) {
+    for (const name of pluginNames) {
+      searchPaths.push(path.join(root, name));
+    }
+  }
+
   for (const p of searchPaths) {
     const pkgPath = path.join(p, 'package.json');
     if (fs.existsSync(pkgPath)) {
@@ -80,10 +159,10 @@ if (isRunningInPluginRepo) {
           pluginDir = path.resolve(p);
           break;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }
-  
+
   if (pluginDir) {
     startInstallation();
   } else {
@@ -92,11 +171,10 @@ if (isRunningInPluginRepo) {
 }
 
 function promptPluginPath() {
-  console.log('\n[INFO] The installer is running from a copied folder inside Apache Superset.');
-  console.log('       To complete the installation, we need to locate the original plugin repository.');
-  rl.question('Please enter the absolute path to the "Calendar-Filter-Superset" plugin repository: ', (answer) => {
+  console.log(`\n${colors.yellow}Could not locate the plugin repository in standard locations.${colors.reset}`);
+  rl.question('Please enter the absolute path to your "Calendar-Filter-Superset" plugin folder: ', (answer) => {
     if (!answer.trim()) {
-      console.error('[ERROR] Path cannot be empty.');
+      UI.error('Path cannot be empty.');
       promptPluginPath();
       return;
     }
@@ -110,9 +188,9 @@ function promptPluginPath() {
           startInstallation();
           return;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
-    console.error('[ERROR] Invalid plugin path (must contain the original package.json with name "superset-plugin-chart-calendar-filter").');
+    UI.error('Invalid plugin path (must contain the original package.json with name "superset-plugin-chart-calendar-filter").');
     promptPluginPath();
   });
 }
@@ -123,7 +201,7 @@ function discoverSuperset() {
     path.resolve(pluginDir, '..', 'superset'),
     path.resolve(pluginDir, '..', 'apache-superset')
   ];
-  
+
   let discovered = '';
   for (const cand of candidates) {
     if (fs.existsSync(path.join(cand, 'superset-frontend', 'package.json'))) {
@@ -131,9 +209,9 @@ function discoverSuperset() {
       break;
     }
   }
-  
+
   if (discovered) {
-    rl.question(`Discovered Apache Superset at [${discovered}]. Use this path? (Y/n): `, (answer) => {
+    rl.question(`Discovered target Apache Superset at [${colors.bright}${discovered}${colors.reset}]. Use this path? (Y/n): `, (answer) => {
       if (answer.trim().toLowerCase() === 'n') {
         promptSupersetPath();
       } else {
@@ -147,9 +225,9 @@ function discoverSuperset() {
 }
 
 function promptSupersetPath() {
-  rl.question('Please enter the absolute path to your target Apache Superset repository: ', (answer) => {
+  rl.question('Please enter the absolute path to your target Apache Superset folder: ', (answer) => {
     if (!answer.trim()) {
-      console.error('[ERROR] Path cannot be empty.');
+      UI.error('Path cannot be empty.');
       promptSupersetPath();
       return;
     }
@@ -160,27 +238,32 @@ function promptSupersetPath() {
 
 function startInstallation() {
   const frontendDir = path.join(supersetDir, 'superset-frontend');
-  
+
   if (!fs.existsSync(path.join(frontendDir, 'package.json'))) {
-    console.error(`\n[ERROR] 'superset-frontend/package.json' not found in: ${supersetDir}`);
-    console.error('Make sure you provided the path to the root folder of Apache Superset.\n');
+    console.error(`\n${colors.red}${colors.bright}[ERROR] 'superset-frontend/package.json' not found in: ${supersetDir}${colors.reset}`);
+    UI.error('Please make sure you provided the path to the root folder of Apache Superset.\n');
     rl.close();
     process.exit(1);
   }
-  
-  console.log(`\n[INFO] Plugin Dir:   ${pluginDir}`);
-  console.log(`[INFO] Superset Dir: ${supersetDir}`);
-  console.log(`[INFO] Frontend Dir: ${frontendDir}\n`);
-  
+
+  UI.banner();
+  UI.info(`Plugin Folder:   ${colors.bright}${pluginDir}${colors.reset}`);
+  UI.info(`Superset Folder: ${colors.bright}${supersetDir}${colors.reset}`);
+
   try {
+    UI.step(1, 'Building Plugin Artifacts');
     buildPluginIfNeeded();
+
+    UI.step(2, 'Registering File Dependency');
     installDependency(frontendDir);
+
+    UI.step(3, 'Patching Preset Registrations');
     registerPreset(frontendDir);
-    
-    // Interactive advanced steps
+
+    UI.step(4, 'Advanced Options & Configuration');
     promptAdvancedSteps(frontendDir);
   } catch (error) {
-    console.error(`\n[ERROR] Installation failed: ${error.message}`);
+    console.error(`\n${colors.red}${colors.bright}[ERROR] Installation failed: ${error.message}${colors.reset}`);
     rl.close();
     process.exit(1);
   }
@@ -189,29 +272,28 @@ function startInstallation() {
 function buildPluginIfNeeded() {
   const libDir = path.join(pluginDir, 'lib');
   if (!fs.existsSync(libDir)) {
-    console.log('[BUILD] Plugin build artifacts (lib/) are missing. Building now...');
+    UI.warn('Plugin build artifacts (lib/) are missing. Building now...');
     try {
       execSync('npm run build', { cwd: pluginDir, stdio: 'inherit' });
-      console.log('[OK] Plugin build completed.\n');
+      UI.success('Plugin build completed successfully.');
     } catch (err) {
       throw new Error(`Failed to build plugin: ${err.message}`);
     }
   } else {
-    console.log('[OK] Plugin build artifacts (lib/) found.\n');
+    UI.success('Pre-compiled plugin build artifacts (lib/) found.');
   }
 }
 
 function installDependency(frontendDir) {
-  console.log('1. Registering file dependency in superset-frontend/package.json...');
   const pkgPath = path.join(frontendDir, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  
+
   const relPath = `file:${path.relative(frontendDir, pluginDir).replace(/\\/g, '/')}`;
   pkg.dependencies = pkg.dependencies || {};
   pkg.dependencies['superset-plugin-chart-calendar-filter'] = relPath;
-  
+
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-  console.log(`   [OK] Added: "superset-plugin-chart-calendar-filter": "${relPath}"\n`);
+  UI.success(`Registered local dependency: "superset-plugin-chart-calendar-filter": "${relPath}"`);
 }
 
 function registerPreset(frontendDir) {
@@ -220,22 +302,21 @@ function registerPreset(frontendDir) {
   if (!fs.existsSync(presetFile)) {
     presetFile = path.join(presetDir, 'MainPreset.js');
   }
-  
-  console.log(`2. Registering in MainPreset (${path.basename(presetFile)})...`);
+
   if (!fs.existsSync(presetFile)) {
-    console.log(`   [WARN] MainPreset file not found in ${presetDir}. Skipping registration.`);
+    UI.warn(`MainPreset file not found in ${presetDir}. Skipping registration.`);
     return;
   }
-  
+
   // Backup file
   fs.copyFileSync(presetFile, `${presetFile}.bak`);
   let content = fs.readFileSync(presetFile, 'utf8');
-  
+
   if (content.includes('SupersetPluginChartCalendarFilter')) {
-    console.log('   [INFO] Plugin already registered in MainPreset.\n');
+    UI.success('Plugin already registered in MainPreset.');
     return;
   }
-  
+
   // Inject import after the last import line
   const importLine = "import SupersetPluginChartCalendarFilter from 'superset-plugin-chart-calendar-filter';";
   const lines = content.split('\n');
@@ -251,17 +332,17 @@ function registerPreset(frontendDir) {
     lines.unshift(importLine);
   }
   content = lines.join('\n');
-  
+
   // Inject into plugins list
   const instantiation = "\n        new SupersetPluginChartCalendarFilter().configure({\n          key: 'superset-plugin-chart-calendar-filter',\n        }),";
-  
+
   const pluginsRe = /plugins:\s*\[/;
   const match = content.match(pluginsRe);
   if (match) {
     const insertPos = match.index + match[0].length;
     content = content.slice(0, insertPos) + instantiation + content.slice(insertPos);
     fs.writeFileSync(presetFile, content, 'utf8');
-    console.log('   [OK] Plugin registered in MainPreset.\n');
+    UI.success(`Plugin registered in MainPreset (${path.basename(presetFile)}).`);
   } else {
     // Fallback: look for any new *Plugin(
     const fallbackRe = /new\s+\w+Plugin\(/;
@@ -271,57 +352,64 @@ function registerPreset(frontendDir) {
       const instantiationFallback = "new SupersetPluginChartCalendarFilter().configure({\n          key: 'superset-plugin-chart-calendar-filter',\n        }),\n        ";
       content = content.slice(0, insertPos) + instantiationFallback + content.slice(insertPos);
       fs.writeFileSync(presetFile, content, 'utf8');
-      console.log('   [OK] Plugin registered in MainPreset (fallback mode).\n');
+      UI.success(`Plugin registered in MainPreset (${path.basename(presetFile)}) in fallback mode.`);
     } else {
-      console.log('   [WARN] Could not auto-locate plugins array. Please register manually:\n');
+      UI.warn('Could not auto-locate plugins array. Please register manually:');
       console.log(`     Import:  ${importLine}`);
-      console.log(`     Preset:  new SupersetPluginChartCalendarFilter().configure({ key: 'superset-plugin-chart-calendar-filter' }),\n`);
+      console.log(`     Preset:  new SupersetPluginChartCalendarFilter().configure({ key: 'superset-plugin-chart-calendar-filter' }),`);
     }
   }
 }
 
 function promptAdvancedSteps(frontendDir) {
-  console.log('3. Options & Workarounds:');
-  
-  rl.question('   - Configure Docker Compose override? (y/N): ', (ansDocker) => {
+  rl.question(`   - Apply Docker Compose override? (y/N): `, (ansDocker) => {
     if (ansDocker.trim().toLowerCase() === 'y') {
       applyDockerOverride();
+    } else {
+      UI.info('Skipped Docker configuration.');
     }
-    
-    rl.question('   - Apply TS2344 type-check workaround for AceEditor? (y/N): ', (ansAce) => {
+
+    rl.question(`   - Apply TS2344 type-check workaround for AceEditor? (y/N): `, (ansAce) => {
       if (ansAce.trim().toLowerCase() === 'y') {
         applyAceFix(frontendDir);
+      } else {
+        UI.info('Skipped AceEditor fix.');
       }
-      
-      rl.question('   - Register plugin in native filter whitelisted viz_types? (y/N): ', (ansFilter) => {
+
+      rl.question(`   - Whitelist plugin in native filters choice list? (y/N): `, (ansFilter) => {
         if (ansFilter.trim().toLowerCase() === 'y') {
           applyFilterWhitelist(frontendDir);
+        } else {
+          UI.info('Skipped filters whitelisting.');
         }
-        
-        console.log('\n4. Package Installation:');
-        rl.question('   - Run "npm install" in superset-frontend now? (Y/n): ', (ansInstall) => {
+
+        UI.step(5, 'Running Package Installations');
+        rl.question(`   - Run "npm install" in superset-frontend now? (Y/n): `, (ansInstall) => {
           const installRun = ansInstall.trim().toLowerCase() !== 'n';
           if (installRun) {
-            console.log(`\n     [NPM] Running 'npm install --legacy-peer-deps' in ${frontendDir}...`);
+            console.log(`\n     ${colors.magenta}[NPM] Running 'npm install' with --ignore-engines...${colors.reset}`);
             console.log('           This might take 1-3 minutes. Please wait.');
             try {
               execSync('npm install --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
-              console.log('     [OK] npm install completed successfully.\n');
+              UI.success('npm install completed successfully.');
             } catch (err) {
-              console.log('     [WARN] npm install encountered errors. You might need to check your package config manually.\n');
+              UI.error('npm install encountered errors. You might need to check your npm packages manually.');
             }
+          } else {
+            UI.info('Skipped package installation step.');
           }
-          
-          console.log('\n================================================================');
-          console.log('  INSTALLATION FINISHED SUCCESSFULLY!');
-          console.log('================================================================\n');
-          console.log('Next steps:');
+
+          console.log(`\n${colors.cyan}${colors.bright}====================================================================`);
+          console.log('    🎉   INSTALLATION FINISHED SUCCESSFULLY!   🎉');
+          console.log(`====================================================================${colors.reset}\n`);
+          console.log(`${colors.bright}Next steps to run the plugin:${colors.reset}`);
           console.log(`  1. cd ${frontendDir}`);
           if (!installRun) {
-            console.log('  2. npm install');
+            console.log(`  2. Run: ${colors.green}npm install --legacy-peer-deps --ignore-engines${colors.reset}`);
           }
-          console.log('  3. npm run dev-server (or restart Docker compose containers)');
-          console.log('\nThe plugin is registered and ready to use.\n');
+          console.log(`  3. Start dev server: ${colors.green}npm run dev-server${colors.reset}`);
+          console.log(`  4. Restart your Flask server or Docker containers.\n`);
+          console.log(`${colors.green}${colors.bright}The Calendar Filter plugin is configured and ready to be used!${colors.reset}\n`);
           rl.close();
         });
       });
@@ -333,20 +421,19 @@ function applyDockerOverride() {
   const overridePath = path.join(supersetDir, 'docker-compose.override.yml');
   const pluginUnixPath = pluginDir.replace(/\\/g, '/');
   const volumeMount = `${pluginUnixPath}:/Calendar-Filter-Superset:delegated`;
-  
+
   let content = '';
   if (fs.existsSync(overridePath)) {
     content = fs.readFileSync(overridePath, 'utf8');
     if (content.includes('Calendar-Filter-Superset')) {
-      console.log('     [INFO] Docker Compose override already configured.');
+      UI.success('Docker Compose override is already configured.');
       return;
     }
   }
-  
+
   const services = ['superset', 'superset-node', 'superset-worker', 'superset-worker-beat'];
-  
+
   if (!content.trim()) {
-    // File doesn't exist or is empty: create new
     content = `version: '3.7'\n\nservices:\n`;
     for (const svc of services) {
       content += `  ${svc}:\n`;
@@ -360,15 +447,13 @@ function applyDockerOverride() {
       }
     }
     fs.writeFileSync(overridePath, content, 'utf8');
-    console.log(`     [OK] Created: ${overridePath}`);
+    UI.success(`Created Docker compose override at: ${overridePath}`);
   } else {
-    // File exists: append services to the existing services block safely
     const servicesIndex = content.indexOf('services:');
     if (servicesIndex >= 0) {
       const insertPos = servicesIndex + 'services:'.length;
       let addition = '';
       for (const svc of services) {
-        // Only add if service not already defined in override
         if (!content.includes(`  ${svc}:`)) {
           addition += `\n  ${svc}:\n`;
           addition += `    volumes:\n`;
@@ -380,17 +465,16 @@ function applyDockerOverride() {
             addition += `      DEV_MODE: 'false'\n`;
           }
         } else {
-          console.log(`     [INFO] Service '${svc}' is already defined in docker-compose.override.yml.`);
-          console.log(`            Please manually add the volume mount: "- ${volumeMount}" to it.`);
+          UI.warn(`Service '${svc}' is already defined in docker-compose.override.yml.`);
+          console.log(`            Please manually append the volume mount: "- ${volumeMount}" to it.`);
         }
       }
       if (addition) {
         content = content.slice(0, insertPos) + addition + content.slice(insertPos);
         fs.writeFileSync(overridePath, content, 'utf8');
-        console.log(`     [OK] Safe additions appended to: ${overridePath}`);
+        UI.success(`Appended services configuration to: ${overridePath}`);
       }
     } else {
-      // 'services:' block not found in the file, append it safely at the end
       content += `\n\nservices:\n`;
       for (const svc of services) {
         content += `  ${svc}:\n`;
@@ -404,7 +488,7 @@ function applyDockerOverride() {
         }
       }
       fs.writeFileSync(overridePath, content, 'utf8');
-      console.log(`     [OK] Services block appended to: ${overridePath}`);
+      UI.success(`Appended services block to: ${overridePath}`);
     }
   }
 }
@@ -414,30 +498,29 @@ function applyAceFix(frontendDir) {
   if (!fs.existsSync(aceFile)) {
     aceFile = path.join(frontendDir, 'src', 'core', 'editors', 'AceEditorProvider.jsx');
   }
-  
+
   if (!fs.existsSync(aceFile)) {
-    console.log('     [INFO] AceEditorProvider file not found. Skipping fix.');
+    UI.warn('AceEditorProvider file not found. Skipping fix.');
     return;
   }
-  
+
   let content = fs.readFileSync(aceFile, 'utf8');
   if (content.includes('type AceEditorComponent')) {
-    console.log('     [INFO] AceEditor workaround is already applied.');
+    UI.success('AceEditor type workaround already applied.');
     return;
   }
-  
+
   const target = "import AceEditor from 'react-ace';";
   const replacement = "import AceEditor from 'react-ace';\n\ntype AceEditorComponent = typeof AceEditor extends any ? any : any;";
-  
+
   if (content.includes(target)) {
     content = content.replace(target, replacement);
   } else {
-    // Try double quotes
     content = content.replace('import AceEditor from "react-ace";', 'import AceEditor from "react-ace";\n\ntype AceEditorComponent = typeof AceEditor extends any ? any : any;');
   }
-  
+
   fs.writeFileSync(aceFile, content, 'utf8');
-  console.log(`     [OK] Applied workaround in ${path.basename(aceFile)}`);
+  UI.success(`Applied workaround in ${path.basename(aceFile)}`);
 }
 
 function applyFilterWhitelist(frontendDir) {
@@ -445,33 +528,33 @@ function applyFilterWhitelist(frontendDir) {
   if (!fs.existsSync(constFile)) {
     constFile = path.join(frontendDir, 'src', 'dashboard', 'components', 'nativeFilters', 'FiltersConfigModal', 'FiltersConfigForm', 'constants.js');
   }
-  
+
   if (!fs.existsSync(constFile)) {
-    console.log('     [INFO] constants.ts/js file for native filters not found. Skipping whitelist.');
+    UI.warn('constants.ts/js file for native filters not found. Skipping whitelist.');
     return;
   }
-  
+
   let content = fs.readFileSync(constFile, 'utf8');
   if (content.includes('superset-plugin-chart-calendar-filter')) {
-    console.log('     [INFO] Plugin is already registered in FILTER_SUPPORTED_TYPES.');
+    UI.success('Plugin already whitelisted in FILTER_SUPPORTED_TYPES.');
     return;
   }
-  
+
   const target = "FILTER_SUPPORTED_TYPES = {";
   const entry = "\n  'superset-plugin-chart-calendar-filter': [\n    GenericDataType.Temporal,\n    GenericDataType.String,\n    GenericDataType.Numeric,\n    GenericDataType.Boolean,\n  ],";
-  
+
   if (content.includes(target)) {
     content = content.replace(target, target + entry);
     fs.writeFileSync(constFile, content, 'utf8');
-    console.log(`     [OK] Whitelisted plugin in ${path.basename(constFile)}`);
+    UI.success(`Whitelisted plugin in ${path.basename(constFile)}`);
   } else {
     const fallbackTarget = "FILTER_SUPPORTED_TYPES: Record<string, GenericDataType[]> = {";
     if (content.includes(fallbackTarget)) {
       content = content.replace(fallbackTarget, fallbackTarget + entry);
       fs.writeFileSync(constFile, content, 'utf8');
-      console.log(`     [OK] Whitelisted plugin in ${path.basename(constFile)}`);
+      UI.success(`Whitelisted plugin in ${path.basename(constFile)}`);
     } else {
-      console.log('     [WARN] Could not auto-locate FILTER_SUPPORTED_TYPES object in constants.');
+      UI.warn('Could not auto-locate FILTER_SUPPORTED_TYPES object in constants.');
     }
   }
 }
