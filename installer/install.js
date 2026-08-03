@@ -21,16 +21,101 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-const pluginDir = path.resolve(__dirname, '..');
+const pluginDirName = path.basename(__dirname);
+let pluginDir = '';
 let supersetDir = '';
 
-// Command line argument for Superset path
-const args = process.argv.slice(2);
-if (args.length > 0) {
-  supersetDir = path.resolve(args[0]);
-  startInstallation();
+// Check if this script is running inside the plugin repository
+const localPackageJsonPath = path.resolve(__dirname, '..', 'package.json');
+let isRunningInPluginRepo = false;
+if (fs.existsSync(localPackageJsonPath)) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(localPackageJsonPath, 'utf8'));
+    if (pkg.name === 'superset-plugin-chart-calendar-filter') {
+      isRunningInPluginRepo = true;
+    }
+  } catch (e) {}
+}
+
+if (isRunningInPluginRepo) {
+  // Mode 1: Running from the plugin repository
+  pluginDir = path.resolve(__dirname, '..');
+  console.log('[INFO] Running from plugin repository.');
+  
+  // Command line argument for Superset path
+  const args = process.argv.slice(2);
+  if (args.length > 0) {
+    supersetDir = path.resolve(args[0]);
+    startInstallation();
+  } else {
+    discoverSuperset();
+  }
 } else {
-  // Auto-discover standard locations relative to this plugin directory
+  // Mode 2: Running from Superset repository (copied installer folder)
+  console.log('[INFO] Running from Superset repository (copied installer).');
+  if (pluginDirName === 'installer') {
+    supersetDir = path.resolve(__dirname, '..');
+  } else {
+    supersetDir = __dirname;
+  }
+  
+  // Search for the plugin repository in standard locations
+  const searchPaths = [
+    process.env.SUPERSET_PLUGIN_PATH,
+    path.resolve(supersetDir, '..', 'Calendar-Filter-Superset'),
+    path.resolve(supersetDir, '..', 'superset-plugin-chart-calendar-filter'),
+    path.join(process.env.USERPROFILE || '', 'OneDrive - mapsengineering.com', 'Calendar-Filter-Superset'),
+    path.join(process.env.USERPROFILE || '', 'Documents', 'Calendar-Filter-Superset'),
+    path.join(process.env.USERPROFILE || '', 'Projects', 'Calendar-Filter-Superset'),
+    'C:\\Projects\\Calendar-Filter-Superset',
+    'D:\\Projects\\Calendar-Filter-Superset'
+  ].filter(Boolean);
+  
+  for (const p of searchPaths) {
+    const pkgPath = path.join(p, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkg.name === 'superset-plugin-chart-calendar-filter') {
+          pluginDir = path.resolve(p);
+          break;
+        }
+      } catch (e) {}
+    }
+  }
+  
+  if (pluginDir) {
+    startInstallation();
+  } else {
+    promptPluginPath();
+  }
+}
+
+function promptPluginPath() {
+  rl.question('Could not locate Calendar-Filter-Superset repository. Please enter its absolute path: ', (answer) => {
+    if (!answer.trim()) {
+      console.error('[ERROR] Path cannot be empty.');
+      promptPluginPath();
+      return;
+    }
+    const target = path.resolve(answer.trim());
+    const pkgPath = path.join(target, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkg.name === 'superset-plugin-chart-calendar-filter') {
+          pluginDir = target;
+          startInstallation();
+          return;
+        }
+      } catch (e) {}
+    }
+    console.error('[ERROR] Invalid plugin path (must contain package.json for the plugin).');
+    promptPluginPath();
+  });
+}
+
+function discoverSuperset() {
   const candidates = [
     path.resolve(pluginDir, '..', 'superset-6.1.0'),
     path.resolve(pluginDir, '..', 'superset'),
