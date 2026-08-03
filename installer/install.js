@@ -298,15 +298,32 @@ function promptAdvancedSteps(frontendDir) {
           applyFilterWhitelist(frontendDir);
         }
         
-        console.log('\n================================================================');
-        console.log('  INSTALLATION FINISHED SUCCESSFULLY!');
-        console.log('================================================================\n');
-        console.log('Next steps:');
-        console.log(`  1. cd ${frontendDir}`);
-        console.log('  2. npm install');
-        console.log('  3. npm run dev-server (or restart Docker compose containers)');
-        console.log('\nThe plugin is registered and ready to use.\n');
-        rl.close();
+        console.log('\n4. Package Installation:');
+        rl.question('   - Run "npm install" in superset-frontend now? (Y/n): ', (ansInstall) => {
+          const installRun = ansInstall.trim().toLowerCase() !== 'n';
+          if (installRun) {
+            console.log(`\n     [NPM] Running 'npm install --legacy-peer-deps' in ${frontendDir}...`);
+            console.log('           This might take 1-3 minutes. Please wait.');
+            try {
+              execSync('npm install --legacy-peer-deps', { cwd: frontendDir, stdio: 'inherit' });
+              console.log('     [OK] npm install completed successfully.\n');
+            } catch (err) {
+              console.log('     [WARN] npm install encountered errors. You might need to check your package config manually.\n');
+            }
+          }
+          
+          console.log('\n================================================================');
+          console.log('  INSTALLATION FINISHED SUCCESSFULLY!');
+          console.log('================================================================\n');
+          console.log('Next steps:');
+          console.log(`  1. cd ${frontendDir}`);
+          if (!installRun) {
+            console.log('  2. npm install');
+          }
+          console.log('  3. npm run dev-server (or restart Docker compose containers)');
+          console.log('\nThe plugin is registered and ready to use.\n');
+          rl.close();
+        });
       });
     });
   });
