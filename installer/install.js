@@ -428,8 +428,6 @@ function installDependency(frontendDir) {
     UI.success('Configured superset-frontend/.npmrc with legacy-peer-deps=true');
   }
 
-  // Regenerate package-lock.json with the new dependency so Docker npm ci succeeds immediately
-  ensurePackageLock(frontendDir, true);
 }
 
 function registerPreset(frontendDir) {
@@ -532,6 +530,9 @@ function promptAdvancedSteps(frontendDir) {
             performFrontendSafetyClean(frontendDir, false);
           }
 
+          UI.step(7, 'Aligning Dependencies (npm install)');
+          ensurePackageLock(frontendDir, true);
+
           if (usingDocker) {
             // Docker mode: option to clean host node_modules to avoid cross-OS conflicts
             console.log(`\n   ${colors.cyan}Docker mode detected. The container will compile the frontend inside Docker.${colors.reset}`);
@@ -543,30 +544,14 @@ function promptAdvancedSteps(frontendDir) {
                 } else {
                   UI.info('Retained host node_modules/');
                 }
-                finishInstallation(frontendDir, usingDocker, false);
+                finishInstallation(frontendDir, usingDocker);
               });
             } else {
               UI.info('Clean host environment ready for Docker.');
-              finishInstallation(frontendDir, usingDocker, false);
+              finishInstallation(frontendDir, usingDocker);
             }
           } else {
-            // Local dev mode: offer fresh npm install
-            rl.question(`   - Run fresh "npm install" in superset-frontend now? (Y/n): `, (ansInstall) => {
-              const installRun = ansInstall.trim().toLowerCase() !== 'n';
-              if (installRun) {
-                console.log(`\n     ${colors.magenta}[NPM] Running 'npm install' with --legacy-peer-deps --ignore-engines...${colors.reset}`);
-                console.log('           This might take 1-3 minutes. Please wait.');
-                try {
-                  execSync('npm install --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
-                  UI.success('npm install completed successfully.');
-                } catch (err) {
-                  UI.error('npm install encountered errors. You might need to check your npm packages manually.');
-                }
-              } else {
-                UI.info('Skipped package installation step.');
-              }
-              finishInstallation(frontendDir, usingDocker, installRun);
-            });
+            finishInstallation(frontendDir, usingDocker);
           }
         });
       });
@@ -620,14 +605,13 @@ function performFrontendSafetyClean(frontendDir, deepCleanModules = false) {
     }
   }
 
-  // Ensure dependencies & package-lock.json are present and aligned for Docker npm ci
-  ensurePackageLock(frontendDir, true);
 }
 
 function ensurePackageLock(frontendDir, force = false) {
   const lockFilePath = path.join(frontendDir, 'package-lock.json');
   if (force || !fs.existsSync(lockFilePath)) {
-    UI.info('Running "npm install --legacy-peer-deps --ignore-engines" to align frontend dependencies...');
+    console.log(`\n     ${colors.magenta}[NPM] Running 'npm install' with --legacy-peer-deps --ignore-engines...${colors.reset}`);
+    console.log('           This might take 1-3 minutes. Please wait.');
     try {
       execSync('npm install --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
       UI.success('NPM dependencies and package-lock.json aligned successfully.');
@@ -637,11 +621,7 @@ function ensurePackageLock(frontendDir, force = false) {
   }
 }
 
-function finishInstallation(frontendDir, usingDocker, installRun) {
-  if (usingDocker) {
-    ensurePackageLock(frontendDir);
-  }
-
+function finishInstallation(frontendDir, usingDocker) {
   console.log(`\n${colors.cyan}${colors.bright}====================================================================`);
   console.log('    🎉   INSTALLATION FINISHED SUCCESSFULLY!   🎉');
   console.log(`====================================================================${colors.reset}\n`);
@@ -654,11 +634,8 @@ function finishInstallation(frontendDir, usingDocker, installRun) {
     console.log(`  4. Open ${colors.cyan}http://localhost:8088${colors.reset} in your browser.\n`);
   } else {
     console.log(`  1. cd ${frontendDir}`);
-    if (!installRun) {
-      console.log(`  2. Run: ${colors.green}npm install --legacy-peer-deps --ignore-engines${colors.reset}`);
-    }
-    console.log(`  3. Start dev server: ${colors.green}npm run dev-server${colors.reset}`);
-    console.log(`  4. Restart your Flask server or Docker containers.\n`);
+    console.log(`  2. Start dev server: ${colors.green}npm run dev-server${colors.reset}`);
+    console.log(`  3. Restart your Flask server or Docker containers.\n`);
   }
   console.log(`${colors.green}${colors.bright}The Calendar Filter plugin is configured and ready to be used!${colors.reset}\n`);
   rl.close();
