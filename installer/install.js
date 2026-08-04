@@ -585,8 +585,15 @@ function applyDockerOverride() {
   const frontendDir = path.join(supersetDir, 'superset-frontend');
   const pluginUnixPath = pluginDir.replace(/\\/g, '/');
   
+  // Backup existing override file if present
+  if (fs.existsSync(overridePath)) {
+    try {
+      fs.copyFileSync(overridePath, `${overridePath}.bak`);
+      UI.info('Backed up existing docker-compose.override.yml to docker-compose.override.yml.bak');
+    } catch (e) {}
+  }
+
   // Dynamically resolve where npm install inside Docker expects to find the plugin
-  // based on the relative path in package.json and /app/superset-frontend path.
   const relPath = path.relative(frontendDir, pluginDir).replace(/\\/g, '/');
   const parts = relPath.split('/');
   let current = ['app', 'superset-frontend'];
@@ -602,79 +609,27 @@ function applyDockerOverride() {
   const dockerPluginPath = '/' + current.join('/');
   const volumeMount = `${pluginUnixPath}:${dockerPluginPath}:delegated`;
 
-  let content = '';
-  if (fs.existsSync(overridePath)) {
-    content = fs.readFileSync(overridePath, 'utf8');
-    if (content.includes('Calendar-Filter-Superset')) {
-      UI.success('Docker Compose override is already configured.');
-      return;
-    }
-  }
-
   const services = ['superset', 'superset-node', 'superset-worker', 'superset-worker-beat'];
 
-  if (!content.trim()) {
-    content = `version: '3.7'\n\nservices:\n`;
-    for (const svc of services) {
-      content += `  ${svc}:\n`;
-      content += `    build:\n`;
-      content += `      args:\n`;
-      content += `        DEV_MODE: 'true'\n`;
-      content += `        NPM_CONFIG_LEGACY_PEER_DEPS: 'true'\n`;
-      content += `    volumes:\n`;
-      content += `      - ${volumeMount}\n`;
-      content += `    environment:\n`;
-      if (svc.includes('node')) {
-        content += `      NPM_CONFIG_install_links: 'true'\n`;
-      } else {
-        content += `      DEV_MODE: 'false'\n`;
-      }
-    }
-    fs.writeFileSync(overridePath, content, 'utf8');
-    UI.success(`Created Docker compose override at: ${overridePath}`);
-  } else {
-    const servicesIndex = content.indexOf('services:');
-    if (servicesIndex >= 0) {
-      const insertPos = servicesIndex + 'services:'.length;
-      let addition = '';
-      for (const svc of services) {
-        if (!content.includes(`  ${svc}:`)) {
-          addition += `\n  ${svc}:\n`;
-          addition += `    volumes:\n`;
-          addition += `      - ${volumeMount}\n`;
-          addition += `    environment:\n`;
-          if (svc.includes('node')) {
-            addition += `      NPM_CONFIG_install_links: 'true'\n`;
-          } else {
-            addition += `      DEV_MODE: 'false'\n`;
-          }
-        } else {
-          UI.warn(`Service '${svc}' is already defined in docker-compose.override.yml.`);
-          console.log(`            Please manually append the volume mount: "- ${volumeMount}" to it.`);
-        }
-      }
-      if (addition) {
-        content = content.slice(0, insertPos) + addition + content.slice(insertPos);
-        fs.writeFileSync(overridePath, content, 'utf8');
-        UI.success(`Appended services configuration to: ${overridePath}`);
-      }
+  let content = `version: '3.7'\n\nservices:\n`;
+  for (const svc of services) {
+    content += `  ${svc}:\n`;
+    content += `    build:\n`;
+    content += `      args:\n`;
+    content += `        DEV_MODE: 'true'\n`;
+    content += `        NPM_CONFIG_LEGACY_PEER_DEPS: 'true'\n`;
+    content += `    volumes:\n`;
+    content += `      - ${volumeMount}\n`;
+    content += `    environment:\n`;
+    if (svc.includes('node')) {
+      content += `      NPM_CONFIG_install_links: 'true'\n`;
     } else {
-      content += `\n\nservices:\n`;
-      for (const svc of services) {
-        content += `  ${svc}:\n`;
-        content += `    volumes:\n`;
-        content += `      - ${volumeMount}\n`;
-        content += `    environment:\n`;
-        if (svc.includes('node')) {
-          content += `      NPM_CONFIG_install_links: 'true'\n`;
-        } else {
-          content += `      DEV_MODE: 'false'\n`;
-        }
-      }
-      fs.writeFileSync(overridePath, content, 'utf8');
-      UI.success(`Appended services block to: ${overridePath}`);
+      content += `      DEV_MODE: 'false'\n`;
     }
   }
+
+  fs.writeFileSync(overridePath, content, 'utf8');
+  UI.success(`Generated & overwritten Docker compose override at: ${overridePath}`);
 }
 
 function applyAceFix(frontendDir) {
