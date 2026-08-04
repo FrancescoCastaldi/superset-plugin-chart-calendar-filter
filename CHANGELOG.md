@@ -8,6 +8,7 @@
 - GitHub Actions CI fixes: cross-platform `copy-images` script (Node.js `fs.cpSync` instead of PowerShell), Node 22 matrix only (Node 20 deprecated), upgraded `actions/checkout@v4` and `actions/setup-node@v4` in release workflow.
 
 ### Fixed
+- Zero-dependency installer & clean scripts: replaced `rimraf` with native Node.js `fs.rmSync` in `package.json` clean scripts and added auto dependency installation in `installer/install.js`.
 - CI pipeline now passes on Ubuntu runners (exit code 127 from `powershell: not found` resolved).
 - Release workflow uses modern action versions and Node 22.
 - **Removed duplicate npm publish job** from CI workflow (conflicted with semantic-release in release.yml).

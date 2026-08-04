@@ -274,6 +274,11 @@ function buildPluginIfNeeded() {
   if (!fs.existsSync(libDir)) {
     UI.warn('Plugin build artifacts (lib/) are missing. Building now...');
     try {
+      const nodeModulesDir = path.join(pluginDir, 'node_modules');
+      if (!fs.existsSync(nodeModulesDir)) {
+        UI.info('Installing plugin dependencies first...');
+        execSync('npm install', { cwd: pluginDir, stdio: 'inherit' });
+      }
       execSync('npm run build', { cwd: pluginDir, stdio: 'inherit' });
       UI.success('Plugin build completed successfully.');
     } catch (err) {
