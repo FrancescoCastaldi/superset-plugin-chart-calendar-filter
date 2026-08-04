@@ -290,10 +290,30 @@ function buildPluginIfNeeded() {
 }
 
 function installDependency(frontendDir) {
+  const targetPluginDir = path.join(frontendDir, 'plugins', 'superset-plugin-chart-calendar-filter');
+  
+  UI.info('Copying plugin files into superset-frontend/plugins/superset-plugin-chart-calendar-filter...');
+  fs.mkdirSync(targetPluginDir, { recursive: true });
+
+  // Copy plugin contents (skipping node_modules and .git)
+  const itemsToCopy = ['src', 'lib', 'esm', 'images', 'package.json', 'tsconfig.json', 'README.md', 'LICENSE'];
+  for (const item of itemsToCopy) {
+    const srcPath = path.join(pluginDir, item);
+    const destPath = path.join(targetPluginDir, item);
+    if (fs.existsSync(srcPath)) {
+      const stat = fs.statSync(srcPath);
+      if (stat.isDirectory()) {
+        fs.cpSync(srcPath, destPath, { recursive: true });
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    }
+  }
+
   const pkgPath = path.join(frontendDir, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
-  const relPath = `file:${path.relative(frontendDir, pluginDir).replace(/\\/g, '/')}`;
+  const relPath = 'file:./plugins/superset-plugin-chart-calendar-filter';
   pkg.dependencies = pkg.dependencies || {};
   pkg.dependencies['superset-plugin-chart-calendar-filter'] = relPath;
   
@@ -312,7 +332,10 @@ function installDependency(frontendDir) {
   }
 
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-  UI.success(`Registered local dependency: "superset-plugin-chart-calendar-filter": "${relPath}"`);
+  UI.success(`Copied plugin into superset-frontend/plugins & registered dependency: "${relPath}"`);
+
+  // Regenerate package-lock.json with the new dependency so Docker npm ci succeeds immediately
+  ensurePackageLock(frontendDir, true);
 }
 
 function registerPreset(frontendDir) {
@@ -459,8 +482,7 @@ function performFrontendSafetyClean(frontendDir, deepCleanModules = false) {
   UI.info('Performing safety cleanup of superset-frontend cache & build artifacts...');
   const itemsToClean = [
     { path: path.join(frontendDir, 'node_modules', '.cache'), label: 'node_modules/.cache (Webpack/Babel cache)' },
-    { path: path.join(frontendDir, 'dist'), label: 'dist/ (stale build outputs)' },
-    { path: path.join(frontendDir, 'package-lock.json'), label: 'package-lock.json (stale lockfile)' }
+    { path: path.join(frontendDir, 'dist'), label: 'dist/ (stale build outputs)' }
   ];
 
   if (deepCleanModules) {
@@ -477,9 +499,29 @@ function performFrontendSafetyClean(frontendDir, deepCleanModules = false) {
       }
     }
   }
+
+  // Ensure package-lock.json is present as Superset Dockerfile non-dev build mandates it for npm ci
+  ensurePackageLock(frontendDir);
+}
+
+function ensurePackageLock(frontendDir, force = false) {
+  const lockFilePath = path.join(frontendDir, 'package-lock.json');
+  if (force || !fs.existsSync(lockFilePath)) {
+    UI.info('Updating package-lock.json for Docker build compatibility...');
+    try {
+      execSync('npm install --package-lock-only --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
+      UI.success('Updated package-lock.json successfully.');
+    } catch (err) {
+      UI.warn(`Could not update package-lock.json automatically: ${err.message}.`);
+    }
+  }
 }
 
 function finishInstallation(frontendDir, usingDocker, installRun) {
+  if (usingDocker) {
+    ensurePackageLock(frontendDir);
+  }
+
   console.log(`\n${colors.cyan}${colors.bright}====================================================================`);
   console.log('    🎉   INSTALLATION FINISHED SUCCESSFULLY!   🎉');
   console.log(`====================================================================${colors.reset}\n`);
