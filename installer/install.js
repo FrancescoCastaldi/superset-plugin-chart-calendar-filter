@@ -251,22 +251,81 @@ function startInstallation() {
   UI.info(`Superset Folder: ${colors.bright}${supersetDir}${colors.reset}`);
 
   try {
-    UI.step(1, 'Building Plugin Artifacts');
+    cleanPreviousInstallation(frontendDir);
+
+    UI.step(2, 'Building Plugin Artifacts');
     buildPluginIfNeeded();
 
-    UI.step(2, 'Registering File Dependency');
+    UI.step(3, 'Registering File Dependency');
     installDependency(frontendDir);
 
-    UI.step(3, 'Patching Preset Registrations');
+    UI.step(4, 'Patching Preset Registrations');
     registerPreset(frontendDir);
 
-    UI.step(4, 'Advanced Options & Configuration');
+    UI.step(5, 'Advanced Options & Configuration');
     promptAdvancedSteps(frontendDir);
   } catch (error) {
     console.error(`\n${colors.red}${colors.bright}[ERROR] Installation failed: ${error.message}${colors.reset}`);
     rl.close();
     process.exit(1);
   }
+}
+
+function cleanPreviousInstallation(frontendDir) {
+  UI.step(1, 'Cleaning Previous Installations & Resolving Conflicts');
+
+  // 1. Remove plugin directory
+  const targetPluginDir = path.join(frontendDir, 'plugins', 'superset-plugin-chart-calendar-filter');
+  if (fs.existsSync(targetPluginDir)) {
+    try {
+      fs.rmSync(targetPluginDir, { recursive: true, force: true });
+      UI.info('Removed old plugin directory to ensure a fresh copy.');
+    } catch (e) {
+      UI.warn('Could not remove old plugin directory: ' + e.message);
+    }
+  }
+
+  // 2. Remove from package.json
+  const pkgPath = path.join(frontendDir, 'package.json');
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      if (pkg.dependencies && pkg.dependencies['superset-plugin-chart-calendar-filter']) {
+        delete pkg.dependencies['superset-plugin-chart-calendar-filter'];
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
+        UI.info('Removed plugin from package.json to rebuild dependency tree.');
+      }
+    } catch (e) {
+      UI.warn('Could not remove plugin from package.json: ' + e.message);
+    }
+  }
+
+  // 3. Remove from MainPreset.ts / MainPreset.js
+  const presetDir = path.join(frontendDir, 'src', 'visualizations', 'presets');
+  for (const ext of ['ts', 'js']) {
+    const presetFile = path.join(presetDir, `MainPreset.${ext}`);
+    if (fs.existsSync(presetFile)) {
+      try {
+        let content = fs.readFileSync(presetFile, 'utf8');
+        const originalContent = content;
+        
+        // Match ANY import for SupersetPluginChartCalendarFilter
+        content = content.replace(/import\s+SupersetPluginChartCalendarFilter\s+from\s+['"].*?['"];?\n?/g, '');
+        
+        // Match ANY instantiation
+        content = content.replace(/[ \t]*new\s+SupersetPluginChartCalendarFilter\(\)\.configure\(\{[\s\S]*?\}\),?\n?/g, '');
+
+        if (content !== originalContent) {
+          fs.writeFileSync(presetFile, content, 'utf8');
+          UI.info(`Cleaned up previous registrations in MainPreset.${ext}.`);
+        }
+      } catch (e) {
+        UI.warn(`Could not clean MainPreset.${ext}: ` + e.message);
+      }
+    }
+  }
+  
+  UI.success('Cleanup completed.');
 }
 
 function buildPluginIfNeeded() {
@@ -391,16 +450,6 @@ function registerPreset(frontendDir) {
 
   const relativeImportLine = "import SupersetPluginChartCalendarFilter from '../../../plugins/superset-plugin-chart-calendar-filter';";
 
-  // Replace any existing package-based import with relative path import
-  if (content.includes("import SupersetPluginChartCalendarFilter from 'superset-plugin-chart-calendar-filter';")) {
-    content = content.replace(
-      "import SupersetPluginChartCalendarFilter from 'superset-plugin-chart-calendar-filter';",
-      relativeImportLine
-    );
-    fs.writeFileSync(presetFile, content, 'utf8');
-    UI.success('Updated MainPreset import to relative plugin path.');
-  }
-
   if (content.includes('SupersetPluginChartCalendarFilter')) {
     UI.success('Plugin already registered in MainPreset.');
     return;
@@ -444,7 +493,7 @@ function registerPreset(frontendDir) {
       UI.success(`Plugin registered in MainPreset (${path.basename(presetFile)}) in fallback mode.`);
     } else {
       UI.warn('Could not auto-locate plugins array. Please register manually:');
-      console.log(`     Import:  ${importLine}`);
+      console.log(`     Import:  ${relativeImportLine}`);
       console.log(`     Preset:  new SupersetPluginChartCalendarFilter().configure({ key: 'superset-plugin-chart-calendar-filter' }),`);
     }
   }
@@ -475,7 +524,7 @@ function promptAdvancedSteps(frontendDir) {
           UI.info('Skipped filters whitelisting.');
         }
 
-        UI.step(5, 'Package Management & Safety Cleanup');
+        UI.step(6, 'Package Management & Safety Cleanup');
 
         rl.question(`   - Run frontend safety cleanup (.cache, dist, stale lockfile)? (Y/n): `, (ansClean) => {
           const doSafetyClean = ansClean.trim().toLowerCase() !== 'n';
