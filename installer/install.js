@@ -325,10 +325,33 @@ function installDependency(frontendDir) {
     "diff-match-patch": "^1.0.5"
   };
 
-  for (const [dep, ver] of Object.entries(missingDeps)) {
-    if (!pkg.dependencies[dep]) {
-      pkg.dependencies[dep] = ver;
+  // Fix Storybook peer dependency conflict in superset-frontend/package.json
+  const storybookDeps = [
+    '@storybook/addon-actions',
+    '@storybook/addon-essentials',
+    '@storybook/addon-links',
+    '@storybook/addon-controls',
+    '@storybook/components',
+    '@storybook/core-common',
+    '@storybook/preset-react-webpack',
+    '@storybook/react',
+    '@storybook/react-webpack5',
+    '@storybook/theming',
+    'storybook'
+  ];
+  let sbFixed = false;
+  for (const dep of storybookDeps) {
+    if (pkg.devDependencies && pkg.devDependencies[dep] && pkg.devDependencies[dep] !== '8.6.17') {
+      pkg.devDependencies[dep] = '8.6.17';
+      sbFixed = true;
     }
+    if (pkg.dependencies && pkg.dependencies[dep] && pkg.dependencies[dep] !== '8.6.17') {
+      pkg.dependencies[dep] = '8.6.17';
+      sbFixed = true;
+    }
+  }
+  if (sbFixed) {
+    UI.success('Fixed Storybook peer dependency mismatch in superset-frontend/package.json (aligned to 8.6.17)');
   }
 
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
@@ -565,7 +588,7 @@ function finishInstallation(frontendDir, usingDocker, installRun) {
 
   if (usingDocker) {
     console.log(`  1. cd ${path.resolve(frontendDir, '..')}`);
-    console.log(`  2. Run: ${colors.green}docker compose down && docker compose up -d${colors.reset}`);
+    console.log(`  2. Run: ${colors.green}docker compose -f docker-compose-non-dev.yml -f docker-compose.override.yml up -d --build${colors.reset}`);
     console.log(`  3. Wait for the container to build the frontend (~3-5 min).`);
     console.log(`  4. Open ${colors.cyan}http://localhost:8088${colors.reset} in your browser.\n`);
   } else {
