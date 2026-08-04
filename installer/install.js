@@ -389,34 +389,46 @@ function registerPreset(frontendDir) {
   fs.copyFileSync(presetFile, `${presetFile}.bak`);
   let content = fs.readFileSync(presetFile, 'utf8');
 
+  const relativeImportLine = "import SupersetPluginChartCalendarFilter from '../../../plugins/superset-plugin-chart-calendar-filter';";
+
+  // Replace any existing package-based import with relative path import
+  if (content.includes("import SupersetPluginChartCalendarFilter from 'superset-plugin-chart-calendar-filter';")) {
+    content = content.replace(
+      "import SupersetPluginChartCalendarFilter from 'superset-plugin-chart-calendar-filter';",
+      relativeImportLine
+    );
+    fs.writeFileSync(presetFile, content, 'utf8');
+    UI.success('Updated MainPreset import to relative plugin path.');
+  }
+
   if (content.includes('SupersetPluginChartCalendarFilter')) {
     UI.success('Plugin already registered in MainPreset.');
     return;
   }
 
   // Inject import after the last import line
-  const importLine = "import SupersetPluginChartCalendarFilter from 'superset-plugin-chart-calendar-filter';";
   const lines = content.split('\n');
   let lastImportIdx = -1;
   for (let i = 0; i < lines.length; i++) {
-    if (/^\s*import\s/.test(lines[i])) {
+    if (lines[i].trim().startsWith('import ')) {
       lastImportIdx = i;
     }
   }
+
   if (lastImportIdx >= 0) {
-    lines.splice(lastImportIdx + 1, 0, importLine);
+    lines.splice(lastImportIdx + 1, 0, relativeImportLine);
+    content = lines.join('\n');
   } else {
-    lines.unshift(importLine);
+    content = relativeImportLine + '\n' + content;
   }
-  content = lines.join('\n');
 
-  // Inject into plugins list
-  const instantiation = "\n        new SupersetPluginChartCalendarFilter().configure({\n          key: 'superset-plugin-chart-calendar-filter',\n        }),";
+  // Inject plugin instantiation into plugins array
+  const pluginsArrayRe = /new\s+Preset\(\s*\{[\s\S]*?plugins:\s*\[/;
+  const match = content.match(pluginsArrayRe);
 
-  const pluginsRe = /plugins:\s*\[/;
-  const match = content.match(pluginsRe);
   if (match) {
     const insertPos = match.index + match[0].length;
+    const instantiation = "\n        new SupersetPluginChartCalendarFilter().configure({\n          key: 'superset-plugin-chart-calendar-filter',\n        }),";
     content = content.slice(0, insertPos) + instantiation + content.slice(insertPos);
     fs.writeFileSync(presetFile, content, 'utf8');
     UI.success(`Plugin registered in MainPreset (${path.basename(presetFile)}).`);
