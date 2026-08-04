@@ -491,9 +491,10 @@ function promptAdvancedSteps(frontendDir) {
 }
 
 function performFrontendSafetyClean(frontendDir, deepCleanModules = false) {
-  UI.info('Performing safety cleanup of superset-frontend cache & build artifacts...');
+  UI.info('Performing cross-platform safety cleanup of superset-frontend...');
   const itemsToClean = [
     { path: path.join(frontendDir, 'node_modules', '.cache'), label: 'node_modules/.cache (Webpack/Babel cache)' },
+    { path: path.join(frontendDir, '.temp_cache'), label: '.temp_cache (temporary build cache)' },
     { path: path.join(frontendDir, 'dist'), label: 'dist/ (stale build outputs)' }
   ];
 
@@ -512,19 +513,42 @@ function performFrontendSafetyClean(frontendDir, deepCleanModules = false) {
     }
   }
 
-  // Ensure package-lock.json is present as Superset Dockerfile non-dev build mandates it for npm ci
-  ensurePackageLock(frontendDir);
+  // Clean sub-package build artifacts in packages/ and plugins/
+  const subDirs = ['packages', 'plugins'];
+  for (const subDir of subDirs) {
+    const parentPath = path.join(frontendDir, subDir);
+    if (fs.existsSync(parentPath)) {
+      try {
+        const children = fs.readdirSync(parentPath);
+        for (const child of children) {
+          const childPath = path.join(parentPath, child);
+          if (fs.statSync(childPath).isDirectory()) {
+            for (const artifact of ['lib', 'esm', 'tsconfig.tsbuildinfo']) {
+              const target = path.join(childPath, artifact);
+              if (fs.existsSync(target)) {
+                fs.rmSync(target, { recursive: true, force: true });
+              }
+            }
+          }
+        }
+        UI.success(`Cleaned build artifacts in superset-frontend/${subDir}/*`);
+      } catch (e) {}
+    }
+  }
+
+  // Ensure dependencies & package-lock.json are present and aligned for Docker npm ci
+  ensurePackageLock(frontendDir, true);
 }
 
 function ensurePackageLock(frontendDir, force = false) {
   const lockFilePath = path.join(frontendDir, 'package-lock.json');
   if (force || !fs.existsSync(lockFilePath)) {
-    UI.info('Updating package-lock.json for Docker build compatibility...');
+    UI.info('Running "npm install --legacy-peer-deps --ignore-engines" to align frontend dependencies...');
     try {
-      execSync('npm install --package-lock-only --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
-      UI.success('Updated package-lock.json successfully.');
+      execSync('npm install --legacy-peer-deps --ignore-engines', { cwd: frontendDir, stdio: 'inherit' });
+      UI.success('NPM dependencies and package-lock.json aligned successfully.');
     } catch (err) {
-      UI.warn(`Could not update package-lock.json automatically: ${err.message}.`);
+      UI.warn(`npm install encountered warnings/issues: ${err.message}.`);
     }
   }
 }
