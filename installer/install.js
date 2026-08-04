@@ -593,6 +593,9 @@ function applyDockerOverride() {
     content = `version: '3.7'\n\nservices:\n`;
     for (const svc of services) {
       content += `  ${svc}:\n`;
+      content += `    build:\n`;
+      content += `      args:\n`;
+      content += `        NPM_CONFIG_LEGACY_PEER_DEPS: 'true'\n`;
       content += `    volumes:\n`;
       content += `      - ${volumeMount}\n`;
       content += `    environment:\n`;
