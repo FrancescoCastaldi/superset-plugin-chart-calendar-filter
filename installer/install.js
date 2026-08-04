@@ -595,6 +595,7 @@ function applyDockerOverride() {
       content += `  ${svc}:\n`;
       content += `    build:\n`;
       content += `      args:\n`;
+      content += `        DEV_MODE: 'true'\n`;
       content += `        NPM_CONFIG_LEGACY_PEER_DEPS: 'true'\n`;
       content += `    volumes:\n`;
       content += `      - ${volumeMount}\n`;
