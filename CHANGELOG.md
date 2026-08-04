@@ -5,6 +5,7 @@
 ### Added
 - Universal drop-in installer (`install-calendar-filter.bat`) for Windows: place in Superset root, double-click to auto-discover plugin, build if needed, install as file dependency, register in MainPreset, and optionally generate Docker Compose override. Supports `SUPERSET_PLUGIN_PATH` environment variable for explicit plugin location.
 - Technical documentation for the installer (`INSTALLER.md`).
+- Frontend Safety Cleanup routine in installer (`performFrontendSafetyClean`): automatically purges stale Webpack/Babel cache (`node_modules/.cache`), old build output (`dist/`), and lockfiles (`package-lock.json`) to guarantee a clean, reliable frontend build.
 - GitHub Actions CI fixes: cross-platform `copy-images` script (Node.js `fs.cpSync` instead of PowerShell), Node 22 matrix only (Node 20 deprecated), upgraded `actions/checkout@v4` and `actions/setup-node@v4` in release workflow.
 
 ### Fixed

@@ -18,6 +18,7 @@ This script will:
    - Generating a `docker-compose.override.yml` for containerized environments.
    - Applying the TS2344 compile compatibility workaround in `editors/AceEditorProvider.tsx`.
    - Whitelisting the plugin in `FILTER_SUPPORTED_TYPES` in `constants.ts` (required for native filters popover choice).
+   - **Frontend Safety Cleanup**: Purging stale Webpack/Babel cache (`node_modules/.cache`), old build output (`dist/`), and lockfiles (`package-lock.json`) to prevent version mismatch or stale bundle bugs.
 
 ---
 
