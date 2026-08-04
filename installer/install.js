@@ -334,6 +334,18 @@ function installDependency(frontendDir) {
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
   UI.success(`Copied plugin into superset-frontend/plugins & registered dependency: "${relPath}"`);
 
+  // Ensure .npmrc in superset-frontend has legacy-peer-deps=true for Docker build compatibility
+  const npmrcPath = path.join(frontendDir, '.npmrc');
+  let npmrcContent = '';
+  if (fs.existsSync(npmrcPath)) {
+    npmrcContent = fs.readFileSync(npmrcPath, 'utf8');
+  }
+  if (!npmrcContent.includes('legacy-peer-deps')) {
+    npmrcContent += '\nlegacy-peer-deps=true\n';
+    fs.writeFileSync(npmrcPath, npmrcContent, 'utf8');
+    UI.success('Configured superset-frontend/.npmrc with legacy-peer-deps=true');
+  }
+
   // Regenerate package-lock.json with the new dependency so Docker npm ci succeeds immediately
   ensurePackageLock(frontendDir, true);
 }
