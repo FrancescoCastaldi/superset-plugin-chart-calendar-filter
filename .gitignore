@@ -53,6 +53,7 @@ COMMESSA.md
 
 # Python utility/setup scripts
 *.py
+!scripts/installer.py
 
 # personal files
 -FrancescoCasta.npmrc
