@@ -20,6 +20,10 @@ import { buildQueryContext, QueryFormData } from '@superset-ui/core';
 
 export default function buildQuery(formData: QueryFormData) {
   const { groupby } = formData;
+  if (!groupby || (Array.isArray(groupby) && groupby.length === 0)) {
+    // Pure Time Range Mode: return empty query context without running SQL
+    return buildQueryContext(formData, () => []);
+  }
   return buildQueryContext(formData, baseQueryObject => {
     const { orderby, timeseries_limit_metric, order_desc, ...restQueryObject } = baseQueryObject;
     return [

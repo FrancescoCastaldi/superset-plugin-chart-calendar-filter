@@ -66,7 +66,11 @@ export function useCalendarData(
   const availableYears = useMemo(() => {
     if (!minDateBound || !maxDateBound) {
       const y = today.getFullYear();
-      return [y - 2, y - 1, y, y + 1, y + 2];
+      const years: number[] = [];
+      for (let offset = -5; offset <= 5; offset++) {
+        years.push(y + offset);
+      }
+      return years;
     }
     const minY = parseDateValue(minDateBound)?.getFullYear() ?? today.getFullYear();
     const maxY = Math.max(
