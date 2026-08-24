@@ -36,10 +36,6 @@ export function useSelectionMask(
           const maxD = sorted[sorted.length - 1];
           extraFormData = {
             time_range: `${minD} : ${maxD}`,
-            filters: [
-              { col: dateColumn ?? '__timestamp', op: '>=', val: minD },
-              { col: dateColumn ?? '__timestamp', op: '<=', val: maxD },
-            ],
           };
         } else {
           extraFormData = {

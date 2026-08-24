@@ -28,12 +28,15 @@ export default function transformProps(chartProps: ChartProps) {
     showYearDropdown = true,
     enableOverview = true,
     cellDensity = 'compact',
-    filterTypeMode = 'in_clause',
+    filterTypeMode: rawFilterTypeMode,
     defaultValueMode = 'none',
     showMacroShortcuts = true,
     customDefaultStartDate,
     customDefaultEndDate,
   } = formData;
+
+  const rawFilterMode = rawFilterTypeMode ?? (formData as any).filterTypeMode;
+  const filterTypeMode = rawFilterMode === 'in_clause' ? 'in_clause' : 'time_range';
   const { hooks, filterState } = chartProps;
   const { setDataMask = () => {} } = hooks || {};
   const data = (queriesData[0]?.data ?? []) as TimeseriesDataRecord[];
