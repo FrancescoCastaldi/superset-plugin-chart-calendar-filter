@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Apache Superset 6.1.0 - Automated Chart Plugin Installer for Calendar Filter
 Author: Francesco Castaldi
@@ -136,24 +136,27 @@ def patch_main_preset(preset_file: Path):
     log_success(f"Registered plugin in {preset_file.name}")
 
 
-def copy_plugin_files(plugin_root: Path, frontend_dir: Path) -> str:
-    """Copies frontend plugin directory into superset-frontend/plugins/."""
+def copy_plugin_files(plugin_root: Path, frontend_dir: Path) -> tuple[str, bool]:
+    """Copies frontend plugin directory into superset-frontend/plugins/. Returns (rel_path, is_update)."""
     target_plugins_dir = frontend_dir / "plugins"
     target_plugins_dir.mkdir(parents=True, exist_ok=True)
 
     dest_dir = target_plugins_dir / "superset-plugin-chart-calendar-filter"
+    is_update = dest_dir.exists()
 
-    if dest_dir.exists():
-        log_info(f"Removing existing plugin destination at '{dest_dir.name}'")
+    if is_update:
+        log_info(f"Plugin già presente in '{dest_dir.name}'. Esecuzione UPDATE & sincronizzazione nuovi sorgenti...")
         shutil.rmtree(dest_dir)
+    else:
+        log_info(f"Nuova installazione del plugin in '{dest_dir.name}'...")
 
     def ignore_patterns(path, names):
         return [n for n in names if n in ("node_modules", "dist", ".git", ".turbo", ".agents", ".slim")]
 
     shutil.copytree(plugin_root, dest_dir, ignore=ignore_patterns)
-    log_success(f"Copied plugin sources to {dest_dir}")
+    log_success(f"Sorgenti plugin aggiornati con successo in {dest_dir}")
 
-    return "./plugins/superset-plugin-chart-calendar-filter"
+    return "./plugins/superset-plugin-chart-calendar-filter", is_update
 
 
 def rollback(superset_root: Path):
@@ -251,7 +254,7 @@ def main():
         preset_file = find_main_preset(frontend_dir)
 
         # 1. Copy plugin files to superset-frontend/plugins/
-        rel_path = copy_plugin_files(plugin_root, frontend_dir)
+        rel_path, is_update = copy_plugin_files(plugin_root, frontend_dir)
 
         # 2. Patch package.json
         patch_package_json(frontend_dir, rel_path)
@@ -259,19 +262,20 @@ def main():
         # 3. Patch MainPreset
         patch_main_preset(preset_file)
 
-        log_success("All frontend files and registrations configured successfully!")
+        action_label = "AGGIORNAMENTO (UPDATE)" if is_update else "INSTALLAZIONE"
+        log_success(f"Tutti i file del frontend e le registrazioni completate con successo ({action_label})!")
 
         # 4. Handle Docker if requested
         if args.docker:
             trigger_docker_build(superset_root)
 
         print("\n" + "=" * 65)
-        log_success("INSTALLATION COMPLETED SUCCESSFULLY!")
+        log_success(f"{action_label} COMPLETATA CON SUCCESSO!")
         print("=" * 65)
-        print("To verify in your browser:")
-        print("1. Open Superset (http://localhost:8088)")
-        print("2. Click '+ -> Chart'")
-        print("3. Search for 'Calendar Filter' in the Filters and controls category.")
+        print("Per verificare nel browser:")
+        print("1. Ricarica la pagina di Apache Superset (Ctrl + F5)")
+        print("2. Clicca '+ -> Chart'")
+        print("3. Cerca 'Calendar Filter' nella categoria Filters and controls.")
         print("=" * 65 + "\n")
 
     except Exception as e:
