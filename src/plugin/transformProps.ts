@@ -40,9 +40,14 @@ export default function transformProps(chartProps: ChartProps) {
   const { hooks, filterState } = chartProps;
   const { setDataMask = () => {} } = hooks || {};
   const data = (queriesData[0]?.data ?? []) as TimeseriesDataRecord[];
-  // In Native Filter mode `groupby` is empty: prefer the explicit date_column control
+  // In Native Filter mode `groupby` is empty: prefer explicit date_column or native filter target
   const [groupByDateColumn] = formData.groupby ?? [];
-  const dateColumn = formData.date_column ?? groupByDateColumn;
+  const nativeFilterColumn =
+    (formData as any).target?.column?.name ??
+    (formData as any).targets?.[0]?.column?.name ??
+    (chartProps as any).rawFormData?.target?.column?.name ??
+    (chartProps as any).rawFormData?.targets?.[0]?.column?.name;
+  const dateColumn = formData.date_column ?? groupByDateColumn ?? nativeFilterColumn ?? 'DATAEROGAZIONE';
 
   return {
     width,

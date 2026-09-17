@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8] - 2026-09-17
+
+### Fixed
+- **Native filter propagation on custom date columns**: added fallback detection for native filter targets (`formData.target.column.name` and default `DATAEROGAZIONE`) in `transformProps.ts`, preventing non-filtering due to undefined date column.
+- **Dual filter emission in `useSelectionMask`**: `time_range` mode now emits both `time_range` and explicit `TEMPORAL_RANGE` column filter in `extraFormData.filters`.
+- **In-clause filter emission**: `in_clause` mode now cleanly emits `{ col: colName, op: 'IN', val: sorted }` with sorted dates array, ensuring universal compatibility with SQL Server CTEs and virtual datasets without requiring `granularity_sqla`.
+
 ## [0.1.7] - 2026-08-01
 
 ### Added

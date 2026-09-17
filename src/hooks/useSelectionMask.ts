@@ -31,15 +31,23 @@ export function useSelectionMask(
       let extraFormData: Record<string, unknown> = {};
 
       if (sorted.length > 0) {
+        const colName = dateColumn ?? 'DATAEROGAZIONE';
         if (filterTypeMode === 'time_range') {
           const minD = sorted[0];
           const maxD = sorted[sorted.length - 1];
           extraFormData = {
             time_range: `${minD} : ${maxD}`,
+            filters: [
+              {
+                col: colName,
+                op: 'TEMPORAL_RANGE',
+                val: `${minD} : ${maxD}`,
+              },
+            ],
           };
         } else {
           extraFormData = {
-            filters: [{ col: dateColumn ?? '__timestamp', op: 'IN' as const, val: sorted }],
+            filters: [{ col: colName, op: 'IN' as const, val: sorted }],
           };
         }
       } else {
