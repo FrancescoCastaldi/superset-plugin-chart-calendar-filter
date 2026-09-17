@@ -1,140 +1,196 @@
-# Calendar Filter - Superset Chart Plugin
+# Calendar Filter - Interactive Heatmap & Native Filter Plugin for Apache Superset
 
-Interactive calendar heatmap chart for Apache Superset 6.1.0 that acts as a dashboard cross-filter and native filter. Click dates to filter your dashboard.
+[![Apache Superset](https://img.shields.io/badge/Apache%20Superset-6.1.0+-007A87.svg?logo=apache-superset&logoColor=white)](https://superset.apache.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.1+-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-17%20%7C%2018-61dafb.svg)](https://reactjs.org/)
+[![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen.svg)](#)
 
-[![Superset Version](https://img.shields.io/badge/Superset-6.1.0-blue)](https://superset.apache.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
-[![Build](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/actions/workflows/ci.yml)
-![TypeScript](https://img.shields.io/badge/TypeScript-4.1-blue)
-![React](https://img.shields.io/badge/React-17-61dafb)
-![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen)
+**Calendar Filter** is an interactive calendar heatmap visualization plugin for **Apache Superset 6.1.0+** engineered for temporal exploratory data analysis. It functions simultaneously as an interactive dashboard visualization, an exploratory cross-filter, and a native dashboard filter component - allowing users to slice and filter companion dashboard charts simply by clicking individual dates or date ranges.
 
 ---
 
-### Install
+## 📸 Visual Preview
 
-Run the cross-platform Node.js installer from the `installer/` directory:
+### 📊 Dashboard Cross-Filtering in Action
 
-**Windows (double-click):**
-Double-click `installer/install.bat`
+![Calendar Filter in Dashboard](docs/screenshots/sales_dashboard_calendar.png)
 
-**Command line:**
-```bash
-node installer/install.js [path/to/superset-root]
+*Figure 1: Calendar Filter integrated into an Apache Superset dashboard, driving cross-filtering across companion analytical charts.*
+
+### 🗓️ Month View & Selection Detail
+
+![Calendar Filter Month View](docs/screenshots/calendar_filter_screenshot.png)
+
+*Figure 2: Interactive month view showing selected dates, metric intensity color scaling, week numbers, and legend.*
+
+---
+
+## 🌟 Key Features
+
+### 1. 📅 Dual Navigation Modes (Month View & Year Overview)
+- **Month View**: Focused single-month calendar with quick navigation (`<` / `>`), year selector dropdown, and one-click return to "Today".
+- **Year Overview**: Comprehensive 4x3 grid displaying all 12 mini-calendars simultaneously, providing an executive bird's-eye view of annual trends and distributions.
+
+### 2. 🖱️ Intuitive Interactive Selection
+- **Single-Click**: Toggle individual dates on or off.
+- **Shift-Click**: Select contiguous date ranges in a single action.
+- **Clear All**: Instant reset button to clear active selections and restore baseline dashboard state.
+- **Visual Highlight**: Selected dates feature distinct accent borders and state highlights.
+
+### 3. 🔄 Dual Role: Visual Chart & Native Dashboard Filter
+- **Standard Chart Mode**: Renders as an informative heatmap chart on any dashboard, emitting `setDataMask` cross-filters when dates are clicked.
+- **Native Filter Mode**: Can be embedded into Superset's **Filter Bar** as a native filter component. By configuring the `date_column` control, it targets the dataset's date column (replacing legacy `__timestamp` fallbacks).
+
+### 4. 🎨 Metric-Driven Heatmap & Color Schemes
+- **6 Color Palettes**: *Superset Default*, *Greens*, *Blues*, *Oranges*, *Reds*, and *Purples*.
+- **Interactive Legend**: Gradient color ramp displaying minimum and maximum threshold values.
+- **Calendar Standards**: ISO 8601 week numbers and configurable start of week (Sunday or Monday).
+- **Rich Tooltips**: Real-time display of date, metric aggregation, and percentage of period maximum.
+
+---
+
+## 🏛️ Architecture Overview
+
+```mermaid
+flowchart LR
+    A[Superset Explore / Dashboard] -->|FormData & Controls| B[buildQuery.ts]
+    B -->|API v1 Chart Data Request| C[Superset Backend / Database]
+    C -->|Tabular Date Records| D[transformProps.ts]
+    D -->|Aggregated Matrix & Metrics| E[CalendarFilter.tsx]
+    E -->|Emotion CSS & SVG Grid| F[Interactive Calendar UI]
+    F -->|Date Click / Range Selection| G[setDataMask Event]
+    G -->|Dispatched IN Filter| A
 ```
 
-The installer auto-discovers your Apache Superset repository, builds the plugin, registers it as a dependency in `superset-frontend/package.json`, patches `MainPreset.ts/js` to register the chart, and prompts you to apply optional workarounds (Docker compose overrides, AceEditor fixes, and native filter whitelisting). See [INSTALLER.md](installer/INSTALLER.md) for full documentation.
+---
 
-### Development Mode
+## 📁 Repository Structure
 
-For active development, run `npm run dev` in the plugin directory to automatically rebuild on changes.
-
-To run the dev server or compile:
-
-```bash
-cd superset-frontend
-npm run dev-server   # Start webpack dev server (hot reload)
-npm run build        # Production build
+```
+superset-plugin-chart-calendar-filter/
+├── package.json                    # Plugin manifest & dependencies
+├── tsconfig.json                   # TypeScript build settings
+├── jest.config.js                  # Jest test configuration
+├── installer/
+│   ├── install.js                  # Cross-platform Node.js installer
+│   ├── install.bat                 # Double-click Windows batch launcher
+│   └── INSTALLER.md                # Comprehensive installer documentation
+├── docs/
+│   ├── INSTALL.md                  # Manual installation instructions
+│   └── screenshots/                # High-resolution screenshots & assets
+├── src/
+│   ├── index.ts                    # Plugin entry point & export
+│   ├── CalendarFilter.tsx          # Main React visualization component
+│   ├── types.ts                    # TypeScript interfaces & models
+│   ├── hooks/
+│   │   ├── useCalendarData.ts      # Metric aggregation & date mapping
+│   │   └── useSelectionMask.ts     # Selection state & filter dispatch
+│   ├── plugin/
+│   │   ├── index.ts                # ChartPlugin & ChartMetadata registration
+│   │   ├── buildQuery.ts           # Query constructor (groupby & metrics)
+│   │   ├── controlPanel.ts         # Explore UI controls & native filter options
+│   │   └── transformProps.ts       # Data transformation pipeline
+│   ├── styles/
+│   │   └── CalendarFilter.styles.ts # Emotion styled components
+│   ├── utils/
+│   │   ├── dateUtils.ts            # Date formatting & range calculations
+│   │   └── themeUtils.ts           # Null-safe theme resolution
+│   └── images/
+│       └── thumbnail.png           # 100x100 chart picker thumbnail
+├── test/                           # Comprehensive Jest test suite (51 tests)
+└── demo/                           # Standalone browser demo bundle
 ```
 
-Then start/restart the Flask backend. For manual steps, see [INSTALL.md](docs/INSTALL.md).
-
 ---
 
-## Features
+## 🚀 Quick Installation in Apache Superset
 
-### Month View
-Neutral day cells stay white and flat — days are highlighted **only when selected**, never by the underlying records (no intensity heatmap). Navigate between months, jump to any year, or return to today with one click.
+The repository includes a cross-platform installer that auto-discovers your Superset directory, builds the plugin, links dependencies, and patches `MainPreset`:
 
-| Control | Description |
-|---|---|
-| < / > | Previous / Next month |
-| Year dropdown | Jump to any year in the data range |
-| Today | Return to current month |
-| Year / Month | Toggle between month and year overview |
+### Option 1: Double-Click Batch Launcher (Windows)
+Double-click:
+👉 **`installer/install.bat`**
 
-### Year Overview
-See the full year as a 4x3 grid of mini-calendars. Each mini-calendar is interactive - dates are clickable.
-
-### Interactive Selection and Cross-Filter
-- Single click - toggle a date on/off
-- Shift-click - select a contiguous date range
-- Clear all - reset selection with one button
-- Auto cross-filter - emits `IN` filter to all dashboard charts
-
-### Display Options
-| Feature | Description |
-|---|---|
-| Color palettes | 6 palettes: Superset Default, Greens, Blues, Oranges, Reds, Purples |
-| Legend | Gradient bar with min-max value range |
-| Week numbers | ISO 8601 week numbers on each week row |
-| First day of week | Configurable Sunday or Monday start |
-| Rich tooltip | Hover shows date, metric value, and % of max |
-| Empty state | "No data available" message when no data |
-
----
-
-## Build
-
-### Prerequisites
-- Apache Superset 6.1.0
-- Node.js 16+
-
-### Commands
-
+### Option 2: Cross-Platform Node.js CLI
 ```bash
-cd superset-plugin-chart-calendar-filter
-npm install --legacy-peer-deps
-npm run build
+# Auto-detect Superset location:
+node installer/install.js
+
+# Or specify your Superset root directory:
+node installer/install.js "D:\Sviluppo\superset"
 ```
 
-Outputs:
-- `lib/` - CommonJS
-- `esm/` - ES Modules
-- TypeScript declarations
-- Runs the full test suite (44 tests)
+The installer autonomously:
+1. Locates `superset-frontend/`.
+2. Compiles the TypeScript plugin (`npm run build`).
+3. Adds `superset-plugin-chart-calendar-filter` into `superset-frontend/package.json`.
+4. Idempotently registers `CalendarFilterPlugin` in `MainPreset.ts` with the key `calendar_filter`.
+5. Prompts for optional Docker overrides and native filter configurations.
+
+### Option 3: Manual Installation
+1. Copy the plugin folder into `superset-frontend/plugins/superset-plugin-chart-calendar-filter`.
+2. In `superset-frontend/src/visualizations/presets/MainPreset.ts`:
+   ```typescript
+   import { CalendarFilterPlugin } from 'superset-plugin-chart-calendar-filter';
+
+   new CalendarFilterPlugin().configure({ key: 'calendar_filter' }).register();
+   ```
+3. Clear stale Webpack cache:
+   ```bash
+   rm -rf superset-frontend/node_modules/.cache
+   ```
 
 ---
 
-## Usage
+## 🐳 Docker Compose Deployment
 
-1. Add a Calendar Filter chart to your dashboard
-2. Configure the date column (e.g. `ds`, `order_date`)
-3. Select a metric (shown in the hover tooltip and selection badge)
-4. Apply optional adhoc filters
-5. Click any date to cross-filter other dashboard charts
+```bash
+cd /path/to/superset
+docker compose -f docker-compose-non-dev.yml up -d --build superset
+```
 
-As a **dashboard Native Filter**, set the `date_column` control (in *Native Filter Settings*) to the dataset's date column — without it the plugin falls back to `__timestamp` and the charts are not filtered.
-
-### Chart Controls
-
-| Control | Type | Default | Description |
-|---|---|---|---|
-| `color_scheme` | Select | `supersetColors` | Color palette for heatmap |
-| `show_legend` | Checkbox | `true` | Show/hide color legend |
-| `show_week_numbers` | Checkbox | `false` | Display ISO week numbers |
-| `first_day_of_week` | Select | `0` (Sunday) | Start week on Sunday or Monday |
-| `show_year_dropdown` | Checkbox | `true` | Year selector dropdown |
-| `enable_overview` | Checkbox | `true` | Year overview toggle |
-| `date_column` | Select | *empty* | Target date column for the emitted cross-filter (in **Native Filter Settings**; falls back to the first `groupby` column in chart mode) |
-| `cell_density` | Select | `compact` | Cell density: `compact` or `comfortable` |
+Launch `http://localhost:8088`, create a new chart, and select **Calendar Filter**!
 
 ---
 
-## Cross-Filter API
+## 🎛️ Explore Control Panel Reference
 
-When dates are selected, the plugin emits cross-filters on the **configured date column** — `date_column` in Native Filter mode, otherwise the first `groupby` column (legacy fallback `__timestamp`):
+| Control | Section | Type | Default | Description |
+|:---|:---|:---|:---|:---|
+| `groupby` | Query | Select | Empty | Primary date column to aggregate records and display heatmap intensity. |
+| `metric` | Query | Metric | Empty | Quantitative metric displayed in hover tooltips and legend. |
+| `date_column` | Native Filter | Select | Empty | Target date column for emitted cross-filters (in **Native Filter Settings**). |
+| `color_scheme` | Calendar Options | Select | `supersetColors` | Color palette for heatmap intensity (`greens`, `blues`, `reds`, etc.). |
+| `show_legend` | Calendar Options | Checkbox | `true` | Toggles visibility of the min/max gradient legend. |
+| `show_week_numbers` | Calendar Options | Checkbox | `false` | Displays ISO 8601 week numbers alongside calendar rows. |
+| `first_day_of_week` | Calendar Options | Select | `0` (Sunday) | Configures starting day of the week (Sunday vs. Monday). |
+| `show_year_dropdown`| Calendar Options | Checkbox | `true` | Displays year selector dropdown for rapid navigation. |
+| `enable_overview` | Calendar Options | Checkbox | `true` | Enables the 4x3 interactive annual overview grid. |
+| `cell_density` | Calendar Options | Select | `compact` | Cell spacing density (`compact` or `comfortable`). |
 
-```ts
+---
+
+## 🔄 Cross-Filter API Payload
+
+When dates are clicked, the plugin dispatches an `IN` operator filter to Superset's `setDataMask` hook:
+
+```typescript
 setDataMask({
   extraFormData: {
-    filters: [{ col: 'order_date', op: 'IN', val: ['2024-01-01', '2024-01-15'] }],
+    filters: [
+      {
+        col: 'order_date',
+        op: 'IN',
+        val: ['2026-04-01', '2026-04-15'],
+      },
+    ],
   },
   filterState: {
-    value: ['2024-01-01', '2024-01-15'],
+    value: ['2026-04-01', '2026-04-15'],
     selectedValues: {
-      '2024-01-01': '2024-01-01',
-      '2024-01-15': '2024-01-15',
+      '2026-04-01': '2026-04-01',
+      '2026-04-15': '2026-04-15',
     },
   },
 });
@@ -142,101 +198,30 @@ setDataMask({
 
 ---
 
-## Development
+## 🧪 Verification & Test Suite
+
+The plugin features 51 unit tests across 6 comprehensive Jest test suites:
 
 ```bash
-# Watch mode - rebuilds on every change
-npm run dev
-
-# Run tests (44 tests across 5 suites)
+# Run all unit tests
 npm test
 
-# Full clean build
-npm run build-clean
+# Run tests in watch mode
+npm run dev
 ```
 
-### Test Suites
-
-| Suite | File | Tests |
-|---|---|---|
-| Component | `test/CalendarFilter.test.tsx` | 27 |
-| Date utils | `test/utils/dateUtils.test.ts` | 11 |
-| Calendar grid | `test/utils/calendarGrid.test.ts` | 5 |
-| Plugin registration | `test/index.test.ts` | 1 |
-| Build query | `test/plugin/buildQuery.test.ts` | 1 |
-| Transform props | `test/plugin/transformProps.test.ts` | 3 |
-
-**Total: 51 tests across 6 suites**
-
-### Quick Demo
-
-A self-contained HTML demo is available in `demo/`:
-
-```bash
-npx esbuild demo/demo-wrapper.tsx --bundle --global-name=CalendarFilterDemo --outfile=demo/demo-bundle.js --loader:.tsx=tsx --loader:.js=jsx
-```
-
-Serve `demo/index.html` with any HTTP server.
+| Test Suite | File | Tests |
+|:---|:---|:---|
+| **Component Rendering & Interactions** | `test/CalendarFilter.test.tsx` | 27 |
+| **Date & Range Utilities** | `test/utils/dateUtils.test.ts` | 11 |
+| **Calendar Grid Math** | `test/utils/calendarGrid.test.ts` | 5 |
+| **Data Transform Pipeline** | `test/plugin/transformProps.test.ts` | 3 |
+| **Query Constructor** | `test/plugin/buildQuery.test.ts` | 1 |
+| **Plugin Registration** | `test/index.test.ts` | 1 |
+| **Total** | | **51 passing** |
 
 ---
 
-## Project Structure
+## 📄 License
 
-```
-superset-plugin-chart-calendar-filter/
-├── src/                            # Plugin source (TypeScript + React)
-│   ├── index.ts                    # Plugin entry point — exports SupersetPluginChartCalendarFilter
-│   ├── CalendarFilter.tsx          # Main React component
-│   ├── types.ts                    # TypeScript interfaces
-│   ├── hooks/
-│   │   ├── useCalendarData.ts      # Data aggregation for the calendar grid
-│   │   └── useSelectionMask.ts     # Selection mask + date column fallback
-│   ├── plugin/
-│   │   ├── index.ts                # ChartPlugin registration + ChartMetadata
-│   │   ├── buildQuery.ts           # Query builder (groupby, metrics)
-│   │   ├── controlPanel.ts         # Form controls (incl. date_column for native filters)
-│   │   └── transformProps.ts       # Data transformation pipeline
-│   ├── styles/
-│   │   └── CalendarFilter.styles.ts  # Emotion styles (flat cells, selection tint)
-│   ├── utils/
-│   │   ├── dateUtils.ts            # Date helpers (month grid, ranges)
-│   │   └── themeUtils.ts           # Theme null-safe access
-│   └── images/
-│       └── thumbnail.png           # 100x100 chart picker thumbnail
-├── test/                           # Jest test suites
-│   ├── CalendarFilter.test.tsx     # 27 component tests
-│   ├── index.test.ts               # Plugin registration test
-│   ├── plugin/                     # buildQuery + transformProps unit tests
-│   ├── utils/                      # dateUtils unit tests (12)
-│   └── __mocks__/                  # Superset / emotion mocks
-├── demo/                           # Standalone HTML demo (esbuild bundle + server.js)
-├── docker/                         # Docker Compose add-on + Dockerfile
-├── scripts/                        # Installer / publisher (PowerShell + bash)
-├── docs/                           # Docs index, INSTALL.md, screenshots
-├── types/
-│   └── external.d.ts               # Module declarations for @apache-superset/core
-├── .github/
-│   └── workflows/ci.yml            # GitHub Actions CI
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── SECURITY.md
-├── LICENSE
-├── package.json
-├── package-lock.json
-├── tsconfig.json
-├── babel.config.js
-├── jest.config.js
-└── run-demo.bat
-```
-
-> Build outputs (`lib/`, `esm/`, `tsconfig.tsbuildinfo`) and local agent files (`AGENTS.md`, `SESSION-CONTEXT.md`) are **gitignored** and not part of the repository.
-
----
-
-## License
-
-[Apache License 2.0](LICENSE)
-
----
-
-Built for [Apache Superset](https://superset.apache.org/) -- [Report a bug](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues) -- [Request a feature](https://github.com/FrancescoCastaldi/superset-plugin-chart-calendar-filter/issues)
+Distributed under the **Apache License 2.0**.
