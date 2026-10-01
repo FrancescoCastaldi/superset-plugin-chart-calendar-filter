@@ -19,13 +19,11 @@
 import { t } from '@apache-superset/core/translation';
 import {
   ControlPanelConfig,
-  sections,
   sharedControls,
 } from '@superset-ui/chart-controls';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    sections.legacyTimeseriesTime,
     {
       label: t('Query'),
       expanded: true,
@@ -36,7 +34,7 @@ const config: ControlPanelConfig = {
             name: 'groupby',
             config: {
               ...sharedControls.groupby,
-              label: t('Date Column (Optional)'),
+              label: t('Colonna Data Heatmap (Obbl. per Chart)'),
               description: t('Optional date column if you want to display data aggregation heatmap'),
               multi: false,
               validators: [],
@@ -48,7 +46,7 @@ const config: ControlPanelConfig = {
       ],
     },
     {
-      label: t('Calendar Options'),
+      label: t('Visualizzazioni Base'),
       expanded: true,
       controlSetRows: [
         [
@@ -85,18 +83,6 @@ const config: ControlPanelConfig = {
         ],
         [
           {
-            name: 'show_week_numbers',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Show Week Numbers'),
-              renderTrigger: true,
-              default: false,
-              description: t('Display ISO week numbers on the left side of each row'),
-            },
-          },
-        ],
-        [
-          {
             name: 'first_day_of_week',
             config: {
               type: 'SelectControl',
@@ -108,6 +94,24 @@ const config: ControlPanelConfig = {
               ],
               renderTrigger: true,
               description: t('Which day to start the week on'),
+            },
+          },
+        ],
+      ],
+    },
+    {
+      label: t('Layout Avanzato'),
+      expanded: false,
+      controlSetRows: [
+        [
+          {
+            name: 'show_week_numbers',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show Week Numbers'),
+              renderTrigger: true,
+              default: false,
+              description: t('Display ISO week numbers on the left side of each row'),
             },
           },
         ],
@@ -154,8 +158,8 @@ const config: ControlPanelConfig = {
       ],
     },
     {
-      label: t('Native Filter Settings'),
-      expanded: true,
+      label: t('Comportamento Filtri'),
+      expanded: false,
       controlSetRows: [
         [
           {
@@ -208,12 +212,12 @@ const config: ControlPanelConfig = {
   ],
   controlOverrides: {
     metric: {
-      label: t('Metric (Optional Heatmap)'),
+      label: t('Metrica Heatmap (Opzionale)'),
       description: t('Optional metric to display heatmap colors on calendar days'),
     },
     groupby: {
       ...sharedControls.groupby,
-      label: t('Date Column (Optional)'),
+      label: t('Colonna Data Heatmap (Obbl. per Chart)'),
       description: t('Optional date column if you want to display data aggregation heatmap'),
       multi: false,
       validators: [],

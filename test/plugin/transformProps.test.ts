@@ -65,7 +65,7 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
       showYearDropdown: false,
       enableOverview: false,
       cellDensity: 'compact',
-      filterTypeMode: 'in_clause',
+      filterTypeMode: 'time_range',
       defaultValueMode: 'none',
       showMacroShortcuts: true,
       customDefaultStartDate: undefined,

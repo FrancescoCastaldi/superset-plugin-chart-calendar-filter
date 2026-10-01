@@ -81,11 +81,12 @@ describe('CalendarFilter', () => {
     expect(buttons.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('shows empty state when no data', () => {
+  it('renders a generic calendar when no data is provided (Standalone mode)', () => {
     const { getByText } = render(
       <CalendarFilter {...defaultProps} data={[]} />,
     );
-    expect(getByText('Nessun dato disponibile')).toBeTruthy();
+    // Deve renderizzare il bottone Oggi o Espandi invece dell'errore
+    expect(getByText('Oggi')).toBeTruthy();
   });
 
   it('calls setDataMask when clicking a day', () => {

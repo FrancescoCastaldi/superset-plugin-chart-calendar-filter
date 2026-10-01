@@ -22,7 +22,6 @@ import { Global } from '@emotion/react';
 import {
   Styles, NativeFilterTriggerContainer, NativeFilterPillButton, CalendarHeader, HeaderLeft, HeaderCenter, HeaderRight,
   NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton,
-  EmptyState, EmptyIcon,
 } from './styles/CalendarFilter.styles';
 import CalendarModal from './components/CalendarModal';
 import MacroShortcuts from './components/MacroShortcuts';
@@ -403,16 +402,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   }
 
   // Render for full chart
-  if (!data || data.length === 0) {
-    return (
-      <Styles height={height} width={width}>
-        <EmptyState>
-          <EmptyIcon>📅</EmptyIcon>
-          <span>Nessun dato disponibile</span>
-        </EmptyState>
-      </Styles>
-    );
-  }
+
 
   return (
     <Styles height={height} width={width} ref={containerRef}>

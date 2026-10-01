@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.1.12] - 2026-10-02
+
+### Added
+- **Standalone Interactive Calendar**: Enabled the calendar to render and function as a standalone visual filter on dashboards even without providing any query data (`data` empty). Previously, omitting a date column or query data would crash the visual into a blocking "Nessun dato disponibile" state. Now it renders a clean, neutral, fully interactive calendar initialized to the current year.
+
+### Changed
+- **Data Panel Cleanup**: Removed the confusing and legacy `sections.legacyTimeseriesTime` (Time Column, Time Grain, Time Range) from the chart configuration panel, as they overlap confusingly with the concept of a calendar filter.
+- **Clarified Mandatory vs Optional Fields**: Renamed `groupby` to `Colonna Data Heatmap (Obbl. per Chart)` and `metric` to `Metrica Heatmap (Opzionale)` in the control panel to clearly guide the user.
+
+## [0.1.11] - 2026-10-02
+
+### Changed
+- **UI Optimization (Cognitive Load)**: Refactored `controlPanel.ts` to logically group control sections (`Visualizzazioni Base`, `Layout Avanzato`, `Comportamento Filtri`). Reduced visual clutter by setting `expanded: false` on advanced sections, making the configuration view cleaner and more approachable for end users.
+
 ## [0.1.10] - 2026-10-01
 
 ### Fixed
