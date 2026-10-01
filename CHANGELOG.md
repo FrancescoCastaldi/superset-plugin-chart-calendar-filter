@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10] - 2026-10-01
+
+### Fixed
+- **Correzione Chiave Registrazione nel Registry Superset (`calendar_filter`)**: Risolto bug critico per cui l'installer registrava il plugin con chiave `superset-plugin-chart-calendar-filter`, causando l'errore frontend `chartType="calendar_filter" — Error: Item with key "calendar_filter" is not registered.` Registrata tassativamente la chiave ufficiale `calendar_filter` (con alias `superset-plugin-chart-calendar-filter`).
+- **Esportazione Multipla `CalendarFilterPlugin` & `SupersetPluginChartCalendarFilter`**: Aggiunto l'export named `CalendarFilterPlugin` in `src/index.ts` ed `esm/index.js` per garantire compatibilità sia con gli import destrutturati di Superset 6.x (`import { CalendarFilterPlugin } from ...`) che con gli import di default.
+- **Risoluzione Warning TypeScript**: Rimosso import non utilizzato `validateNonEmpty` in `controlPanel.ts`.
+
 ## [0.1.9] - 2026-10-01
 
 ### Fixed

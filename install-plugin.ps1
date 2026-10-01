@@ -151,11 +151,23 @@ Write-Color "[SUCCESS] Plugin copiato con successo in '$DestPluginDir'" "Green"
 Write-Color ""
 
 Write-Color "=== FASE 3: Registrazione in MainPreset.ts ===" "Cyan"
-$PresetFile = Join-Path $FrontendDir "src\visualizations\presets\MainPreset.ts"
-if (Test-Path $PresetFile) {
+$PresetCandidates = @(
+    (Join-Path $FrontendDir "src\visualizations\presets\MainPreset.ts"),
+    (Join-Path $FrontendDir "src\visualizations\presets\MainPreset.js")
+)
+
+$PresetFile = $null
+foreach ($pf in $PresetCandidates) {
+    if (Test-Path $pf) {
+        $PresetFile = $pf
+        break
+    }
+}
+
+if ($PresetFile) {
     $Content = [System.IO.File]::ReadAllText($PresetFile, [System.Text.Encoding]::UTF8)
-    $TargetImport = "import SupersetPluginChartCalendarFilter from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
-    $TargetRegister = "        new SupersetPluginChartCalendarFilter().configure({ key: 'superset-plugin-chart-calendar-filter' }).register(),"
+    $TargetImport = "import { CalendarFilterPlugin } from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
+    $TargetRegister = "        new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),`n        new CalendarFilterPlugin().configure({ key: 'superset-plugin-chart-calendar-filter' }),"
 
     $NL = "`n"
     if ($Content -match "`r`n") { $NL = "`r`n" }
@@ -171,13 +183,21 @@ if (Test-Path $PresetFile) {
         } else {
             $lines.Insert(0, $TargetImport)
         }
+    } else {
+        # Update existing import line to named CalendarFilterPlugin
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -match 'from\s+[\x27\x22]\.\./\.\./\.\./plugins/superset-plugin-chart-calendar-filter') {
+                $lines[$i] = $TargetImport
+                break
+            }
+        }
     }
 
     $finalLines = [System.Collections.Generic.List[string]]::new()
     $pluginsIdx = -1
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
-        if ($line -match 'new\s+SupersetPluginChartCalendarFilter') { continue }
+        if ($line -match 'new\s+(SupersetPluginChartCalendarFilter|CalendarFilterPlugin)') { continue }
         $finalLines.Add($line)
         if ($line -match 'plugins\s*:\s*\[') { $pluginsIdx = $finalLines.Count }
     }
@@ -187,7 +207,7 @@ if (Test-Path $PresetFile) {
 
     $NewContent = $finalLines -join $NL
     [System.IO.File]::WriteAllText($PresetFile, $NewContent, [System.Text.UTF8Encoding]::new($false))
-    Write-Color "[SUCCESS] MainPreset.ts registrato con successo." "Green"
+    Write-Color "[SUCCESS] MainPreset.ts registrato con successo (key: 'calendar_filter')." "Green"
 }
 
 if (-not $SkipCleanCache) {

@@ -18,4 +18,5 @@
  */
 import SupersetPluginChartCalendarFilter from './plugin';
 export { SupersetPluginChartCalendarFilter };
+export { SupersetPluginChartCalendarFilter as CalendarFilterPlugin };
 export default SupersetPluginChartCalendarFilter;

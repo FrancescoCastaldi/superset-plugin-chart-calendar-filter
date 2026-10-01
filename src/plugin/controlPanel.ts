@@ -17,7 +17,6 @@
  * under the License.
  */
 import { t } from '@apache-superset/core/translation';
-import { validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
   sections,
