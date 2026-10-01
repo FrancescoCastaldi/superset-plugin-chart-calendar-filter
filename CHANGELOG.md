@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.9] - 2026-10-01
+
+### Fixed
+- **Installer istantaneo senza npm install**: Rimosso il tentativo di esecuzione automatica di `npm install --legacy-peer-deps` in `install-plugin.ps1`. I sorgenti `src/` vengono ora copiati e registrati direttamente per la compilazione nativa Webpack di Superset, eliminando i tempi di attesa e i blocchi di rete sulla macchina cliente.
+
 ## [0.1.8] - 2026-09-17
 
 ### Fixed

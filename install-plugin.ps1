@@ -102,38 +102,15 @@ Write-Color "[INFO] Cartella superset-frontend: $FrontendDir" "Gray"
 Write-Color ""
 
 if (-not $SkipBuild) {
-    Write-Color "=== FASE 1: Compilazione del Plugin ===" "Cyan"
-    $NpmCmd = Get-Command "npm" -ErrorAction SilentlyContinue
-    if ($NpmCmd) {
-        $PluginNodeModules = Join-Path $ResolvedPluginPath "node_modules"
-        if (-not (Test-Path $PluginNodeModules)) {
-            Write-Color "[INFO] Dipendenze non trovate. Esecuzione 'npm install --legacy-peer-deps'..." "Yellow"
-            $OrigLoc = Get-Location
-            try {
-                Set-Location $ResolvedPluginPath
-                & $NpmCmd.Source install --legacy-peer-deps
-            } catch {
-                Write-Color "[WARN] Avviso durante npm install: $_" "Yellow"
-            } finally {
-                Set-Location $OrigLoc
-            }
-        }
-        Write-Color "[INFO] Esecuzione 'npm run build' in '$ResolvedPluginPath'..." "Yellow"
-        $OrigLoc = Get-Location
-        try {
-            Set-Location $ResolvedPluginPath
-            & $NpmCmd.Source run build
-            if ($LASTEXITCODE -eq 0) {
-                Write-Color "[SUCCESS] Compilazione completata con successo." "Green"
-            } else {
-                Write-Color "[WARN] 'npm run build' ha restituito codice $LASTEXITCODE." "Yellow"
-            }
-        } catch {
-            Write-Color "[WARN] Avviso compilazione: $_" "Yellow"
-        } finally {
-            Set-Location $OrigLoc
-        }
+    Write-Color "=== FASE 1: Verifica Bundle e Sorgenti Plugin ===" "Cyan"
+    $EsmDir = Join-Path $ResolvedPluginPath "esm"
+    $LibDir = Join-Path $ResolvedPluginPath "lib"
+    if ((Test-Path $EsmDir) -or (Test-Path $LibDir)) {
+        Write-Color "[OK] Bundle compilati rilevati (esm/lib). Installazione istantanea senza download dipendenze." "Green"
+    } else {
+        Write-Color "[OK] Sorgenti 'src/' pronti. Superset li compilera' direttamente tramite Webpack." "Green"
     }
+    Write-Color ""
 }
 
 Write-Color "=== FASE 2: Copia e Sincronizzazione Plugin ===" "Cyan"
