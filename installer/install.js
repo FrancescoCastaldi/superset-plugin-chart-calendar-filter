@@ -446,9 +446,9 @@ function registerPreset(frontendDir) {
   fs.copyFileSync(presetFile, `${presetFile}.bak`);
   let content = fs.readFileSync(presetFile, 'utf8');
 
-  const relativeImportLine = "import SupersetPluginChartCalendarFilter from '../../../plugins/superset-plugin-chart-calendar-filter';";
+  const relativeImportLine = "import { CalendarFilterPlugin } from '../../../plugins/superset-plugin-chart-calendar-filter/src';";
 
-  if (content.includes('SupersetPluginChartCalendarFilter')) {
+  if (content.includes('CalendarFilterPlugin')) {
     UI.success('Plugin already registered in MainPreset.');
     return;
   }
@@ -475,7 +475,7 @@ function registerPreset(frontendDir) {
 
   if (match) {
     const insertPos = match.index + match[0].length;
-    const instantiation = "\n        new SupersetPluginChartCalendarFilter().configure({\n          key: 'superset-plugin-chart-calendar-filter',\n        }),";
+    const instantiation = "\n        new CalendarFilterPlugin().configure({\n          key: 'calendar_filter',\n        }),";
     content = content.slice(0, insertPos) + instantiation + content.slice(insertPos);
     fs.writeFileSync(presetFile, content, 'utf8');
     UI.success(`Plugin registered in MainPreset (${path.basename(presetFile)}).`);
@@ -485,14 +485,14 @@ function registerPreset(frontendDir) {
     const fallbackMatch = content.match(fallbackRe);
     if (fallbackMatch) {
       const insertPos = fallbackMatch.index;
-      const instantiationFallback = "new SupersetPluginChartCalendarFilter().configure({\n          key: 'superset-plugin-chart-calendar-filter',\n        }),\n        ";
+      const instantiationFallback = "new CalendarFilterPlugin().configure({\n          key: 'calendar_filter',\n        }),\n        ";
       content = content.slice(0, insertPos) + instantiationFallback + content.slice(insertPos);
       fs.writeFileSync(presetFile, content, 'utf8');
       UI.success(`Plugin registered in MainPreset (${path.basename(presetFile)}) in fallback mode.`);
     } else {
       UI.warn('Could not auto-locate plugins array. Please register manually:');
       console.log(`     Import:  ${relativeImportLine}`);
-      console.log(`     Preset:  new SupersetPluginChartCalendarFilter().configure({ key: 'superset-plugin-chart-calendar-filter' }),`);
+      console.log(`     Preset:  new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),`);
     }
   }
 }

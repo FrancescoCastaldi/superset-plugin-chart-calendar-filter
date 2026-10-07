@@ -14,7 +14,7 @@ Pure utility functions for date parsing, formatting, ISO week calculations, date
   - `getDatesBetween(start, end)`: Returns inclusive array of dates between two bounds.
   - `getISOWeekNumber(d)`: Calculates ISO-8601 week number.
   - `formatDateRangeBadge(dates)`: Formats smart selection badge text.
-  - `resolveTheme(token)`: Safely extracts Superset theme colors with fallbacks.
+  - `getBaseColor(paletteName)`: Returns the strongest color of a `COLOR_PALETTES` scheme (falls back to `supersetColors`). Consumed by `useCalendarData` to build the gradient scale — not dead code.
 
 ## Flow
 

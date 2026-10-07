@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@apache-superset/core/translation';
 import { Behavior, ChartMetadata, ChartPlugin } from '@superset-ui/core';
 import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
+
+// Local translation shim aligned with the other plugins of the suite:
+// outside the Superset webpack tree there is no i18n bundle to hook into,
+// so keys pass through unchanged.
+const t = (str: string) => str;
 
 export default class SupersetPluginChartCalendarFilter extends ChartPlugin {
   constructor() {

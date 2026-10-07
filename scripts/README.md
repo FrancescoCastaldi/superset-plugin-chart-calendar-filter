@@ -4,6 +4,10 @@ Utility scripts for plugin lifecycle automation, including local installation, p
 
 ## Contents
 
+### Build
+
+- **build.js** -- Single source of truth for the esbuild entry points of the plugin. The `build-cjs`, `build-esm` and `dev` npm scripts delegate to it (`--format=cjs|esm --outdir=<dir> [--watch]`), replacing the previously duplicated hardcoded file lists.
+
 ### Installation
 
 - **install.py** -- Zero-touch cross-platform installer (Python). Detects the OS, finds the local Superset checkout, symlinks the plugin, rebuilds the frontend, and registers the chart.

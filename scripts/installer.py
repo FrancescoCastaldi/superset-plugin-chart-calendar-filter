@@ -101,10 +101,10 @@ def patch_main_preset(preset_file: Path):
     with open(preset_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    import_stmt = "import SupersetPluginChartCalendarFilter from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
-    register_stmt = "        new SupersetPluginChartCalendarFilter().configure({ key: 'calendar_filter' }).register(),"
+    import_stmt = "import { CalendarFilterPlugin } from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
+    register_stmt = "        new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),"
 
-    if import_stmt in content or "SupersetPluginChartCalendarFilter" in content:
+    if import_stmt in content or "CalendarFilterPlugin" in content:
         log_warn("Plugin is already imported in MainPreset. Skipping injection.")
         return
 
@@ -128,7 +128,7 @@ def patch_main_preset(preset_file: Path):
             content = content[:idx] + "\n" + register_stmt + content[idx:]
         else:
             log_warn("Could not find standard 'plugins: [...]' array. Appending registration.")
-            content += f"\nnew SupersetPluginChartCalendarFilter().configure({{ key: 'calendar_filter' }}).register();\n"
+            content += f"\nnew CalendarFilterPlugin().configure({{ key: 'calendar_filter' }}),\n"
 
     with open(preset_file, "w", encoding="utf-8") as f:
         f.write(content)

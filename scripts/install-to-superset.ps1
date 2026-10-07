@@ -38,7 +38,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $PLUGIN_NAME = 'superset-plugin-chart-calendar-filter'
-$PLUGIN_KEY = 'superset-plugin-chart-calendar-filter'
+$PLUGIN_KEY = 'calendar_filter'
 
 if ($Help) {
     Write-Host "Usage: .\install-to-superset.ps1 [-SupersetRoot <path>] [-SkipBuild] [-Link] [-Docker] [-ComposeFile <file>] [-Test]"
@@ -161,11 +161,11 @@ function Print-ManualInstructions {
     Write-Host ""
     Write-Host "   1. Import near the top:"
     Write-Host ""
-    Write-Host "      import { SupersetPluginChartCalendarFilter } from '$PLUGIN_NAME';"
+    Write-Host "      import { CalendarFilterPlugin } from '$PLUGIN_NAME';"
     Write-Host ""
     Write-Host "   2. Inside the preset constructor's 'plugins:' array, add:"
     Write-Host ""
-    Write-Host "      new SupersetPluginChartCalendarFilter().configure({"
+    Write-Host "      new CalendarFilterPlugin().configure({"
     Write-Host "        key: '$PLUGIN_KEY',"
     Write-Host "      }),"
     Write-Host ""
@@ -439,10 +439,10 @@ try {
 
     $src = Get-Content $MainPreset -Raw
 
-    if ($src.Contains('SupersetPluginChartCalendarFilter') -or $src.Contains($PLUGIN_KEY)) {
+    if ($src.Contains('CalendarFilterPlugin') -or $src.Contains($PLUGIN_KEY)) {
         Write-Host "   Plugin already registered; nothing to patch."
     } else {
-        $importLine = "import { SupersetPluginChartCalendarFilter } from 'superset-plugin-chart-calendar-filter';"
+        $importLine = "import { CalendarFilterPlugin } from 'superset-plugin-chart-calendar-filter';"
 
         $lines = $src -split "`n"
         $lastImport = -1
@@ -456,7 +456,7 @@ try {
         }
         $src = $lines -join "`n"
 
-        $pluginEntry = "        new SupersetPluginChartCalendarFilter().configure({`n          key: 'superset-plugin-chart-calendar-filter',`n        }),"
+        $pluginEntry = "        new CalendarFilterPlugin().configure({`n          key: 'calendar_filter',`n        }),"
 
         $inserted = $false
         $calendarRe = [regex]'new\s+CalendarChartPlugin\(\)\.configure\(\{\s*key:\s*VizType\.Calendar\s*\}\),?\n?'

@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.1.14] - 2026-10-08
+
+### Changed
+- **Decomposed `CalendarFilter.tsx` into dedicated hooks**: extracted `src/hooks/useMacroActions.ts` (whole-year / current-month / **quarter** / weekdays macro selections, with pure `getQuarterDates()` and `getWeekdayDates()`), `src/hooks/useCalendarTooltip.ts` (tooltip state plus viewport positioning via `getBoundingClientRect`, with pure `computeTooltipPosition()`) and `src/hooks/useViewSelection.ts` (dropdown month/year changes that propagate the `dataMask`). Added 19 direct unit tests in `test/hooks/`; the 51 existing tests pass with unchanged expectations and rendering is identical.
+- **Centralized esbuild entry points**: `scripts/build.js` is now the single source of the source-file list; the `build-cjs`, `build-esm` and `dev` scripts delegate to it with the same esbuild flags. Verified byte-identical outputs (all 76 `lib/`+`esm/` files unchanged against the previous build).
+- **Local translation shim**: `src/plugin/index.ts` no longer imports `t` from `@apache-superset/core/translation`; it uses the suite-wide local pattern `const t = (str: string) => str` like the other four plugins.
+- **Legacy installers aligned to the canonical registration**: `scripts/install.ps1`, `scripts/installer.py`, `scripts/install-to-superset.ps1` and `installer/install.js` no longer reintroduce the obsolete idiom (class `SupersetPluginChartCalendarFilter`, `.register()` lines, alias key `superset-plugin-chart-calendar-filter`); they now write only the canonical `new CalendarFilterPlugin().configure({ key: 'calendar_filter' })` form already used by `install-plugin.ps1`. Verified with ripgrep that `install.bat` and `aggiorna-tutti-i-chart.bat` reference only `install-plugin.ps1`.
+
+### Fixed
+- **Accurate utils documentation**: `src/utils/codemap.md` no longer mentions the non-existent `resolveTheme()`; `themeUtils.ts` is documented as live code. The audit's dead-code premise for `COLOR_PALETTES`/`getBaseColor` was disproved by grep (`src/hooks/useCalendarData.ts` imports `getBaseColor`), so the module stays in the build inputs as prescribed by the architecture plan for real consumers.
+
 ## [0.1.13] - 2026-10-07
 
 ### Fixed

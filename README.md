@@ -85,7 +85,10 @@ superset-plugin-chart-calendar-filter/
 │   ├── types.ts                    # TypeScript interfaces & models
 │   ├── hooks/
 │   │   ├── useCalendarData.ts      # Metric aggregation & date mapping
-│   │   └── useSelectionMask.ts     # Selection state & filter dispatch
+│   │   ├── useSelectionMask.ts     # Selection state & filter dispatch
+│   │   ├── useMacroActions.ts      # One-click macro selections (year/quarter/weekdays)
+│   │   ├── useCalendarTooltip.ts   # Tooltip state & viewport positioning
+│   │   └── useViewSelection.ts     # Dropdown view changes that propagate the mask
 │   ├── plugin/
 │   │   ├── index.ts                # ChartPlugin & ChartMetadata registration
 │   │   ├── buildQuery.ts           # Query constructor (groupby & metrics)
@@ -95,10 +98,10 @@ superset-plugin-chart-calendar-filter/
 │   │   └── CalendarFilter.styles.ts # Emotion styled components
 │   ├── utils/
 │   │   ├── dateUtils.ts            # Date formatting & range calculations
-│   │   └── themeUtils.ts           # Null-safe theme resolution
+│   │   └── themeUtils.ts           # Color palettes & base color for heat scale
 │   └── images/
 │       └── thumbnail.png           # 100x100 chart picker thumbnail
-├── test/                           # Comprehensive Jest test suite (51 tests)
+├── test/                           # Comprehensive Jest test suite (70 tests)
 └── demo/                           # Standalone browser demo bundle
 ```
 
@@ -134,7 +137,7 @@ The installer autonomously:
    ```typescript
    import { CalendarFilterPlugin } from 'superset-plugin-chart-calendar-filter';
 
-   new CalendarFilterPlugin().configure({ key: 'calendar_filter' }).register();
+   new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),
    ```
 3. Clear stale Webpack cache:
    ```bash

@@ -30,18 +30,18 @@ import MonthGrid from './components/MonthGrid';
 import YearOverview from './components/YearOverview';
 import { useCalendarData } from './hooks/useCalendarData';
 import { useSelectionMask } from './hooks/useSelectionMask';
+import { useMacroActions } from './hooks/useMacroActions';
+import { useCalendarTooltip } from './hooks/useCalendarTooltip';
+import { useViewSelection } from './hooks/useViewSelection';
 
 import {
   CalendarFilterProps,
   CalendarDay,
-  TooltipData,
 } from './types';
 import {
   parseDateValue,
   formatDateKey,
   formatDateParts,
-  getDatesInMonth,
-  getDatesInYear,
   getDaysInMonth,
   formatDateRangeBadge as formatSelectionRange,
 } from './utils/dateUtils';
@@ -81,7 +81,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1); // 1-12
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
-  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const DAY_LABELS_SUNDAY = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
@@ -129,41 +128,26 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     }
   }, [dataMap.maxDate]);
 
-  // Macro Filter Actions
-  const selectEntireYear = useCallback(() => {
-    emitSelection(getDatesInYear(viewYear));
-  }, [viewYear, emitSelection]);
+  // Macro filter actions (year / current month / quarter / weekdays),
+  // dropdown-driven view selection and tooltip positioning live in
+  // dedicated hooks: they all propagate through `emitSelection` (dataMask).
+  const {
+    selectEntireYear,
+    selectCurrentMonth,
+    selectQuarter,
+    selectWeekdays,
+  } = useMacroActions(viewYear, viewMonth, emitSelection);
 
-  const selectCurrentMonth = useCallback(() => {
-    const now = new Date();
-    emitSelection(getDatesInMonth(now.getFullYear(), now.getMonth() + 1));
-  }, [emitSelection]);
+  const {
+    handleMonthSelectChange,
+    handleYearSelectChange,
+  } = useViewSelection(viewMode, viewYear, viewMonth, setViewYear, setViewMonth, emitSelection);
 
-  const selectQuarter = useCallback(
-    (quarter: 1 | 2 | 3 | 4) => {
-      const startMonth = (quarter - 1) * 3 + 1;
-      const endMonth = startMonth + 2;
-      const qDates: string[] = [];
-      for (let m = startMonth; m <= endMonth; m++) {
-        qDates.push(...getDatesInMonth(viewYear, m));
-      }
-      emitSelection(qDates);
-    },
-    [viewYear, emitSelection],
-  );
-
-  const selectWeekdays = useCallback(() => {
-    const weekdays: string[] = [];
-    const daysInM = getDaysInMonth(viewYear, viewMonth);
-    for (let d = 1; d <= daysInM; d++) {
-      const dt = new Date(viewYear, viewMonth - 1, d);
-      const dayOfWeek = dt.getDay(); // 0 = Sun, 6 = Sat
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        weekdays.push(formatDateParts(viewYear, viewMonth, d));
-      }
-    }
-    emitSelection(weekdays);
-  }, [viewYear, viewMonth, emitSelection]);
+  const {
+    tooltip,
+    handleMouseEnter,
+    handleMouseLeave,
+  } = useCalendarTooltip(intensityScale);
 
   // Is prev/next disabled?
   const isPrevDisabled = useMemo(() => {
@@ -248,21 +232,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     });
   }, []);
 
-  // Dropdown selection change handlers (update view AND emit filter to chart)
-  const handleMonthSelectChange = useCallback((newMonth: number) => {
-    setViewMonth(newMonth);
-    emitSelection(getDatesInMonth(viewYear, newMonth));
-  }, [viewYear, emitSelection]);
-
-  const handleYearSelectChange = useCallback((newYear: number) => {
-    setViewYear(newYear);
-    if (viewMode === 'year') {
-      emitSelection(getDatesInYear(newYear));
-    } else {
-      emitSelection(getDatesInMonth(newYear, viewMonth));
-    }
-  }, [viewMode, viewMonth, emitSelection]);
-
   // Month label
   const monthLabel = useMemo(() => {
     const date = new Date(viewYear, viewMonth - 1, 1);
@@ -275,33 +244,6 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     const sorted = Array.from(selectedDates).sort();
     return formatSelectionRange(sorted);
   }, [selectedDates]);
-
-  // Tooltip handlers
-  const handleMouseEnter = useCallback(
-    (cell: CalendarDay, event: React.MouseEvent) => {
-      if (!cell.hasData) {
-        setTooltip(null);
-        return;
-      }
-      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-      const viewportX = rect.left + rect.width / 2;
-      const viewportY = rect.top;
-      const pct = intensityScale(cell.value) * 100;
-
-      setTooltip({
-        date: cell.date,
-        value: cell.value,
-        percentage: Math.round(pct),
-        x: viewportX,
-        y: viewportY,
-      });
-    },
-    [intensityScale],
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    setTooltip(null);
-  }, []);
 
   // Year Overview
   const yearOverviewMonths = useMemo(() => {

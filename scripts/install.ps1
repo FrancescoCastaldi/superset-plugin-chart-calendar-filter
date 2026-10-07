@@ -110,10 +110,10 @@ if ($PythonCmd) {
         }
 
         $Content = Get-Content -Raw -Path $PresetPath
-        $ImportStmt = "import SupersetPluginChartCalendarFilter from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
-        $RegStmt = "        new SupersetPluginChartCalendarFilter().configure({ key: 'calendar_filter' }).register(),"
+        $ImportStmt = "import { CalendarFilterPlugin } from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
+        $RegStmt = "        new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),"
 
-        if (-not ($Content.Contains("SupersetPluginChartCalendarFilter"))) {
+        if (-not ($Content.Contains("CalendarFilterPlugin"))) {
             $Content = "$ImportStmt`n$Content"
             $Content = $Content -replace "(plugins\s*:\s*\[)", "`$1`n$RegStmt"
             Set-Content -Path $PresetPath -Value $Content -NoNewline
