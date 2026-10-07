@@ -1,6 +1,17 @@
 <#
 .SYNOPSIS
     Automated installer script for Calendar Filter Chart Plugin in Apache Superset.
+.DESCRIPTION
+    Installs and registers the Calendar Filter chart plugin into an Apache Superset instance:
+    1. Locates and validates the Apache Superset root directory.
+    2. Copies plugin files into superset-frontend/plugins/superset-plugin-chart-calendar-filter.
+    3. Safely parses and updates MainPreset.ts with backup (MainPreset.ts.bak) and idempotency:
+       - import { CalendarFilterPlugin } from '../../../plugins/superset-plugin-chart-calendar-filter/src';
+       - new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),
+       Legacy registration variants (alias key 'superset-plugin-chart-calendar-filter',
+       SupersetPluginChartCalendarFilter class, `.register()` lines, duplicates) are
+       normalized to the canonical form instead of adding new lines.
+    4. Cleans stale Webpack cache.
 #>
 
 [CmdletBinding()]
@@ -171,49 +182,73 @@ foreach ($pf in $PresetCandidates) {
 }
 
 if ($PresetFile) {
+    # Backup preventivo (MainPreset.ts.bak) prima di qualsiasi modifica
+    $BackupFile = "$PresetFile.bak"
+    if (-not (Test-Path $BackupFile)) {
+        Copy-Item -Path $PresetFile -Destination $BackupFile -Force
+        Write-Color "[SUCCESS] Creato backup di sicurezza: $(Split-Path -Leaf $BackupFile)" "Green"
+    } else {
+        Write-Color "[INFO] Backup di sicurezza preesistente mantenuto: $(Split-Path -Leaf $BackupFile)" "Gray"
+    }
+
     $Content = [System.IO.File]::ReadAllText($PresetFile, [System.Text.Encoding]::UTF8)
     $TargetImport = "import { CalendarFilterPlugin } from '../../../plugins/superset-plugin-chart-calendar-filter/src';"
-    $TargetRegister = "        new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),`n        new CalendarFilterPlugin().configure({ key: 'superset-plugin-chart-calendar-filter' }),"
+    $TargetRegister = "        new CalendarFilterPlugin().configure({ key: 'calendar_filter' }),"
+    $ImportRegex = "from\s*['`"][^'`"]*superset-plugin-chart-calendar-filter"
+    $RegisterRegex = 'new\s+(SupersetPluginChartCalendarFilter|CalendarFilterPlugin)'
 
     $NL = "`n"
     if ($Content -match "`r`n") { $NL = "`r`n" }
 
     $lines = [System.Collections.Generic.List[string]]::new($Content -split "\r?\n")
-    if ($Content -notmatch 'from\s+[\x27\x22]\.\./\.\./\.\./plugins/superset-plugin-chart-calendar-filter') {
+
+    # Verifica se il file e' gia' configurato NELLA FORMA CANONICA (riga-esatta):
+    # una sola riga di import e una sola registrazione con chiave 'calendar_filter'.
+    # Le varianti legacy (riga alias 'superset-plugin-chart-calendar-filter', classe
+    # SupersetPluginChartCalendarFilter, righe con `.register()`, duplicati) vengono
+    # normalizzate alla forma canonica senza aggiungere righe nuove.
+    $hasExactImport = ($lines -contains $TargetImport)
+    $hasExactRegister = ($lines -contains $TargetRegister)
+    $importCount = @($lines | Where-Object { $_ -match $ImportRegex }).Count
+    $registerCount = @($lines | Where-Object { $_ -match $RegisterRegex }).Count
+
+    if (-not $CleanReinstall -and $hasExactImport -and $hasExactRegister -and ($importCount -eq 1) -and ($registerCount -eq 1)) {
+        Write-Color "[INFO] MainPreset.ts e' gia' registrato correttamente (idempotente - nessuna modifica necessaria)." "Green"
+    } else {
+        # Normalizzazione: rimuove import/registrazioni esistenti (anche legacy o
+        # duplicate) e reinserisce la sola forma canonica con chiave 'calendar_filter'.
+        $importLines = [System.Collections.Generic.List[string]]::new()
         $lastImportIdx = -1
         for ($i = 0; $i -lt $lines.Count; $i++) {
-            if ($lines[$i] -match '^import\s+') { $lastImportIdx = $i }
+            $line = $lines[$i]
+            if ($line -match $ImportRegex) { continue }
+            if ($line.Trim().StartsWith("import ")) { $lastImportIdx = $importLines.Count }
+            $importLines.Add($line)
         }
         if ($lastImportIdx -ge 0) {
-            $lines.Insert($lastImportIdx + 1, $TargetImport)
+            $importLines.Insert($lastImportIdx + 1, $TargetImport)
         } else {
-            $lines.Insert(0, $TargetImport)
+            $importLines.Insert(0, $TargetImport)
         }
-    } else {
-        # Update existing import line to named CalendarFilterPlugin
-        for ($i = 0; $i -lt $lines.Count; $i++) {
-            if ($lines[$i] -match 'from\s+[\x27\x22]\.\./\.\./\.\./plugins/superset-plugin-chart-calendar-filter') {
-                $lines[$i] = $TargetImport
-                break
-            }
+
+        $finalLines = [System.Collections.Generic.List[string]]::new()
+        $pluginsIdx = -1
+        for ($i = 0; $i -lt $importLines.Count; $i++) {
+            $line = $importLines[$i]
+            if ($line -match $RegisterRegex) { continue }
+            $finalLines.Add($line)
+            if ($line -match 'plugins\s*:\s*\[') { $pluginsIdx = $finalLines.Count }
         }
-    }
+        if ($pluginsIdx -ge 0) {
+            $finalLines.Insert($pluginsIdx, $TargetRegister)
+        } else {
+            $finalLines.Add($TargetRegister)
+        }
 
-    $finalLines = [System.Collections.Generic.List[string]]::new()
-    $pluginsIdx = -1
-    for ($i = 0; $i -lt $lines.Count; $i++) {
-        $line = $lines[$i]
-        if ($line -match 'new\s+(SupersetPluginChartCalendarFilter|CalendarFilterPlugin)') { continue }
-        $finalLines.Add($line)
-        if ($line -match 'plugins\s*:\s*\[') { $pluginsIdx = $finalLines.Count }
+        $NewContent = $finalLines -join $NL
+        [System.IO.File]::WriteAllText($PresetFile, $NewContent, [System.Text.UTF8Encoding]::new($false))
+        Write-Color "[SUCCESS] MainPreset.ts normalizzato alla sola forma canonica (key: 'calendar_filter')." "Green"
     }
-    if ($pluginsIdx -ge 0) {
-        $finalLines.Insert($pluginsIdx, $TargetRegister)
-    }
-
-    $NewContent = $finalLines -join $NL
-    [System.IO.File]::WriteAllText($PresetFile, $NewContent, [System.Text.UTF8Encoding]::new($false))
-    Write-Color "[SUCCESS] MainPreset.ts registrato con successo (key: 'calendar_filter')." "Green"
 }
 
 if (-not $SkipCleanCache) {

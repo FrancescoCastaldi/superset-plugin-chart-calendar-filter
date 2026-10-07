@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-10-07
+
+### Fixed
+- **Registrazione Canonica Unica in `MainPreset.ts`**: `install-plugin.ps1` registra ora il plugin con la sola chiave canonica `calendar_filter`, rimuovendo dal template la riga alias legacy `superset-plugin-chart-calendar-filter` (resa obsoleta dalla normalizzazione). La verifica di idempotenza e' ora riga-esatta: le varianti legacy (riga alias, classe `SupersetPluginChartCalendarFilter`, righe con `.register()`, duplicati) vengono riconosciute e normalizzate alla forma canonica senza aggiungere righe nuove.
+- **Backup Preventivo `MainPreset.ts.bak`**: L'installer crea ora il backup di sicurezza di `MainPreset.ts` prima di qualsiasi modifica, in linea con il comportamento degli altri installer della suite.
+
 ## [0.1.12] - 2026-10-02
 
 ### Added
