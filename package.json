@@ -1,6 +1,6 @@
 {
   "name": "superset-plugin-chart-calendar-filter",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Calendar Filter Plugin for Apache Superset — interactive calendar heatmap with dashboard cross-filtering",
   "sideEffects": false,
   "main": "lib/index.js",
@@ -56,7 +56,6 @@
     "dev": "node scripts/build.js --format=esm --outdir=esm --watch",
     "clean": "node -e \"const fs=require('fs');for(const d of ['lib','esm'])fs.rmSync(d,{recursive:true,force:true});\"",
     "prebuild": "npm run clean",
-    "postbuild": "npm run test",
     "ts-types": "tsc --emitDeclarationOnly --outDir lib",
     "test": "jest",
     "prepublishOnly": "npm run build"

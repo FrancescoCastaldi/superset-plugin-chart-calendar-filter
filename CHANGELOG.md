@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+- **Smaller, modern bundler output (v0.1.15)**: `scripts/build.js` now passes `minify: true`, an explicit `target` of `es2020` / `chrome110` / `firefox110` / `safari16` and `sourcemap: 'linked'` to esbuild. The per-file dual output is preserved (`lib/` CommonJS for `main`, `esm/` for `module`), so imports from Superset and `MainPreset.ts` are unaffected while `lib/` + `esm/` shrink noticeably. `package.json` keeps `"sideEffects": false` so host bundlers can tree-shake unused modules.
+- **Build no longer chains the Jest suite**: the `postbuild` hook that ran `npm run test` after every `npm run build` has been removed, so builds and installer runs stay fast. Tests are still available on demand with `npm test`.
+
 ## [0.1.14] - 2026-10-08
 
 ### Changed

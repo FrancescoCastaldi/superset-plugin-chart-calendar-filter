@@ -4,9 +4,10 @@
  *
  * The previous package.json scripts (build-cjs / build-esm / dev) each
  * duplicated the same hardcoded list of source files. This script keeps
- * the list in exactly one place while preserving the original esbuild
- * output: same entry points, same `--sourcemap --loader:.png=dataurl`
- * flags, same outdir layout.
+ * the list in exactly one place. Every entry point is emitted per-file
+ * (no bundling) so the dual cjs (lib/) and esm (esm/) layouts consumed by
+ * package.json `main`/`module` stay intact; output is minified for an
+ * es2020-capable browser baseline with linked sourcemaps.
  *
  * Usage:
  *   node scripts/build.js --format=cjs --outdir=lib
@@ -63,7 +64,9 @@ async function main() {
     entryPoints: ENTRY_POINTS,
     outdir,
     format,
-    sourcemap: true,
+    target: ['es2020', 'chrome110', 'firefox110', 'safari16'],
+    minify: true,
+    sourcemap: 'linked',
     loader: { '.png': 'dataurl' },
   };
 
