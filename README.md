@@ -20,9 +20,9 @@
 
 ### 🗓️ Month View & Selection Detail
 
-![Calendar Filter Month View](docs/screenshots/calendar_filter_screenshot.png)
+![Calendar Filter Month View](docs/screenshots/live_calendar_filter.png)
 
-*Figure 2: Interactive month view showing selected dates, metric intensity color scaling, week numbers, and legend.*
+*Figure 2: Interactive month view with multi-date selection, metric intensity heatmap ramp, ISO 8601 week numbers, and rapid month/year navigation.*
 
 ---
 

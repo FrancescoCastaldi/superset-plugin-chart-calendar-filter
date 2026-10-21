@@ -1,4 +1,4 @@
-# Calendar Filter Plugin — Automatic Installer for Apache Superset
+# Calendar Filter Plugin :  Automatic Installer for Apache Superset
 
 ## Overview
 
