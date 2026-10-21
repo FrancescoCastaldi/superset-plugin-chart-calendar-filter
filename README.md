@@ -1,4 +1,4 @@
-# Calendar Filter - Interactive Heatmap & Native Filter Plugin for Apache Superset
+# StratumCalendar (Calendar Filter) - Interactive Heatmap & Native Filter Plugin for Apache Superset
 
 [![Apache Superset](https://img.shields.io/badge/Apache%20Superset-6.1.0+-007A87.svg?logo=apache-superset&logoColor=white)](https://superset.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -6,7 +6,7 @@
 [![React](https://img.shields.io/badge/React-17%20%7C%2018-61dafb.svg)](https://reactjs.org/)
 [![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen.svg)](#)
 
-**Calendar Filter** is an interactive calendar heatmap visualization plugin for **Apache Superset 6.1.0+** engineered for temporal exploratory data analysis. It functions simultaneously as an interactive dashboard visualization, an exploratory cross-filter, and a native dashboard filter component - allowing users to slice and filter companion dashboard charts simply by clicking individual dates or date ranges.
+**StratumCalendar** (Calendar Filter) is an interactive calendar heatmap visualization plugin for **Apache Superset 6.1.0+** engineered for temporal exploratory data analysis. It functions simultaneously as an interactive dashboard visualization, an exploratory cross-filter, and a native dashboard filter component - allowing users to slice and filter companion dashboard charts simply by clicking individual dates or date ranges.
 
 ---
 
