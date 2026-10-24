@@ -70,6 +70,16 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
       showMacroShortcuts: true,
       customDefaultStartDate: undefined,
       customDefaultEndDate: undefined,
+      inValueFormat: 'date',
+      locale: 'it',
+      holidayMode: 'none',
+      customHolidays: undefined,
+      excludeHolidaysFromWorkdays: true,
+      scaleType: 'linear',
+      scaleThresholds: undefined,
+      enabledPresets: ['last_7_days', 'last_30_days', 'last_month', 'year_to_date'],
+      valueAggregation: 'sum',
+      metricKey: 'sum__num',
       data: [
         { ds: '2024-01-01', sum__num: 10 },
         { ds: '2024-01-02', sum__num: 20 },
@@ -128,5 +138,50 @@ describe('SupersetPluginChartCalendarFilter transformProps', () => {
     expect(result.data).toEqual([]);
     expect(result.dateColumn).toBe('ds');
     expect(typeof result.setDataMask).toBe('function');
+  });
+
+  describe('filter target column', () => {
+    const build = (options: Record<string, unknown>) =>
+      transformProps(
+        new ChartProps({
+          formData: { viz_type: 'calendar_filter', ...options },
+          width: 400,
+          height: 300,
+          theme: supersetTheme,
+          queriesData: [{ data: [] }],
+        } as any),
+      );
+
+    it('prefers the explicit column (camelCased, as Superset delivers formData)', () => {
+      expect(build({ dateColumn: 'order_date', groupby: ['ds'] }).dateColumn).toBe('order_date');
+    });
+
+    it('accepts the raw snake_case option too', () => {
+      expect(build({ date_column: 'created_at', groupby: ['ds'] }).dateColumn).toBe('created_at');
+    });
+
+    it('reads the column name of an adhoc groupby object', () => {
+      expect(build({ groupby: [{ column_name: 'event_ts', label: 'Event time' }] }).dateColumn).toBe('event_ts');
+    });
+
+    it('falls back to the native filter target', () => {
+      expect(build({ target: { column: { name: 'sale_day' } } }).dateColumn).toBe('sale_day');
+    });
+
+    it('has no hard-coded column when nothing identifies one', () => {
+      expect(build({}).dateColumn).toBeUndefined();
+    });
+
+    it('takes the metric label from an adhoc metric', () => {
+      expect(build({ groupby: ['ds'], metric: { label: 'SUM(amount)' } }).metricKey).toBe('SUM(amount)');
+    });
+
+    it('ignores unknown option values', () => {
+      const result = build({ filter_type_mode: 'weird', scale_type: 'nope', locale: 'xx', holiday_mode: 'x' });
+      expect(result.filterTypeMode).toBe('time_range');
+      expect(result.scaleType).toBe('linear');
+      expect(result.locale).toBe('it');
+      expect(result.holidayMode).toBe('none');
+    });
   });
 });

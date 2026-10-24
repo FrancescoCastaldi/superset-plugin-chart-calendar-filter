@@ -8,8 +8,8 @@ Encapsulates state management, data transformation pipelines, and selection filt
 
 - **Separation of Concerns**: Moves complex data transformations and event handler logic out of rendering components into reusable hooks.
 - **Hook Responsibilities**:
-  - `useCalendarData.ts`: Normalizes raw Superset timeseries records into `CalendarDay` objects, computes minimum/maximum values, calculates available year dropdown ranges, and derives dynamic HSL color intensity scales based on selected GitHub-style palettes.
-  - `useSelectionMask.ts`: Manages active date selection sets (`Set<string>`), handles single-click date toggle, shift-click range selection, mouse drag-sweep selection, macro shortcut execution, default value initialization, and dispatches `setDataMask({ filterState })` to Superset.
+  - `useCalendarData.ts`: Normalizes raw Superset timeseries records into `CalendarDay` objects, computes minimum/maximum values, calculates available year dropdown ranges, and derives intensity scales (linear, log, sqrt, thresholds) and heat colors from the selected palette. Several rows of one day are combined with the chosen aggregation; the metric column is the configured one, not just the first numeric column.
+  - `useSelectionMask.ts`: Manages active date selection sets (`Set<string>`), handles single-click date toggle, second-click range selection, mouse drag-sweep selection, macro shortcut execution, default value initialization, and dispatches `setDataMask({ filterState })` to Superset.
 
 ## Flow
 

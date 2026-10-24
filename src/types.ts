@@ -22,14 +22,20 @@ import {
   SetDataMaskHook,
   DataMask,
 } from '@superset-ui/core';
+import type { FilterTypeMode, InValueFormat } from './utils/filterMask';
+import type { HolidayMode } from './utils/holidays';
+import type { PresetId } from './utils/presets';
+import type { ScaleType } from './utils/colorScale';
 
 export interface CalendarFilterStylesProps {
   height: number;
   width: number;
 }
 
-export type FilterTypeMode = 'time_range' | 'in_clause';
-export type DefaultValueMode = 'none' | 'today' | 'current_month' | 'current_year' | 'custom';
+export type { FilterTypeMode, InValueFormat } from './utils/filterMask';
+export type DefaultValueMode = 'none' | 'today' | 'current_month' | 'current_year' | 'custom' | PresetId;
+export type CalendarLocale = 'it' | 'en' | 'auto';
+export type ValueAggregation = 'sum' | 'avg' | 'max' | 'min' | 'count';
 
 interface CalendarFilterCustomizeProps {
   colorScheme: string;
@@ -44,6 +50,23 @@ interface CalendarFilterCustomizeProps {
   showMacroShortcuts?: boolean;
   customDefaultStartDate?: string;
   customDefaultEndDate?: string;
+  /** Format of the values of an `IN` filter, to match the column type */
+  inValueFormat?: InValueFormat;
+  locale?: CalendarLocale;
+  holidayMode?: HolidayMode;
+  /** Free-text holiday list: `YYYY-MM-DD` or `MM-DD`, optional `=Name` */
+  customHolidays?: string;
+  /** Skip holidays in the "working days" shortcut */
+  excludeHolidaysFromWorkdays?: boolean;
+  scaleType?: ScaleType;
+  /** Comma separated thresholds, used by the `steps` scale */
+  scaleThresholds?: string;
+  /** Relative-date shortcuts to show, in order */
+  enabledPresets?: PresetId[];
+  /** How several rows of the same day are combined */
+  valueAggregation?: ValueAggregation;
+  /** Result column holding the metric (defaults to the first numeric column) */
+  metricKey?: string;
 }
 
 export type CalendarFilterQueryFormData = QueryFormData &
@@ -74,6 +97,8 @@ export interface TooltipData {
   date: string;
   value: number | null;
   percentage: number;
+  /** Holiday name when the day is a holiday */
+  holiday?: string;
   x: number;
   y: number;
 }

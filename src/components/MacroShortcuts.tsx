@@ -18,6 +18,8 @@
  */
 import React, { memo } from 'react';
 import { MacroBar, MacroButton } from '../styles/CalendarFilter.styles';
+import { useCalendarDisplay } from '../utils/labels';
+import type { PresetId } from '../utils/presets';
 
 interface MacroShortcutsProps {
   viewYear: number;
@@ -27,9 +29,12 @@ interface MacroShortcutsProps {
   onSelectQuarter: (quarter: 1 | 2 | 3 | 4) => void;
   onSelectWeekdays: () => void;
   onClear: () => void;
+  /** Relative-date shortcuts to show after the fixed ones */
+  presets?: PresetId[];
+  onSelectPreset?: (preset: PresetId) => void;
 }
 
-/** Macro filter shortcut bar (year, current month, quarters, weekdays, clear) */
+/** Macro filter shortcut bar (year, current month, quarters, working days, relative dates, clear) */
 const MacroShortcuts = memo(function MacroShortcuts({
   viewYear,
   selectedCount,
@@ -38,14 +43,17 @@ const MacroShortcuts = memo(function MacroShortcuts({
   onSelectQuarter,
   onSelectWeekdays,
   onClear,
+  presets = [],
+  onSelectPreset,
 }: MacroShortcutsProps) {
+  const { labels } = useCalendarDisplay();
   return (
     <MacroBar>
       <MacroButton type="button" onClick={onSelectYear}>
-        🎯 Anno {viewYear}
+        {labels.yearShortcut(viewYear)}
       </MacroButton>
       <MacroButton type="button" onClick={onSelectCurrentMonth}>
-        📅 Mese Corrente
+        {labels.currentMonth}
       </MacroButton>
       <MacroButton type="button" onClick={() => onSelectQuarter(1)}>
         📊 Q1
@@ -60,11 +68,17 @@ const MacroShortcuts = memo(function MacroShortcuts({
         📊 Q4
       </MacroButton>
       <MacroButton type="button" onClick={onSelectWeekdays}>
-        💼 Feriali
+        {labels.workdays}
       </MacroButton>
+      {onSelectPreset &&
+        presets.map(id => (
+          <MacroButton key={id} type="button" onClick={() => onSelectPreset(id)}>
+            🕒 {labels.presets[id]}
+          </MacroButton>
+        ))}
       {selectedCount > 0 && (
         <MacroButton type="button" onClick={onClear} style={{ color: '#e74c3c', borderColor: '#f5c6cb' }}>
-          ❌ Azzera ({selectedCount})
+          ❌ {labels.clear} ({selectedCount})
         </MacroButton>
       )}
     </MacroBar>

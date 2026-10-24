@@ -22,8 +22,10 @@ import {
   getDatesInMonth,
   getDatesInYear,
   getDaysInMonth,
+  getWeekDates,
   formatDateParts,
 } from '../utils/dateUtils';
+import { getPresetDates, PresetId } from '../utils/presets';
 
 export type Quarter = 1 | 2 | 3 | 4;
 
@@ -38,18 +40,31 @@ export function getQuarterDates(year: number, quarter: Quarter): string[] {
   return dates;
 }
 
-/** All weekday (Mon-Fri) date keys of the given month. */
-export function getWeekdayDates(year: number, month: number): string[] {
+/** All weekday (Mon-Fri) date keys of the given month, minus any date in `skip` (e.g. holidays). */
+export function getWeekdayDates(
+  year: number,
+  month: number,
+  skip?: { has(dateKey: string): boolean },
+): string[] {
   const weekdays: string[] = [];
   const daysInM = getDaysInMonth(year, month);
   for (let d = 1; d <= daysInM; d++) {
     const dt = new Date(year, month - 1, d);
     const dayOfWeek = dt.getDay(); // 0 = Sun, 6 = Sat
-    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-      weekdays.push(formatDateParts(year, month, d));
+    const key = formatDateParts(year, month, d);
+    if (dayOfWeek !== 0 && dayOfWeek !== 6 && !skip?.has(key)) {
+      weekdays.push(key);
     }
   }
   return weekdays;
+}
+
+export interface MacroOptions {
+  /** Dates left out of the working days shortcut */
+  skipDates?: { has(dateKey: string): boolean };
+  firstDayOfWeek?: number;
+  /** Reference "today", injectable for tests */
+  now?: () => Date;
 }
 
 /**
@@ -61,7 +76,9 @@ export function useMacroActions(
   viewYear: number,
   viewMonth: number,
   emitSelection: (dates: string[]) => void,
+  options: MacroOptions = {},
 ) {
+  const { skipDates, firstDayOfWeek = 1, now = () => new Date() } = options;
   const selectEntireYear = useCallback(() => {
     emitSelection(getDatesInYear(viewYear));
   }, [viewYear, emitSelection]);
@@ -79,8 +96,33 @@ export function useMacroActions(
   );
 
   const selectWeekdays = useCallback(() => {
-    emitSelection(getWeekdayDates(viewYear, viewMonth));
-  }, [viewYear, viewMonth, emitSelection]);
+    emitSelection(getWeekdayDates(viewYear, viewMonth, skipDates));
+  }, [viewYear, viewMonth, emitSelection, skipDates]);
 
-  return { selectEntireYear, selectCurrentMonth, selectQuarter, selectWeekdays };
+  /** Select the 7 days of the week that contains `dateKey` */
+  const selectWeek = useCallback(
+    (dateKey: string) => {
+      emitSelection(getWeekDates(dateKey, firstDayOfWeek));
+    },
+    [firstDayOfWeek, emitSelection],
+  );
+
+  /** Select a whole month of the viewed year without changing the view */
+  const selectMonth = useCallback(
+    (month: number) => {
+      emitSelection(getDatesInMonth(viewYear, month));
+    },
+    [viewYear, emitSelection],
+  );
+
+  /** Select a period relative to today (last 30 days, last month, ...) */
+  const selectPreset = useCallback(
+    (preset: PresetId) => {
+      emitSelection(getPresetDates(preset, now(), firstDayOfWeek));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [emitSelection, firstDayOfWeek],
+  );
+
+  return { selectEntireYear, selectCurrentMonth, selectQuarter, selectWeekdays, selectWeek, selectMonth, selectPreset };
 }

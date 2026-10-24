@@ -51,6 +51,8 @@ function generateMockData(): TimeseriesDataRecord[] {
 const mockData = generateMockData();
 const mockSetDataMask: SetDataMaskHook = (dataMask: any) => {
   console.log('setDataMask called:', JSON.stringify(dataMask));
+  const out = document.getElementById('mask');
+  if (out) out.textContent = JSON.stringify(dataMask.extraFormData, null, 2);
 };
 
 // Self-rendering function
@@ -77,6 +79,12 @@ export function renderDemo(rootId: string = 'root', height: number = 700, width:
         enableOverview: true,
         setDataMask: mockSetDataMask,
         filterState: { value: null, selectedValues: null },
+        // Any column name works: the filter targets whatever the chart is configured with
+        dateColumn: 'order_date',
+        filterTypeMode: 'auto',
+        holidayMode: 'it',
+        locale: (new URLSearchParams(window.location.search).get('lang') as 'it' | 'en' | 'auto') || 'it',
+        enabledPresets: ['last_7_days', 'last_30_days', 'last_month', 'year_to_date'],
       })
     ),
     rootEl

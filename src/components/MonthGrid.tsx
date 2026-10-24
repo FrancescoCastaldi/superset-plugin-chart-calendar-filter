@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   CalendarGrid,
   DayHeader,
@@ -25,6 +25,8 @@ import {
   DayNumber,
 } from '../styles/CalendarFilter.styles';
 import { CalendarDay } from '../types';
+import { useCalendarDisplay } from '../utils/labels';
+import { handleGridKeyDown, pickTabStop } from '../utils/gridKeys';
 
 interface WeekRowCells {
   weekNumber: number;
@@ -49,7 +51,7 @@ interface MonthGridProps {
   onDayMouseDown?: (date: string) => void;
   onDayMouseUp?: () => void;
   onDayDragEnter?: (date: string) => void;
-  /** Enable keyboard access + drag-to-select (interactive contexts only) */
+  /** Kept for compatibility: keyboard access is now always on */
   interactive?: boolean;
 }
 
@@ -72,35 +74,68 @@ const MonthGrid = memo(function MonthGrid({
   onDayMouseDown,
   onDayMouseUp,
   onDayDragEnter,
-  interactive = false,
 }: MonthGridProps) {
-  const renderDayCell = (cell: CalendarDay, key: string) => (
-    <DayCell
-      key={key}
-      intensity={intensityScale(cell.value)}
-      isSelected={selectedDates.has(cell.date)}
-      isCurrentMonth
-      $isToday={cell.date === todayStr}
-      baseColor={baseColor}
-      $cellHeight={cellHeight}
-      onClick={() => onDayClick(cell.date)}
-      onMouseDown={onDayMouseDown ? () => onDayMouseDown(cell.date) : undefined}
-      onMouseUp={onDayMouseUp}
-      tabIndex={interactive ? 0 : undefined}
-      onKeyDown={interactive ? e => e.key === 'Enter' && onDayClick(cell.date) : undefined}
-      onMouseEnter={e => {
-        if (onDayDragEnter) onDayDragEnter(cell.date);
-        if (onDayHover) onDayHover(cell, e);
-      }}
-      onMouseLeave={onDayLeave}
-      title=""
-    >
-      <DayNumber>{cell.date.split('-')[2]}</DayNumber>
-    </DayCell>
+  const { labels, holidays, heatStyle, onWeekSelect } = useCalendarDisplay();
+
+  const tabStop = useMemo(
+    () => pickTabStop(cells.filter((c): c is CalendarDay => c !== null).map(c => c.date), selectedDates, todayStr),
+    [cells, selectedDates, todayStr],
   );
 
+  const renderDayCell = (cell: CalendarDay, key: string) => {
+    const holiday = holidays.get(cell.date);
+    const isSelected = selectedDates.has(cell.date);
+    return (
+      <DayCell
+        key={key}
+        data-date={cell.date}
+        role="button"
+        aria-pressed={isSelected}
+        aria-label={holiday ? `${cell.date} - ${holiday}` : cell.date}
+        intensity={intensityScale(cell.value)}
+        isSelected={isSelected}
+        isCurrentMonth
+        $isToday={cell.date === todayStr}
+        $heat={heatStyle(cell.value, cell.hasData)}
+        $isHoliday={Boolean(holiday)}
+        baseColor={baseColor}
+        $cellHeight={cellHeight}
+        onClick={() => onDayClick(cell.date)}
+        onMouseDown={onDayMouseDown ? () => onDayMouseDown(cell.date) : undefined}
+        onMouseUp={onDayMouseUp}
+        tabIndex={cell.date === tabStop ? 0 : -1}
+        onMouseEnter={e => {
+          if (onDayDragEnter) onDayDragEnter(cell.date);
+          if (onDayHover) onDayHover(cell, e);
+        }}
+        onMouseLeave={onDayLeave}
+        title=""
+      >
+        <DayNumber>{cell.date.split('-')[2]}</DayNumber>
+      </DayCell>
+    );
+  };
+
+  const renderWeekNumber = (row: WeekRowCells) => {
+    const firstDate = row.cells.find(c => c !== null)?.date;
+    return (
+      <WeekNumberCell
+        role="button"
+        title={labels.weekTitle(row.weekNumber)}
+        aria-label={labels.weekTitle(row.weekNumber)}
+        onClick={() => firstDate && onWeekSelect?.(firstDate)}
+      >
+        {row.weekNumber}
+      </WeekNumberCell>
+    );
+  };
+
   return (
-    <CalendarGrid showWeekNumbers={showWeekNumbers} style={style}>
+    <CalendarGrid
+      showWeekNumbers={showWeekNumbers}
+      style={style}
+      onKeyDown={e => handleGridKeyDown(e, onDayClick)}
+    >
       {showWeekNumbers && <div />}
       {dayLabels.map(day => (
         <DayHeader key={`${keyPrefix}-dh-${day}`}>{day}</DayHeader>
@@ -109,7 +144,7 @@ const MonthGrid = memo(function MonthGrid({
       {showWeekNumbers
         ? weekRows.map((row, rowIdx) => (
             <React.Fragment key={`${keyPrefix}-row-${rowIdx}`}>
-              <WeekNumberCell>{row.weekNumber}</WeekNumberCell>
+              {renderWeekNumber(row)}
               {row.cells.map((cell, cellIdx) =>
                 cell ? (
                   renderDayCell(cell, `${keyPrefix}-${cell.date}`)

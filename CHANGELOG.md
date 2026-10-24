@@ -2,7 +2,31 @@
 
 ## [Unreleased]
 
+### Added
+- **Filter target column control** (`date_column`, "Filter target column"): choose any dataset column the filter applies to. The option was documented but never existed in the control panel.
+- **Filter formats for any column type**: new `filter_type_mode` value `auto` (one range when the days are contiguous, otherwise a list; default for new charts) and `in_value_format` (`date`, `datetime`, `epoch_ms`) so lists match date, timestamp, text-date or epoch columns.
+- **Week and month selection**: click an ISO week number to select that week (honouring the first day of the week), or a month name in the year overview to select that month.
+- **Relative-date shortcuts**: today, yesterday, this/last week, last 7/30/90 days, month to date, last month, last quarter, year to date, last year. The visible ones are configurable (`enabled_presets`) and any of them can be the initial selection.
+- **Holidays**: Italian national holidays (Easter and Easter Monday computed) and/or a custom list (`2026-06-15`, or `12-24=Name` for every year), shown in red, named in tooltips and aria labels, and skipped by the working days shortcut (`holiday_mode`, `custom_holidays`, `exclude_holidays_from_workdays`).
+- **Color scales**: linear, logarithmic, square root or custom thresholds (`scale_type`, `scale_thresholds`).
+- **Several rows per day**: `value_aggregation` (sum, average, maximum, minimum, row count); without a metric each row counts as one record.
+- **Language**: `locale` (`it`, `en`, `auto`) for month names, weekdays and every button and tooltip text.
+- **Keyboard and screen reader support**: day cells are buttons with `aria-pressed` and a date label, arrow keys move by a day or a week, Enter/Space select, and each grid has a single tab stop.
+- **Drag selection in the chart view**, not only in the expanded dialog; releasing the button outside the calendar now ends the drag.
+- 94 new tests (164 in total).
+
+### Fixed
+- **The heatmap was never painted**: cell colors, the legend and `show_legend` were documented but not rendered. Days with data are now colored from the palette, days without data stay white, a real zero keeps the lightest shade, and the legend is drawn.
+- **Time ranges excluded the last selected day**: Superset ranges are `[start, end)`, so selecting one day sent an empty range (`2026-04-15 : 2026-04-15`). The end is now the day after the last selected day.
+- **Hard-coded column `DATAEROGAZIONE`**: removed. Without any known column the calendar shows a notice and sends no filter instead of filtering on a guessed name.
+- **Options read from inconsistent keys**: `transformProps` read `date_column` in snake case while every other option was read camel-cased, and `formData` is camel-cased by Superset. It now accepts both forms, plus adhoc column and metric objects.
+- **First numeric column used as the metric**: the configured metric is used; rows of the same day are combined instead of the last one winning.
+- **Scattered selections in `time_range` mode**: `auto` mode sends a list for non-contiguous days, so the working days shortcut no longer includes weekends.
+- **Quadratic cost of large selections**: building the selected-values map no longer copies the object for every day.
+- **README**: describes the real click behavior (second click selects the range) and the real test counts.
+
 ### Changed
+- **Control panel labels are in English** (Query, Appearance, Layout, Holidays, Filter behaviour) instead of a mix of Italian and English; the heatmap date column is labelled optional, as it is. The calendar texts follow the `locale` option (default `it`, as before).
 - **Smaller, modern bundler output (v0.1.15)**: `scripts/build.js` now passes `minify: true`, an explicit `target` of `es2020` / `chrome110` / `firefox110` / `safari16` and `sourcemap: 'linked'` to esbuild. The per-file dual output is preserved (`lib/` CommonJS for `main`, `esm/` for `module`), so imports from Superset and `MainPreset.ts` are unaffected while `lib/` + `esm/` shrink noticeably. `package.json` keeps `"sideEffects": false` so host bundlers can tree-shake unused modules.
 - **Build no longer chains the Jest suite**: the `postbuild` hook that ran `npm run test` after every `npm run build` has been removed, so builds and installer runs stay fast. Tests are still available on demand with `npm test`.
 

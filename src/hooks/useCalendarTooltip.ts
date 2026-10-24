@@ -35,12 +35,14 @@ export function computeTooltipPosition(element: HTMLElement): { x: number; y: nu
  */
 export function useCalendarTooltip(
   intensityScale: (val: number | null) => number,
+  holidays?: Map<string, string>,
 ) {
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
 
   const handleMouseEnter = useCallback(
     (cell: CalendarDay, event: React.MouseEvent) => {
-      if (!cell.hasData) {
+      const holiday = holidays?.get(cell.date);
+      if (!cell.hasData && !holiday) {
         setTooltip(null);
         return;
       }
@@ -51,11 +53,12 @@ export function useCalendarTooltip(
         date: cell.date,
         value: cell.value,
         percentage: Math.round(pct),
+        holiday,
         x,
         y,
       });
     },
-    [intensityScale],
+    [intensityScale, holidays],
   );
 
   const handleMouseLeave = useCallback(() => {

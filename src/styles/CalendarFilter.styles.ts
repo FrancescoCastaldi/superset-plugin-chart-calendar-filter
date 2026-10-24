@@ -217,12 +217,25 @@ export const WeekNumberCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
   font-size: 9px;
   color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
   font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
+
+  &:hover {
+    background: #e2e8f0;
+    color: #334155;
+  }
 `;
 
-export interface DayCellProps {
+export interface HeatProps {
+  /** Heat color of the day, `null` for days without data */
+  $heat?: { background: string; dark: boolean } | null;
+  $isHoliday?: boolean;
+}
+
+export interface DayCellProps extends HeatProps {
   intensity: number;
   isSelected: boolean;
   isCurrentMonth: boolean;
@@ -246,12 +259,21 @@ export const DayCell = styled.div<DayCellProps>`
   position: relative;
   user-select: none;
 
-  background-color: ${({ isSelected, baseColor }) => {
+  background-color: ${({ isSelected, baseColor, $heat }) => {
     if (isSelected) return `${baseColor}35`;
-    return '#ffffff';
+    return $heat ? $heat.background : '#ffffff';
+  }};
+  color: ${({ $heat, $isHoliday }) => {
+    if ($isHoliday) return $heat?.dark ? '#ffd1d1' : '#d32f2f';
+    return $heat?.dark ? '#ffffff' : '#1a1a1a';
   }};
   border: 1px solid ${({ isSelected, baseColor }) =>
     isSelected ? baseColor : '#e2e8f0'};
+
+  &:focus-visible {
+    outline: 2px solid ${({ baseColor }) => baseColor};
+    outline-offset: 1px;
+  }
 
   ${({ isSelected, baseColor }) =>
     isSelected
@@ -291,7 +313,7 @@ export const DayNumber = styled.span`
   font-weight: 600;
   pointer-events: none;
   line-height: 1;
-  color: #1a1a1a;
+  color: inherit;
 `;
 
 export const TooltipContainer = styled.div<{ x: number; y: number }>`
@@ -366,6 +388,12 @@ export const MiniMonthTitle = styled.div`
   font-weight: ${({ theme }) => (theme?.typography?.weights?.bold ?? 700)};
   color: ${({ theme }) => theme?.colors?.grayscale?.dark1 ?? '#333'};
   margin-bottom: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+
+  &:hover {
+    background: #e2e8f0;
+  }
 `;
 
 export const MiniMonthGrid = styled.div<{ showWeekNumbers: boolean }>`
@@ -384,6 +412,8 @@ export const MiniDayHeader = styled.div`
 `;
 
 export const MiniWeekNum = styled.div`
+  cursor: pointer;
+  border-radius: 2px;
   font-size: 7px;
   color: ${({ theme }) => theme?.colors?.grayscale?.light1 ?? '#bbb'};
   display: flex;
@@ -391,8 +421,7 @@ export const MiniWeekNum = styled.div`
   justify-content: center;
 `;
 
-export interface MiniDayCellProps {
-  intensity: number;
+export interface MiniDayCellProps extends HeatProps {
   isSelected: boolean;
   $isToday: boolean;
   baseColor: string;
@@ -410,12 +439,19 @@ export const MiniDayCell = styled.div<MiniDayCellProps>`
   font-size: 8px;
   font-weight: 600;
 
-  background-color: ${({ isSelected, baseColor }) => {
+  background-color: ${({ isSelected, baseColor, $heat }) => {
     if (isSelected) return `${baseColor}35`;
-    return '#ffffff';
+    return $heat ? $heat.background : '#ffffff';
   }};
-  border: 1px solid ${({ isSelected, baseColor }) =>
-    isSelected ? baseColor : '#e2e8f0'};
+  border: 1px solid ${({ isSelected, baseColor, $isHoliday }) => {
+    if (isSelected) return baseColor;
+    return $isHoliday ? '#d32f2f' : '#e2e8f0';
+  }};
+
+  &:focus-visible {
+    outline: 2px solid ${({ baseColor }) => baseColor};
+    outline-offset: 1px;
+  }
 
   ${({ isSelected, baseColor }) =>
     isSelected
@@ -542,4 +578,31 @@ export const MacroButton = styled.button`
   &:active {
     transform: translateY(0);
   }
+`;
+
+export const LegendBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px 12px 8px;
+  font-size: 10px;
+  color: #64748b;
+`;
+
+export const LegendSwatch = styled.span<{ $color: string }>`
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: ${({ $color }) => $color};
+  border: 1px solid #e2e8f0;
+`;
+
+export const ConfigHint = styled.div`
+  padding: 6px 12px;
+  font-size: 11px;
+  color: #92400e;
+  background: #fffbeb;
+  border-bottom: 1px solid #fde68a;
 `;

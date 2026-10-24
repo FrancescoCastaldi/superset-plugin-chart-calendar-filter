@@ -33,6 +33,8 @@ import { CalendarDay } from '../types';
 import MacroShortcuts from './MacroShortcuts';
 import MonthGrid from './MonthGrid';
 import YearOverview from './YearOverview';
+import { useCalendarDisplay } from '../utils/labels';
+import type { PresetId } from '../utils/presets';
 
 interface WeekRowCells {
   weekNumber: number;
@@ -88,6 +90,10 @@ interface CalendarModalProps {
   onSelectQuarter: (quarter: 1 | 2 | 3 | 4) => void;
   onSelectWeekdays: () => void;
   onClear: () => void;
+  presets?: PresetId[];
+  onSelectPreset?: (preset: PresetId) => void;
+  /** Color legend shown under the calendar */
+  legend?: React.ReactNode;
   /** Enable keyboard access + drag-to-select inside the modal */
   interactive?: boolean;
 }
@@ -152,15 +158,19 @@ export default function CalendarModal({
   onSelectQuarter,
   onSelectWeekdays,
   onClear,
+  presets,
+  onSelectPreset,
+  legend,
   interactive = false,
 }: CalendarModalProps) {
+  const { labels } = useCalendarDisplay();
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
         <ModalHeader>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <ModalTitle>
-              📅 Calendar Filter — {viewMode === 'year' ? `Vista Annuale ${viewYear}` : `Vista Mensile (${monthLabel})`}
+              📅 Calendar Filter — {viewMode === 'year' ? `${labels.yearView} ${viewYear}` : `${labels.monthView} (${monthLabel})`}
             </ModalTitle>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               {viewMode === 'month' && (
@@ -168,7 +178,7 @@ export default function CalendarModal({
                   type="button"
                   onClick={onPrev}
                   disabled={isPrevDisabled}
-                  title="Mese precedente"
+                  title={labels.previousMonth}
                   style={navButtonStyle}
                 >
                   ◀
@@ -179,7 +189,7 @@ export default function CalendarModal({
                   type="button"
                   onClick={onPrevYear}
                   disabled={isPrevDisabled}
-                  title="Anno precedente"
+                  title={labels.previousYear}
                   style={navButtonStyle}
                 >
                   ◀
@@ -189,7 +199,7 @@ export default function CalendarModal({
                 <MonthSelect
                   value={viewMonth}
                   onChange={e => onMonthSelect(Number(e.target.value))}
-                  aria-label="Seleziona mese"
+                  aria-label={labels.selectMonth}
                   style={selectStyle}
                 >
                   {monthOptions.map(m => (
@@ -201,7 +211,7 @@ export default function CalendarModal({
                 <YearSelect
                   value={viewYear}
                   onChange={e => onYearSelect(Number(e.target.value))}
-                  aria-label="Seleziona anno"
+                  aria-label={labels.selectYear}
                   style={selectStyle}
                 >
                   {availableYears.map(y => (
@@ -214,7 +224,7 @@ export default function CalendarModal({
                   type="button"
                   onClick={onNext}
                   disabled={isNextDisabled}
-                  title="Mese successivo"
+                  title={labels.nextMonth}
                   style={navButtonStyle}
                 >
                   ▶
@@ -225,7 +235,7 @@ export default function CalendarModal({
                   type="button"
                   onClick={onNextYear}
                   disabled={isNextDisabled}
-                  title="Anno successivo"
+                  title={labels.nextYear}
                   style={navButtonStyle}
                 >
                   ▶
@@ -237,16 +247,16 @@ export default function CalendarModal({
                   onClick={onToggleView}
                   style={toggleButtonStyle}
                 >
-                  {viewMode === 'month' ? 'Vista Annuale' : 'Vista Mensile'}
+                  {viewMode === 'month' ? labels.yearView : labels.monthView}
                 </ViewToggleButton>
               )}
               <TodayButton type="button" onClick={onToday} style={navButtonStyle}>
-                Oggi
+                {labels.today}
               </TodayButton>
             </div>
           </div>
           <ModalCloseButton type="button" onClick={onClose}>
-            ✕ Chiudi
+            {labels.close}
           </ModalCloseButton>
         </ModalHeader>
         {showMacroShortcuts && (
@@ -258,6 +268,8 @@ export default function CalendarModal({
             onSelectQuarter={onSelectQuarter}
             onSelectWeekdays={onSelectWeekdays}
             onClear={onClear}
+            presets={presets}
+            onSelectPreset={onSelectPreset}
           />
         )}
         <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
@@ -301,6 +313,7 @@ export default function CalendarModal({
               interactive={interactive}
             />
           )}
+          {legend}
         </div>
       </ModalContent>
     </ModalOverlay>

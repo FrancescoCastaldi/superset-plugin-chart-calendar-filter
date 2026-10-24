@@ -308,7 +308,8 @@ describe('CalendarFilter', () => {
     expect(mockSetDataMask).toHaveBeenCalledWith(
       expect.objectContaining({
         extraFormData: expect.objectContaining({
-          time_range: expect.stringMatching(/2026-12-15 : 2026-12-15/),
+          // Superset ranges are [start, end): one selected day ends on the next day
+          time_range: expect.stringMatching(/2026-12-15 : 2026-12-16/),
         }),
       }),
     );

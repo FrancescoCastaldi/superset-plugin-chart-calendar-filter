@@ -12,6 +12,7 @@ function createStyledComponent(tag: any) {
       // Filter out styled-specific props that shouldn't be passed to DOM
       const domProps: any = {};
       for (const key of Object.keys(rest)) {
+        if (key.startsWith('$')) continue;
         if (['theme', 'as', 'forwardedRef', 'isSelected', 'isCurrentMonth', 'isToday', '$isToday', 'baseColor', 'intensity', 'density', 'cellHeight', '$cellHeight', 'showWeekNumbers', 'firstDayOfWeek', 'showYearDropdown', 'enableOverview'].includes(key)) continue;
         domProps[key] = rest[key];
       }

@@ -25,6 +25,7 @@ import {
   TooltipValue,
 } from '../styles/CalendarFilter.styles';
 import { TooltipData } from '../types';
+import { useCalendarDisplay } from '../utils/labels';
 
 interface CalendarTooltipProps {
   tooltip: TooltipData;
@@ -33,34 +34,40 @@ interface CalendarTooltipProps {
   formatNumbers?: boolean;
 }
 
-/** Hover tooltip showing date, value, max, and percentage of max */
+/** Hover tooltip showing date, holiday, value, max, and percentage of max */
 const CalendarTooltip = memo(function CalendarTooltip({
   tooltip,
   maxValue,
   formatNumbers = false,
 }: CalendarTooltipProps) {
+  const { labels } = useCalendarDisplay();
   const displayValue = formatNumbers
-    ? tooltip.value?.toLocaleString() ?? 'N/D'
+    ? tooltip.value?.toLocaleString() ?? labels.noValue
     : tooltip.value != null
       ? tooltip.value
-      : 'N/D';
+      : labels.noValue;
   const displayMax = formatNumbers ? maxValue.toLocaleString() : maxValue;
 
   return (
     <TooltipContainer x={tooltip.x} y={tooltip.y}>
       <TooltipTitle>{tooltip.date}</TooltipTitle>
-      <TooltipRow>
-        <TooltipLabel>Valore:</TooltipLabel>
-        <TooltipValue>{displayValue}</TooltipValue>
-      </TooltipRow>
-      <TooltipRow>
-        <TooltipLabel>Massimo:</TooltipLabel>
-        <TooltipValue>{displayMax}</TooltipValue>
-      </TooltipRow>
-      <TooltipRow>
-        <TooltipLabel>% del max:</TooltipLabel>
-        <TooltipValue>{tooltip.percentage}%</TooltipValue>
-      </TooltipRow>
+      {tooltip.holiday && <TooltipRow>🎉 {tooltip.holiday}</TooltipRow>}
+      {tooltip.value != null && (
+        <>
+          <TooltipRow>
+            <TooltipLabel>{labels.tooltipValue}</TooltipLabel>
+            <TooltipValue>{displayValue}</TooltipValue>
+          </TooltipRow>
+          <TooltipRow>
+            <TooltipLabel>{labels.tooltipMax}</TooltipLabel>
+            <TooltipValue>{displayMax}</TooltipValue>
+          </TooltipRow>
+          <TooltipRow>
+            <TooltipLabel>{labels.tooltipPercent}</TooltipLabel>
+            <TooltipValue>{tooltip.percentage}%</TooltipValue>
+          </TooltipRow>
+        </>
+      )}
     </TooltipContainer>
   );
 });

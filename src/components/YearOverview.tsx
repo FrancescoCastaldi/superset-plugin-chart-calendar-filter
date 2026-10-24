@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   YearOverviewGrid,
   MiniMonth,
@@ -27,6 +27,8 @@ import {
   MiniDayCell,
 } from '../styles/CalendarFilter.styles';
 import { CalendarDay } from '../types';
+import { useCalendarDisplay } from '../utils/labels';
+import { handleGridKeyDown, pickTabStop } from '../utils/gridKeys';
 
 interface OverviewMonth {
   month: number;
@@ -54,7 +56,7 @@ interface YearOverviewProps {
   onDayMouseDown?: (date: string) => void;
   onDayMouseUp?: () => void;
   onDayDragEnter?: (date: string) => void;
-  /** Enable keyboard access + drag-to-select (interactive contexts only) */
+  /** Kept for compatibility: keyboard access is now always on */
   interactive?: boolean;
 }
 
@@ -64,9 +66,8 @@ const YearOverview = memo(function YearOverview({
   dayLabels,
   gridWeekNumbers,
   showWeekRows,
-  baseColor,
-  intensityScale,
   selectedDates,
+  baseColor,
   todayStr,
   keyPrefix,
   style,
@@ -75,41 +76,77 @@ const YearOverview = memo(function YearOverview({
   onDayMouseDown,
   onDayMouseUp,
   onDayDragEnter,
-  interactive = false,
 }: YearOverviewProps) {
-  const renderMiniDay = (cell: CalendarDay, key: string) => (
-    <MiniDayCell
-      key={key}
-      intensity={intensityScale(cell.value)}
-      isSelected={selectedDates.has(cell.date)}
-      $isToday={cell.date === todayStr}
-      baseColor={baseColor}
-      onClick={() => onDayClick(cell.date)}
-      onMouseDown={onDayMouseDown ? () => onDayMouseDown(cell.date) : undefined}
-      onMouseUp={onDayMouseUp}
-      onMouseEnter={onDayDragEnter ? () => onDayDragEnter(cell.date) : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onKeyDown={interactive ? e => e.key === 'Enter' && onDayClick(cell.date) : undefined}
-      title={
-        titleWithValue
-          ? `${cell.date}${cell.value != null ? `: ${cell.value}` : ''}`
-          : cell.date
-      }
-    />
+  const { labels, holidays, heatStyle, onWeekSelect, onMonthSelect } = useCalendarDisplay();
+
+  const tabStop = useMemo(
+    () =>
+      pickTabStop(
+        months.flatMap(m => m.cells.filter((c): c is CalendarDay => c !== null).map(c => c.date)),
+        selectedDates,
+        todayStr,
+      ),
+    [months, selectedDates, todayStr],
   );
 
+  const renderMiniDay = (cell: CalendarDay, key: string) => {
+    const holiday = holidays.get(cell.date);
+    const isSelected = selectedDates.has(cell.date);
+    return (
+      <MiniDayCell
+        key={key}
+        data-date={cell.date}
+        role="button"
+        aria-pressed={isSelected}
+        aria-label={holiday ? `${cell.date} - ${holiday}` : cell.date}
+        isSelected={isSelected}
+        $isToday={cell.date === todayStr}
+        $heat={heatStyle(cell.value, cell.hasData)}
+        $isHoliday={Boolean(holiday)}
+        baseColor={baseColor}
+        onClick={() => onDayClick(cell.date)}
+        onMouseDown={onDayMouseDown ? () => onDayMouseDown(cell.date) : undefined}
+        onMouseUp={onDayMouseUp}
+        onMouseEnter={onDayDragEnter ? () => onDayDragEnter(cell.date) : undefined}
+        tabIndex={cell.date === tabStop ? 0 : -1}
+        title={[
+          titleWithValue ? `${cell.date}${cell.value != null ? `: ${cell.value}` : ''}` : cell.date,
+          holiday,
+        ]
+          .filter(Boolean)
+          .join(' - ')}
+      />
+    );
+  };
+
   return (
-    <YearOverviewGrid style={style}>
+    <YearOverviewGrid style={style} onKeyDown={e => handleGridKeyDown(e, onDayClick)}>
       {months.map(m => (
         <MiniMonth key={m.month}>
-          <MiniMonthTitle>{m.label}</MiniMonthTitle>
+          <MiniMonthTitle
+            role="button"
+            title={labels.monthTitle(m.label)}
+            aria-label={labels.monthTitle(m.label)}
+            onClick={() => onMonthSelect?.(m.month)}
+          >
+            {m.label}
+          </MiniMonthTitle>
           <MiniMonthGrid showWeekNumbers={gridWeekNumbers}>
             {dayLabels.map(d => (
               <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
             ))}
             {showWeekRows && m.weekRows.map((wr, wi) => (
               <React.Fragment key={`${keyPrefix}-wr-${wi}`}>
-                <MiniWeekNum>{wr.weekNumber}</MiniWeekNum>
+                <MiniWeekNum
+                  role="button"
+                  title={labels.weekTitle(wr.weekNumber)}
+                  onClick={() => {
+                    const first = wr.cells.find(c => c !== null)?.date;
+                    if (first) onWeekSelect?.(first);
+                  }}
+                >
+                  {wr.weekNumber}
+                </MiniWeekNum>
                 {wr.cells.map((cell, ci) =>
                   cell ? (
                     renderMiniDay(cell, `${keyPrefix}-${cell.date}`)

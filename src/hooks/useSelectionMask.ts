@@ -1,6 +1,8 @@
 import { useMemo, useCallback, useRef, useEffect, useState } from 'react';
 import { formatDateKey, getDatesInMonth, getDatesInYear, getDatesBetween } from '../utils/dateUtils';
-import { FilterTypeMode, DefaultValueMode } from '../types';
+import { DefaultValueMode } from '../types';
+import { getPresetDates, PRESET_IDS, PresetId } from '../utils/presets';
+import { buildExtraFormData, FilterTypeMode, InValueFormat } from '../utils/filterMask';
 
 export function useSelectionMask(
   filterState: any,
@@ -9,7 +11,8 @@ export function useSelectionMask(
   dateColumn: string | undefined,
   defaultValueMode: DefaultValueMode,
   customDefaultStartDate?: string,
-  customDefaultEndDate?: string
+  customDefaultEndDate?: string,
+  inValueFormat: InValueFormat = 'date',
 ) {
   // Selected dates from filterState
   const selectedDates: Set<string> = useMemo(() => {
@@ -28,43 +31,26 @@ export function useSelectionMask(
     (datesArray: string[]) => {
       if (!setDataMask) return;
       const sorted = Array.from(new Set(datesArray)).sort();
-      let extraFormData: Record<string, unknown> = {};
+      const extraFormData = buildExtraFormData(sorted, dateColumn, filterTypeMode, inValueFormat);
 
-      if (sorted.length > 0) {
-        const colName = dateColumn ?? 'DATAEROGAZIONE';
-        if (filterTypeMode === 'time_range') {
-          const minD = sorted[0];
-          const maxD = sorted[sorted.length - 1];
-          extraFormData = {
-            time_range: `${minD} : ${maxD}`,
-            filters: [
-              {
-                col: colName,
-                op: 'TEMPORAL_RANGE',
-                val: `${minD} : ${maxD}`,
-              },
-            ],
-          };
-        } else {
-          extraFormData = {
-            filters: [{ col: colName, op: 'IN' as const, val: sorted }],
-          };
-        }
-      } else {
-        extraFormData = { filters: [] };
+      // Plain loop: the previous reduce+spread was quadratic on multi-year selections
+      let selectedValues: Record<string, string> | null = null;
+      if (sorted.length) {
+        selectedValues = {};
+        sorted.forEach(date => {
+          (selectedValues as Record<string, string>)[date] = date;
+        });
       }
 
       setDataMask({
         extraFormData,
         filterState: {
           value: sorted.length ? sorted : null,
-          selectedValues: sorted.length
-            ? sorted.reduce((acc, date) => ({ ...acc, [date]: date }), {} as Record<string, string>)
-            : null,
+          selectedValues,
         },
       });
     },
-    [setDataMask, filterTypeMode, dateColumn],
+    [setDataMask, filterTypeMode, dateColumn, inValueFormat],
   );
 
   // Initialize Default Value on Mount if not already selected
@@ -85,6 +71,8 @@ export function useSelectionMask(
       emitSelection(getDatesInMonth(currentY, currentM));
     } else if (defaultValueMode === 'current_year') {
       emitSelection(getDatesInYear(currentY));
+    } else if (PRESET_IDS.includes(defaultValueMode as PresetId)) {
+      emitSelection(getPresetDates(defaultValueMode as PresetId, now, 1));
     } else if (defaultValueMode === 'custom' && customDefaultStartDate && customDefaultEndDate) {
       emitSelection(getDatesBetween(customDefaultStartDate, customDefaultEndDate));
     }
@@ -127,7 +115,11 @@ export function useSelectionMask(
     current: null,
   });
 
+  // The cell and the window both report the button release; only the first one counts
+  const dragFinished = useRef(true);
+
   const handleDragStart = useCallback((dateStr: string) => {
+    dragFinished.current = false;
     setDragState({ isDragging: true, start: dateStr, current: dateStr });
   }, []);
 
@@ -136,7 +128,8 @@ export function useSelectionMask(
   }, []);
 
   const handleDragEnd = useCallback(() => {
-    if (!dragState.isDragging) return;
+    if (!dragState.isDragging || dragFinished.current) return;
+    dragFinished.current = true;
     if (dragState.start && dragState.current) {
       if (dragState.start !== dragState.current) {
         // Was a real drag, emit range
@@ -150,6 +143,13 @@ export function useSelectionMask(
     }
     setDragState({ isDragging: false, start: null, current: null });
   }, [dragState, emitSelection]);
+
+  // Releasing the button outside any day cell would otherwise leave the drag stuck
+  useEffect(() => {
+    if (!dragState.isDragging) return undefined;
+    window.addEventListener('mouseup', handleDragEnd);
+    return () => window.removeEventListener('mouseup', handleDragEnd);
+  }, [dragState.isDragging, handleDragEnd]);
 
   const effectiveSelectedDates = useMemo(() => {
     if (dragState.isDragging && dragState.start && dragState.current && dragState.start !== dragState.current) {

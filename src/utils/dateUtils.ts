@@ -97,20 +97,38 @@ export function getDatesInYear(year: number): string[] {
 }
 
 /** Check if two dates represent the same year, month, and day */
+/** Texts and locale the range badge needs; Italian when omitted */
+export interface BadgeLabels {
+  intlLocale: string;
+  selectedOne: string;
+  selectedMany: (n: number) => string;
+}
+
+const ITALIAN_BADGE: BadgeLabels = {
+  intlLocale: 'it-IT',
+  selectedOne: '1 selezionato',
+  selectedMany: n => `${n} selezionati`,
+};
+
 /** Format selected date keys into a readable badge string (e.g. "12-15 Mar 2026" or "3 selezionati") */
-export function formatDateRangeBadge(dates: string[]): string {
+export function formatDateRangeBadge(dates: string[], labels: BadgeLabels = ITALIAN_BADGE): string {
   if (dates.length === 0) return '';
+  const monthShort = (d: Date): string =>
+    labels.intlLocale.startsWith('it')
+      ? MONTH_SHORT_NAMES[d.getMonth()]
+      : d.toLocaleDateString(labels.intlLocale, { month: 'short' });
+
   if (dates.length === 1) {
     const d = parseDateValue(dates[0]);
-    if (!d) return '1 selezionato';
-    return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (!d) return labels.selectedOne;
+    return d.toLocaleDateString(labels.intlLocale, { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   const sorted = [...dates].sort();
   const first = parseDateValue(sorted[0]);
   const last = parseDateValue(sorted[sorted.length - 1]);
 
-  if (!first || !last) return `${dates.length} selezionati`;
+  if (!first || !last) return labels.selectedMany(dates.length);
 
   // Check if contiguous
   const isContiguous = sorted.every((dateStr, idx) => {
@@ -127,15 +145,15 @@ export function formatDateRangeBadge(dates: string[]): string {
       first.getFullYear() === last.getFullYear() &&
       first.getMonth() === last.getMonth()
     ) {
-      return `${first.getDate()}-${last.getDate()} ${MONTH_SHORT_NAMES[first.getMonth()]} ${first.getFullYear()}`;
+      return `${first.getDate()}-${last.getDate()} ${monthShort(first)} ${first.getFullYear()}`;
     }
     if (first.getFullYear() === last.getFullYear()) {
-      return `${first.getDate()} ${MONTH_SHORT_NAMES[first.getMonth()]} - ${last.getDate()} ${MONTH_SHORT_NAMES[last.getMonth()]} ${first.getFullYear()}`;
+      return `${first.getDate()} ${monthShort(first)} - ${last.getDate()} ${monthShort(last)} ${first.getFullYear()}`;
     }
-    return `${first.getDate()} ${MONTH_SHORT_NAMES[first.getMonth()]} ${first.getFullYear()} - ${last.getDate()} ${MONTH_SHORT_NAMES[last.getMonth()]} ${last.getFullYear()}`;
+    return `${first.getDate()} ${monthShort(first)} ${first.getFullYear()} - ${last.getDate()} ${monthShort(last)} ${last.getFullYear()}`;
   }
 
-  return `${dates.length} selezionati`;
+  return labels.selectedMany(dates.length);
 }
 
 /** Get all dates between two dates (inclusive) */
@@ -152,4 +170,34 @@ export function getDatesBetween(start: string, end: string): string[] {
   }
 
   return dates;
+}
+
+/** Date key shifted by a number of days (negative goes back); DST-safe */
+export function addDays(dateKey: string, days: number): string {
+  const d = parseDateValue(dateKey);
+  if (!d) return dateKey;
+  const shifted = new Date(d.getFullYear(), d.getMonth(), d.getDate() + days);
+  return formatDateKey(shifted);
+}
+
+/** The 7 date keys of the week containing `dateKey`, starting on `firstDayOfWeek` (0 = Sunday) */
+export function getWeekDates(dateKey: string, firstDayOfWeek: number): string[] {
+  const d = parseDateValue(dateKey);
+  if (!d) return [];
+  const offset = (d.getDay() - firstDayOfWeek + 7) % 7;
+  const start = addDays(dateKey, -offset);
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+}
+
+/** True when sorted date keys cover every day between the first and the last */
+export function isContiguousSelection(sortedKeys: string[]): boolean {
+  if (sortedKeys.length < 2) return true;
+  return sortedKeys.every((key, i) => i === 0 || addDays(sortedKeys[i - 1], 1) === key);
+}
+
+/** Midnight UTC of a date key, in epoch milliseconds (null when the key is invalid) */
+export function dateKeyToEpochMs(dateKey: string): number | null {
+  const match = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return Date.UTC(+match[1], +match[2] - 1, +match[3]);
 }

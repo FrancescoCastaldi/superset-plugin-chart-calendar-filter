@@ -21,13 +21,14 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { Global } from '@emotion/react';
 import {
   Styles, NativeFilterTriggerContainer, NativeFilterPillButton, CalendarHeader, HeaderLeft, HeaderCenter, HeaderRight,
-  NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton,
+  NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton, ConfigHint,
 } from './styles/CalendarFilter.styles';
 import CalendarModal from './components/CalendarModal';
 import MacroShortcuts from './components/MacroShortcuts';
 import CalendarTooltip from './components/CalendarTooltip';
 import MonthGrid from './components/MonthGrid';
 import YearOverview from './components/YearOverview';
+import HeatLegend from './components/HeatLegend';
 import { useCalendarData } from './hooks/useCalendarData';
 import { useSelectionMask } from './hooks/useSelectionMask';
 import { useMacroActions } from './hooks/useMacroActions';
@@ -46,6 +47,15 @@ import {
   formatDateRangeBadge as formatSelectionRange,
 } from './utils/dateUtils';
 import { buildMonthCells, buildWeekRows } from './utils/calendarGrid';
+import { buildHolidayMap } from './utils/holidays';
+import {
+  CalendarDisplay,
+  CalendarDisplayContext,
+  getLabels,
+  getMonthName,
+  getWeekdayLabels,
+} from './utils/labels';
+import { DEFAULT_PRESETS } from './utils/presets';
 
 
 
@@ -58,6 +68,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     width,
     formData,
     colorScheme = 'supersetColors',
+    showLegend = true,
     firstDayOfWeek = 0,
     showWeekNumbers = false,
     showYearDropdown = true,
@@ -71,6 +82,16 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     setDataMask,
     filterState,
     dateColumn,
+    inValueFormat = 'date',
+    locale = 'it',
+    holidayMode = 'none',
+    customHolidays,
+    excludeHolidaysFromWorkdays = true,
+    scaleType = 'linear',
+    scaleThresholds,
+    enabledPresets = DEFAULT_PRESETS,
+    valueAggregation = 'sum',
+    metricKey,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,9 +104,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const DAY_LABELS_SUNDAY = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-  const DAY_LABELS_MONDAY = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-  const dayLabels = firstDayOfWeek === 0 ? DAY_LABELS_SUNDAY : DAY_LABELS_MONDAY;
+  const labels = useMemo(() => getLabels(locale), [locale]);
+  const dayLabels = useMemo(() => getWeekdayLabels(labels, firstDayOfWeek), [labels, firstDayOfWeek]);
 
   const cellHeight = cellDensity === 'normal' ? 38 : 30;
 
@@ -96,7 +116,20 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     availableYears,
     intensityScale,
     baseColor,
-  } = useCalendarData(data, dateColumn, colorScheme, viewYear, today);
+    palette,
+    heatStyle,
+  } = useCalendarData(data, dateColumn, colorScheme, viewYear, today, {
+    metricKey,
+    aggregation: valueAggregation,
+    scaleType,
+    scaleThresholds,
+  });
+
+  // Holidays for every year the calendar can show
+  const holidays = useMemo(
+    () => buildHolidayMap(holidayMode, customHolidays, Array.from(new Set([...availableYears, viewYear]))),
+    [holidayMode, customHolidays, availableYears, viewYear],
+  );
 
   const {
     selectedDates,
@@ -113,7 +146,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     dateColumn,
     defaultValueMode,
     customDefaultStartDate,
-    customDefaultEndDate
+    customDefaultEndDate,
+    inValueFormat,
   );
 
   const hasInitialized = useRef(false);
@@ -136,7 +170,13 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     selectCurrentMonth,
     selectQuarter,
     selectWeekdays,
-  } = useMacroActions(viewYear, viewMonth, emitSelection);
+    selectWeek,
+    selectMonth,
+    selectPreset,
+  } = useMacroActions(viewYear, viewMonth, emitSelection, {
+    skipDates: holidayMode !== 'none' && excludeHolidaysFromWorkdays ? holidays : undefined,
+    firstDayOfWeek,
+  });
 
   const {
     handleMonthSelectChange,
@@ -147,7 +187,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
     tooltip,
     handleMouseEnter,
     handleMouseLeave,
-  } = useCalendarTooltip(intensityScale);
+  } = useCalendarTooltip(intensityScale, holidays);
 
   // Is prev/next disabled?
   const isPrevDisabled = useMemo(() => {
@@ -222,28 +262,21 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
   // Month labels for dropdown
   const MONTH_LABELS = useMemo(() => {
-    const formatter = new Intl.DateTimeFormat('it-IT', { month: 'long' });
-    return Array.from({ length: 12 }, (_, i) => {
-      const raw = formatter.format(new Date(2000, i, 1));
-      return {
-        value: i + 1,
-        label: raw.charAt(0).toUpperCase() + raw.slice(1),
-      };
-    });
-  }, []);
+    return Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: getMonthName(labels, i + 1) }));
+  }, [labels]);
 
   // Month label
   const monthLabel = useMemo(() => {
     const date = new Date(viewYear, viewMonth - 1, 1);
-    const raw = date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    const raw = date.toLocaleDateString(labels.intlLocale, { month: 'long', year: 'numeric' });
     return raw.charAt(0).toUpperCase() + raw.slice(1);
-  }, [viewYear, viewMonth]);
+  }, [viewYear, viewMonth, labels]);
 
   // Selection badge text
   const selectionBadgeText = useMemo(() => {
     const sorted = Array.from(selectedDates).sort();
-    return formatSelectionRange(sorted);
-  }, [selectedDates]);
+    return formatSelectionRange(sorted, labels);
+  }, [selectedDates, labels]);
 
   // Year Overview
   const yearOverviewMonths = useMemo(() => {
@@ -253,26 +286,35 @@ export default function CalendarFilter(props: CalendarFilterProps) {
       const cells = buildMonthCells(viewYear, m, firstDayOfWeek, dataMap.map);
       const wRows = showWeekNumbers ? buildWeekRows(cells) : [];
 
-      const label = new Date(viewYear, m - 1, 1).toLocaleDateString('it-IT', { month: 'short' });
+      const label = new Date(viewYear, m - 1, 1).toLocaleDateString(labels.intlLocale, { month: 'short' });
       months.push({ month: m, label, cells, weekRows: wRows });
     }
 
     return months;
-  }, [viewYear, dataMap, firstDayOfWeek, showWeekNumbers]); // Removed viewMode, isModalOpen - compute always, filter at render
+  }, [viewYear, dataMap, firstDayOfWeek, showWeekNumbers, labels]);
 
   
+
+  const display = useMemo<CalendarDisplay>(
+    () => ({ labels, holidays, heatStyle, onWeekSelect: selectWeek, onMonthSelect: selectMonth }),
+    [labels, holidays, heatStyle, selectWeek, selectMonth],
+  );
+  const legend =
+    showLegend && dataMap.hasData ? <HeatLegend palette={palette} min={dataMap.min} max={dataMap.max} /> : null;
+  const missingColumnHint = !dateColumn ? <ConfigHint role="status">{labels.noColumn}</ConfigHint> : null;
 
   const isCompactNativeFilter = Boolean(formData?.inView || (height && height <= 120));
 
   // Render for Compact Native Filter Bar
   if (isCompactNativeFilter) {
-    const selectionText = selectedDates.size === 0 
-      ? 'Seleziona Date Calendario' 
-      : selectionBadgeText 
-        ? `${selectedDates.size} date (${selectionBadgeText})` 
-        : `${selectedDates.size} date selezionate`;
+    const selectionText = selectedDates.size === 0
+      ? labels.pickDates
+      : selectionBadgeText
+        ? `${labels.datesCount(selectedDates.size)} (${selectionBadgeText})`
+        : labels.datesSelected(selectedDates.size);
 
     return (
+      <CalendarDisplayContext.Provider value={display}>
       <Styles height={height} width={width} ref={containerRef}>
         <Global styles={`
           [data-test="filterbar-action-buttons"] {
@@ -282,6 +324,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             pointer-events: auto;
           }
         `} />
+        {missingColumnHint}
         <NativeFilterTriggerContainer>
           <NativeFilterPillButton type="button" onClick={() => setIsModalOpen(true)}>
             <span>📅 {selectionText}</span>
@@ -333,6 +376,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             onSelectQuarter={selectQuarter}
             onSelectWeekdays={selectWeekdays}
             onClear={clearSelection}
+            presets={enabledPresets}
+            onSelectPreset={selectPreset}
+            legend={legend}
             interactive
           />
         )}
@@ -340,6 +386,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <CalendarTooltip tooltip={tooltip} maxValue={dataMap.max} />
         )}
       </Styles>
+      </CalendarDisplayContext.Provider>
     );
   }
 
@@ -347,16 +394,18 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
 
   return (
+    <CalendarDisplayContext.Provider value={display}>
     <Styles height={height} width={width} ref={containerRef}>
+      {missingColumnHint}
       {/* Header */}
       <CalendarHeader>
         <HeaderLeft>
           <NavButton
             onClick={goPrevMonth}
             type="button"
-            aria-label="Precedente"
+            aria-label={labels.previous}
             disabled={isPrevDisabled}
-            title={isPrevDisabled ? 'Nessun dato prima di questa data' : 'Precedente'}
+            title={isPrevDisabled ? labels.noDataBefore : labels.previous}
           >
             ◀
           </NavButton>
@@ -364,7 +413,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             <MonthSelect
               value={viewMonth}
               onChange={e => handleMonthSelectChange(Number(e.target.value))}
-              aria-label="Seleziona mese"
+              aria-label={labels.selectMonth}
             >
               {MONTH_LABELS.map(m => (
                 <option key={m.value} value={m.value}>{m.label}</option>
@@ -375,7 +424,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             <YearSelect
               value={viewYear}
               onChange={e => handleYearSelectChange(Number(e.target.value))}
-              aria-label="Seleziona anno"
+              aria-label={labels.selectYear}
             >
               {availableYears.map(y => (
                 <option key={y} value={y}>{y}</option>
@@ -387,7 +436,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
               type="button"
               onClick={() => setViewMode(viewMode === 'month' ? 'year' : 'month')}
             >
-              {viewMode === 'month' ? 'Anno' : 'Mese'}
+              {viewMode === 'month' ? labels.year : labels.month}
             </ViewToggleButton>
           )}
         </HeaderLeft>
@@ -402,25 +451,25 @@ export default function CalendarFilter(props: CalendarFilterProps) {
                 {selectedDates.size}{selectionBadgeText ? ` · ${selectionBadgeText}` : ''}
               </SelectionBadge>
               <ClearButton type="button" onClick={clearSelection}>
-                Azzera
+                {labels.clear}
               </ClearButton>
             </>
           )}
         </HeaderCenter>
 
         <HeaderRight>
-          <ViewToggleButton type="button" onClick={() => setIsModalOpen(true)} title="Apri vista espansa in modal">
-            🖥️ Espandi
+          <ViewToggleButton type="button" onClick={() => setIsModalOpen(true)} title={labels.expandTitle}>
+            {labels.expand}
           </ViewToggleButton>
           <TodayButton type="button" onClick={goToToday}>
-            Oggi
+            {labels.today}
           </TodayButton>
           <NavButton
             onClick={goNextMonth}
             type="button"
-            aria-label="Successivo"
+            aria-label={labels.next}
             disabled={isNextDisabled}
-            title={isNextDisabled ? 'Nessun dato dopo questa data' : 'Successivo'}
+            title={isNextDisabled ? labels.noDataAfter : labels.next}
           >
             ▶
           </NavButton>
@@ -437,6 +486,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           onSelectQuarter={selectQuarter}
           onSelectWeekdays={selectWeekdays}
           onClear={clearSelection}
+          presets={enabledPresets}
+          onSelectPreset={selectPreset}
         />
       )}
 
@@ -454,6 +505,9 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           keyPrefix=""
           titleWithValue
           onDayClick={handleDayToggle}
+          onDayMouseDown={handleDragStart}
+          onDayMouseUp={handleDragEnd}
+          onDayDragEnter={handleDragEnter}
         />
       ) : (
         <>
@@ -471,7 +525,11 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             onDayClick={handleDayToggle}
             onDayHover={handleMouseEnter}
             onDayLeave={handleMouseLeave}
+            onDayMouseDown={handleDragStart}
+            onDayMouseUp={handleDragEnd}
+            onDayDragEnter={handleDragEnter}
           />
+          {legend}
 
           {/* Tooltip */}
           {tooltip && (
@@ -521,8 +579,12 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           onSelectQuarter={selectQuarter}
           onSelectWeekdays={selectWeekdays}
           onClear={clearSelection}
+          presets={enabledPresets}
+          onSelectPreset={selectPreset}
+          legend={legend}
         />
       )}
     </Styles>
+    </CalendarDisplayContext.Provider>
   );
 }

@@ -24,7 +24,10 @@
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div style="width:100%;max-width:960px">
+    <div id="root"></div>
+    <pre id="mask" style="margin-top:12px;padding:12px;background:#fff;border-radius:8px;font-size:12px;min-height:40px">Click a day, a week number or a shortcut to see the filter sent to the dashboard.</pre>
+  </div>
   <script src="demo-bundle.js"></script>
   <script>
     CalendarFilterDemo.renderDemo('root', 700, 920);
