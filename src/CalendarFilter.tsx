@@ -107,7 +107,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   const labels = useMemo(() => getLabels(locale), [locale]);
   const dayLabels = useMemo(() => getWeekdayLabels(labels, firstDayOfWeek), [labels, firstDayOfWeek]);
 
-  const cellHeight = cellDensity === 'normal' ? 38 : 30;
+  const baseCellHeight = cellDensity === 'normal' ? 38 : 30;
 
   const {
     dataMap,
@@ -301,6 +301,14 @@ export default function CalendarFilter(props: CalendarFilterProps) {
   );
   const legend =
     showLegend && dataMap.hasData ? <HeatLegend palette={palette} min={dataMap.min} max={dataMap.max} /> : null;
+  // Cells grow with the space the dashboard gives the chart (up to 56px) so tall charts are not left empty
+  const cellHeight = useMemo(() => {
+    if (!height || height <= 120) return baseCellHeight;
+    const shortcuts = showMacroShortcuts ? (enabledPresets.length > 0 ? 84 : 48) : 0;
+    const chrome = 56 + shortcuts + (legend ? 38 : 0) + 36 + 20;
+    const perRow = Math.floor((height - chrome) / 6) - 4;
+    return Math.min(56, Math.max(baseCellHeight, perRow));
+  }, [height, baseCellHeight, showMacroShortcuts, enabledPresets.length, legend]);
   const missingColumnHint = !dateColumn ? <ConfigHint role="status">{labels.noColumn}</ConfigHint> : null;
 
   const isCompactNativeFilter = Boolean(formData?.inView || (height && height <= 120));
@@ -328,7 +336,7 @@ export default function CalendarFilter(props: CalendarFilterProps) {
         <NativeFilterTriggerContainer>
           <NativeFilterPillButton type="button" onClick={() => setIsModalOpen(true)}>
             <span>📅 {selectionText}</span>
-            <span style={{ fontSize: 10, color: '#6b7280' }}>▼</span>
+            <span style={{ fontSize: 10, opacity: 0.6 }}>▼</span>
           </NativeFilterPillButton>
         </NativeFilterTriggerContainer>
 

@@ -40,8 +40,8 @@ interface OverviewMonth {
 interface YearOverviewProps {
   months: OverviewMonth[];
   dayLabels: string[];
-  /** CSS flag passed to MiniMonthGrid (always the real showWeekNumbers) */
-  gridWeekNumbers: boolean;
+  /** Kept for compatibility: the week column now follows `showWeekRows` */
+  gridWeekNumbers?: boolean;
   /** Whether to actually render the week number rows */
   showWeekRows: boolean;
   baseColor: string;
@@ -64,7 +64,6 @@ interface YearOverviewProps {
 const YearOverview = memo(function YearOverview({
   months,
   dayLabels,
-  gridWeekNumbers,
   showWeekRows,
   selectedDates,
   baseColor,
@@ -131,7 +130,8 @@ const YearOverview = memo(function YearOverview({
           >
             {m.label}
           </MiniMonthTitle>
-          <MiniMonthGrid showWeekNumbers={gridWeekNumbers}>
+          <MiniMonthGrid showWeekNumbers={showWeekRows}>
+            {showWeekRows && <div />}
             {dayLabels.map(d => (
               <MiniDayHeader key={d}>{d[0]}</MiniDayHeader>
             ))}

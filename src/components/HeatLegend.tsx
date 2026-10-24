@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { memo } from 'react';
-import { LegendBar, LegendSwatch } from '../styles/CalendarFilter.styles';
+import { LegendBar, LegendSeparator, LegendSwatch } from '../styles/CalendarFilter.styles';
 import { useCalendarDisplay } from '../utils/labels';
 
 interface HeatLegendProps {
@@ -31,13 +31,16 @@ const HeatLegend = memo(function HeatLegend({ palette, min, max }: HeatLegendPro
   const { labels } = useCalendarDisplay();
   return (
     <LegendBar data-testid="heat-legend">
-      <LegendSwatch $color="#ffffff" title={labels.legendNoData} />
-      <span style={{ marginRight: 8 }}>{labels.legendNoData}</span>
-      <span>{labels.legendLess} ({min.toLocaleString()})</span>
+      <LegendSwatch $color="transparent" title={labels.legendNoData} />
+      <span>{labels.legendNoData}</span>
+      <LegendSeparator />
+      <span>{labels.legendLess}</span>
+      <strong>{min.toLocaleString()}</strong>
       {palette.map(color => (
         <LegendSwatch key={color} $color={color} />
       ))}
-      <span>({max.toLocaleString()}) {labels.legendMore}</span>
+      <strong>{max.toLocaleString()}</strong>
+      <span>{labels.legendMore}</span>
     </LegendBar>
   );
 });

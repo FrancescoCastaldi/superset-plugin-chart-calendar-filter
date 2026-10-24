@@ -49,10 +49,16 @@ function generateMockData(): TimeseriesDataRecord[] {
 }
 
 const mockData = generateMockData();
+// Like Superset, the demo feeds the emitted filter state back to the chart
+let filterState: any = { value: null, selectedValues: null };
+let redraw: () => void = () => {};
+
 const mockSetDataMask: SetDataMaskHook = (dataMask: any) => {
   console.log('setDataMask called:', JSON.stringify(dataMask));
   const out = document.getElementById('mask');
   if (out) out.textContent = JSON.stringify(dataMask.extraFormData, null, 2);
+  filterState = dataMask.filterState;
+  redraw();
 };
 
 // Self-rendering function
@@ -63,6 +69,11 @@ export function renderDemo(rootId: string = 'root', height: number = 700, width:
     return;
   }
 
+  redraw = () => draw(rootEl, height, width);
+  redraw();
+}
+
+function draw(rootEl: HTMLElement, height: number, width: number) {
   ReactDOM.render(
     React.createElement(
       ThemeProvider,
@@ -78,7 +89,7 @@ export function renderDemo(rootId: string = 'root', height: number = 700, width:
         showYearDropdown: true,
         enableOverview: true,
         setDataMask: mockSetDataMask,
-        filterState: { value: null, selectedValues: null },
+        filterState,
         // Any column name works: the filter targets whatever the chart is configured with
         dateColumn: 'order_date',
         filterTypeMode: 'auto',

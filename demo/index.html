@@ -30,7 +30,8 @@
   </div>
   <script src="demo-bundle.js"></script>
   <script>
-    CalendarFilterDemo.renderDemo('root', 700, 920);
+    // ?h=60 shows the compact native filter; ?lang=en switches language
+    CalendarFilterDemo.renderDemo('root', Number(new URLSearchParams(location.search).get('h')) || 700, 920);
   </script>
 </body>
 </html>

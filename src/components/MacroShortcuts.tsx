@@ -34,7 +34,9 @@ interface MacroShortcutsProps {
   onSelectPreset?: (preset: PresetId) => void;
 }
 
-/** Macro filter shortcut bar (year, current month, quarters, working days, relative dates, clear) */
+const QUARTERS = [1, 2, 3, 4] as const;
+
+/** Shortcut bar (year, month, quarters, working days, relative periods, clear) */
 const MacroShortcuts = memo(function MacroShortcuts({
   viewYear,
   selectedCount,
@@ -55,18 +57,11 @@ const MacroShortcuts = memo(function MacroShortcuts({
       <MacroButton type="button" onClick={onSelectCurrentMonth}>
         {labels.currentMonth}
       </MacroButton>
-      <MacroButton type="button" onClick={() => onSelectQuarter(1)}>
-        📊 Q1
-      </MacroButton>
-      <MacroButton type="button" onClick={() => onSelectQuarter(2)}>
-        📊 Q2
-      </MacroButton>
-      <MacroButton type="button" onClick={() => onSelectQuarter(3)}>
-        📊 Q3
-      </MacroButton>
-      <MacroButton type="button" onClick={() => onSelectQuarter(4)}>
-        📊 Q4
-      </MacroButton>
+      {QUARTERS.map(q => (
+        <MacroButton key={q} type="button" onClick={() => onSelectQuarter(q)}>
+          {`📊 Q${q}`}
+        </MacroButton>
+      ))}
       <MacroButton type="button" onClick={onSelectWeekdays}>
         {labels.workdays}
       </MacroButton>
@@ -77,7 +72,7 @@ const MacroShortcuts = memo(function MacroShortcuts({
           </MacroButton>
         ))}
       {selectedCount > 0 && (
-        <MacroButton type="button" onClick={onClear} style={{ color: '#e74c3c', borderColor: '#f5c6cb' }}>
+        <MacroButton type="button" $tone="danger" onClick={onClear}>
           ❌ {labels.clear} ({selectedCount})
         </MacroButton>
       )}

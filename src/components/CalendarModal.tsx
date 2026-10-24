@@ -98,23 +98,6 @@ interface CalendarModalProps {
   interactive?: boolean;
 }
 
-const navButtonStyle = { padding: '4px 10px', fontSize: '12px' };
-const selectStyle = {
-  padding: '4px 8px',
-  fontSize: '13px',
-  fontWeight: 600,
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-};
-const toggleButtonStyle = {
-  padding: '4px 10px',
-  fontSize: '12px',
-  fontWeight: 600,
-  background: '#ffffff',
-  border: '1px solid #cbd5e1',
-  color: '#2563eb',
-};
-
 /** Expandable modal popover with header navigation, macro shortcuts and calendar body */
 export default function CalendarModal({
   viewMode,
@@ -179,10 +162,7 @@ export default function CalendarModal({
                   onClick={onPrev}
                   disabled={isPrevDisabled}
                   title={labels.previousMonth}
-                  style={navButtonStyle}
-                >
-                  ◀
-                </NavButton>
+                >◀</NavButton>
               )}
               {viewMode === 'year' && (
                 <NavButton
@@ -190,17 +170,13 @@ export default function CalendarModal({
                   onClick={onPrevYear}
                   disabled={isPrevDisabled}
                   title={labels.previousYear}
-                  style={navButtonStyle}
-                >
-                  ◀
-                </NavButton>
+                >◀</NavButton>
               )}
               {viewMode === 'month' && (
                 <MonthSelect
                   value={viewMonth}
                   onChange={e => onMonthSelect(Number(e.target.value))}
                   aria-label={labels.selectMonth}
-                  style={selectStyle}
                 >
                   {monthOptions.map(m => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -212,7 +188,6 @@ export default function CalendarModal({
                   value={viewYear}
                   onChange={e => onYearSelect(Number(e.target.value))}
                   aria-label={labels.selectYear}
-                  style={selectStyle}
                 >
                   {availableYears.map(y => (
                     <option key={y} value={y}>{y}</option>
@@ -225,10 +200,7 @@ export default function CalendarModal({
                   onClick={onNext}
                   disabled={isNextDisabled}
                   title={labels.nextMonth}
-                  style={navButtonStyle}
-                >
-                  ▶
-                </NavButton>
+                >▶</NavButton>
               )}
               {viewMode === 'year' && (
                 <NavButton
@@ -236,21 +208,17 @@ export default function CalendarModal({
                   onClick={onNextYear}
                   disabled={isNextDisabled}
                   title={labels.nextYear}
-                  style={navButtonStyle}
-                >
-                  ▶
-                </NavButton>
+                >▶</NavButton>
               )}
               {enableOverview && (
                 <ViewToggleButton
                   type="button"
                   onClick={onToggleView}
-                  style={toggleButtonStyle}
                 >
                   {viewMode === 'month' ? labels.yearView : labels.monthView}
                 </ViewToggleButton>
               )}
-              <TodayButton type="button" onClick={onToday} style={navButtonStyle}>
+              <TodayButton type="button" onClick={onToday}>
                 {labels.today}
               </TodayButton>
             </div>
