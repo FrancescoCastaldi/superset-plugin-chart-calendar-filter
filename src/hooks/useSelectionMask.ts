@@ -14,8 +14,16 @@ export function useSelectionMask(
   customDefaultEndDate?: string,
   inValueFormat: InValueFormat = 'date',
 ) {
-  // Selected dates from filterState
-  const selectedDates: Set<string> = useMemo(() => {
+  const [activeSlot, setActiveSlot] = useState<'T1' | 'T2'>('T1');
+  const lastEmittedT1Ref = useRef<string[]>([]);
+  const lastEmittedT2Ref = useRef<string[]>([]);
+
+  // Selected dates for T1 from filterState (purely controlled)
+  const selectedDatesT1: Set<string> = useMemo(() => {
+    if (filterState?.selectedDatesT1) {
+      const vals = Array.isArray(filterState.selectedDatesT1) ? filterState.selectedDatesT1 : Object.keys(filterState.selectedDatesT1);
+      return new Set(vals.map(String));
+    }
     if (filterState?.selectedValues) {
       return new Set(Object.keys(filterState.selectedValues));
     }
@@ -26,37 +34,84 @@ export function useSelectionMask(
     return new Set<string>();
   }, [filterState]);
 
-  // Unified selection emission handler
-  const emitSelection = useCallback(
-    (datesArray: string[]) => {
-      if (!setDataMask) return;
-      const sorted = Array.from(new Set(datesArray)).sort();
-      const extraFormData = buildExtraFormData(sorted, dateColumn, filterTypeMode, inValueFormat);
+  // Selected dates for T2
+  const selectedDatesT2: Set<string> = useMemo(() => {
+    if (filterState?.selectedDatesT2) {
+      const vals = Array.isArray(filterState.selectedDatesT2) ? filterState.selectedDatesT2 : Object.keys(filterState.selectedDatesT2);
+      return new Set(vals.map(String));
+    }
+    return new Set<string>(lastEmittedT2Ref.current);
+  }, [filterState]);
 
-      // Plain loop: the previous reduce+spread was quadratic on multi-year selections
+  // Unified dual selection emission handler
+  const emitSelectionDual = useCallback(
+    (t1Array: string[], t2Array: string[]) => {
+      if (!setDataMask) return;
+      const sortedT1 = Array.from(new Set(t1Array)).sort();
+      const sortedT2 = Array.from(new Set(t2Array)).sort();
+      lastEmittedT1Ref.current = sortedT1;
+      lastEmittedT2Ref.current = sortedT2;
+
+      const extraFormData = buildExtraFormData(sortedT1, dateColumn, filterTypeMode, inValueFormat);
+
+      // Add time_compare and custom_form_data if T2 is present
+      if (sortedT2.length > 0 && dateColumn) {
+        const t2RangeExtra = buildExtraFormData(sortedT2, dateColumn, 'time_range', inValueFormat);
+        if (t2RangeExtra.time_range) {
+          (extraFormData as any).time_compare = [t2RangeExtra.time_range];
+        }
+        (extraFormData as any).custom_form_data = {
+          t1_dates: sortedT1,
+          t2_dates: sortedT2,
+          t1_range: extraFormData.time_range,
+          t2_range: t2RangeExtra.time_range,
+          active_slot: activeSlot,
+        };
+      }
+
       let selectedValues: Record<string, string> | null = null;
-      if (sorted.length) {
+      if (sortedT1.length) {
         selectedValues = {};
-        sorted.forEach(date => {
+        sortedT1.forEach(date => {
           (selectedValues as Record<string, string>)[date] = date;
         });
       }
 
+      const filterStatePayload: Record<string, any> = {
+        value: sortedT1.length ? sortedT1 : null,
+        selectedValues,
+      };
+      if (sortedT2.length > 0) {
+        filterStatePayload.selectedDatesT1 = sortedT1;
+        filterStatePayload.selectedDatesT2 = sortedT2;
+        filterStatePayload.activeSlot = activeSlot;
+      }
+
       setDataMask({
         extraFormData,
-        filterState: {
-          value: sorted.length ? sorted : null,
-          selectedValues,
-        },
+        filterState: filterStatePayload,
       });
     },
-    [setDataMask, filterTypeMode, dateColumn, inValueFormat],
+    [setDataMask, filterTypeMode, dateColumn, inValueFormat, activeSlot],
+  );
+
+  const emitSelection = useCallback(
+    (datesArray: string[]) => {
+      if (activeSlot === 'T2') {
+        const t1 = selectedDatesT1.size > 0 ? Array.from(selectedDatesT1) : lastEmittedT1Ref.current;
+        emitSelectionDual(t1, datesArray);
+      } else {
+        const t2 = selectedDatesT2.size > 0 ? Array.from(selectedDatesT2) : lastEmittedT2Ref.current;
+        emitSelectionDual(datesArray, t2);
+      }
+    },
+    [activeSlot, emitSelectionDual, selectedDatesT1, selectedDatesT2],
   );
 
   // Initialize Default Value on Mount if not already selected
   const defaultInitialized = useRef(false);
   useEffect(() => {
-    if (defaultInitialized.current || !setDataMask || selectedDates.size > 0 || defaultValueMode === 'none') {
+    if (defaultInitialized.current || !setDataMask || selectedDatesT1.size > 0 || defaultValueMode === 'none') {
       return;
     }
     defaultInitialized.current = true;
@@ -76,21 +131,29 @@ export function useSelectionMask(
     } else if (defaultValueMode === 'custom' && customDefaultStartDate && customDefaultEndDate) {
       emitSelection(getDatesBetween(customDefaultStartDate, customDefaultEndDate));
     }
-  }, [defaultValueMode, setDataMask, selectedDates.size, customDefaultStartDate, customDefaultEndDate, emitSelection]);
+  }, [defaultValueMode, setDataMask, selectedDatesT1.size, customDefaultStartDate, customDefaultEndDate, emitSelection]);
 
   const clearSelection = useCallback(() => {
-    emitSelection([]);
-  }, [emitSelection]);
+    if (activeSlot === 'T2') {
+      emitSelectionDual(Array.from(selectedDatesT1), []);
+    } else {
+      emitSelectionDual([], Array.from(selectedDatesT2));
+    }
+  }, [activeSlot, emitSelectionDual, selectedDatesT1, selectedDatesT2]);
+
+  const clearAllSlots = useCallback(() => {
+    emitSelectionDual([], []);
+  }, [emitSelectionDual]);
 
   // Click single or shift select helper
   const handleDayToggle = useCallback(
     (dateStr: string) => {
       if (!setDataMask) return;
+      const currentDates = activeSlot === 'T2' ? selectedDatesT2 : selectedDatesT1;
+      let newSelected = new Set(currentDates);
 
-      let newSelected = new Set(selectedDates);
-
-      if (selectedDates.size === 1) {
-        const firstDate = Array.from(selectedDates)[0];
+      if (currentDates.size === 1) {
+        const firstDate = Array.from(currentDates)[0];
         if (firstDate === dateStr) {
           newSelected.delete(dateStr);
         } else {
@@ -105,7 +168,7 @@ export function useSelectionMask(
 
       emitSelection(Array.from(newSelected));
     },
-    [setDataMask, selectedDates, emitSelection],
+    [setDataMask, activeSlot, selectedDatesT1, selectedDatesT2, emitSelection],
   );
 
   // Drag to select state
@@ -137,8 +200,6 @@ export function useSelectionMask(
         emitSelection(range);
       } else {
         // Was a click (start == current), let handleDayToggle do its thing
-        // Or we can just call handleDayToggle here.
-        // But since CalendarFilter might still use onClick, we just do nothing here for single clicks to avoid double fire
       }
     }
     setDragState({ isDragging: false, start: null, current: null });
@@ -155,13 +216,19 @@ export function useSelectionMask(
     if (dragState.isDragging && dragState.start && dragState.current && dragState.start !== dragState.current) {
       return new Set(getDatesBetween(dragState.start, dragState.current));
     }
-    return selectedDates;
-  }, [selectedDates, dragState]);
+    return activeSlot === 'T2' ? selectedDatesT2 : selectedDatesT1;
+  }, [activeSlot, selectedDatesT1, selectedDatesT2, dragState]);
 
   return {
     selectedDates: effectiveSelectedDates,
+    selectedDatesT1,
+    selectedDatesT2,
+    activeSlot,
+    setActiveSlot,
     emitSelection,
+    emitSelectionDual,
     clearSelection,
+    clearAllSlots,
     handleDayToggle,
     handleDragStart,
     handleDragEnter,

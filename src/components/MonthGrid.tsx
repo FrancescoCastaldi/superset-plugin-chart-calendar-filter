@@ -42,6 +42,8 @@ interface MonthGridProps {
   baseColor: string;
   intensityScale: (val: number | null) => number;
   selectedDates: Set<string>;
+  selectedDatesT1?: Set<string>;
+  selectedDatesT2?: Set<string>;
   todayStr: string;
   keyPrefix: string;
   style?: React.CSSProperties;
@@ -65,6 +67,8 @@ const MonthGrid = memo(function MonthGrid({
   baseColor,
   intensityScale,
   selectedDates,
+  selectedDatesT1,
+  selectedDatesT2,
   todayStr,
   keyPrefix,
   style,
@@ -84,7 +88,17 @@ const MonthGrid = memo(function MonthGrid({
 
   const renderDayCell = (cell: CalendarDay, key: string) => {
     const holiday = holidays.get(cell.date);
-    const isSelected = selectedDates.has(cell.date);
+    const inT1 = selectedDatesT1?.has(cell.date) ?? false;
+    const inT2 = selectedDatesT2?.has(cell.date) ?? false;
+    let slotType: 'T1' | 'T2' | 'BOTH' | 'STANDARD' | undefined;
+    if (selectedDatesT1 || selectedDatesT2) {
+      if (inT1 && inT2) slotType = 'BOTH';
+      else if (inT1) slotType = 'T1';
+      else if (inT2) slotType = 'T2';
+    } else {
+      slotType = selectedDates.has(cell.date) ? 'STANDARD' : undefined;
+    }
+    const isSelected = selectedDates.has(cell.date) || inT1 || inT2;
     return (
       <DayCell
         key={key}
@@ -94,6 +108,7 @@ const MonthGrid = memo(function MonthGrid({
         aria-label={holiday ? `${cell.date} - ${holiday}` : cell.date}
         intensity={intensityScale(cell.value)}
         isSelected={isSelected}
+        $selectionSlot={slotType}
         isCurrentMonth
         $isToday={cell.date === todayStr}
         $heat={heatStyle(cell.value, cell.hasData)}

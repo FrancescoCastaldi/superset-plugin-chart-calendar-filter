@@ -22,6 +22,7 @@ import { Global } from '@emotion/react';
 import {
   Styles, NativeFilterTriggerContainer, NativeFilterPillButton, CalendarHeader, HeaderLeft, HeaderCenter, HeaderRight,
   NavButton, TodayButton, MonthTitle, SelectionBadge, ClearButton, YearSelect, MonthSelect, ViewToggleButton, ConfigHint,
+  SlotSwitcher, SlotButton,
 } from './styles/CalendarFilter.styles';
 import CalendarModal from './components/CalendarModal';
 import MacroShortcuts from './components/MacroShortcuts';
@@ -133,6 +134,10 @@ export default function CalendarFilter(props: CalendarFilterProps) {
 
   const {
     selectedDates,
+    selectedDatesT1,
+    selectedDatesT2,
+    activeSlot,
+    setActiveSlot,
     emitSelection,
     clearSelection,
     handleDayToggle,
@@ -365,6 +370,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             baseColor={baseColor}
             intensityScale={intensityScale}
             selectedDates={selectedDates}
+            selectedDatesT1={selectedDatesT1}
+            selectedDatesT2={selectedDatesT2}
             todayStr={todayStr}
             onClose={() => setIsModalOpen(false)}
             onPrev={goPrevMonth}
@@ -453,6 +460,26 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           <MonthTitle>
             {viewMode === 'year' ? viewYear : monthLabel}
           </MonthTitle>
+          <SlotSwitcher>
+            <SlotButton
+              type="button"
+              $slot="T1"
+              $isActive={activeSlot === 'T1'}
+              onClick={() => setActiveSlot('T1')}
+              title="Seleziona periodo Tempo 1 (Riferimento)"
+            >
+              🔵 Tempo 1 {selectedDatesT1.size > 0 ? `(${selectedDatesT1.size})` : ''}
+            </SlotButton>
+            <SlotButton
+              type="button"
+              $slot="T2"
+              $isActive={activeSlot === 'T2'}
+              onClick={() => setActiveSlot('T2')}
+              title="Seleziona periodo Tempo 2 (Confronto)"
+            >
+              🟣 Tempo 2 {selectedDatesT2.size > 0 ? `(${selectedDatesT2.size})` : ''}
+            </SlotButton>
+          </SlotSwitcher>
           {selectedDates.size > 0 && (
             <>
               <SelectionBadge>
@@ -509,6 +536,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           baseColor={baseColor}
           intensityScale={intensityScale}
           selectedDates={selectedDates}
+          selectedDatesT1={selectedDatesT1}
+          selectedDatesT2={selectedDatesT2}
           todayStr={todayStr}
           keyPrefix=""
           titleWithValue
@@ -528,6 +557,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
             baseColor={baseColor}
             intensityScale={intensityScale}
             selectedDates={selectedDates}
+            selectedDatesT1={selectedDatesT1}
+            selectedDatesT2={selectedDatesT2}
             todayStr={todayStr}
             keyPrefix=""
             onDayClick={handleDayToggle}
@@ -571,6 +602,8 @@ export default function CalendarFilter(props: CalendarFilterProps) {
           baseColor={baseColor}
           intensityScale={intensityScale}
           selectedDates={selectedDates}
+          selectedDatesT1={selectedDatesT1}
+          selectedDatesT2={selectedDatesT2}
           todayStr={todayStr}
           onClose={() => setIsModalOpen(false)}
           onPrev={goPrevMonth}

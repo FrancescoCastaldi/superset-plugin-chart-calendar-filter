@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.16] - 2026-10-26
+### Added
+- **Filtro temporale comparativo a doppio slot (Dual-Slot Comparison)**: Gestione integrata di Periodo di Riferimento (Tempo 1, Navy #0A224E) e Periodo di Confronto (Tempo 2, Magenta #E12B72) nello stesso componente calendario.
+- **Pulsanti di selezione rapida dello slot attivo**: Interfaccia ergonomica per commutare la maschera di selezione tra T1 e T2 e propagare i filtri tramite extraFormData per template Jinja e viste analitiche Superset.
+
+
 ### Added
 - **Filter target column control** (`date_column`, "Filter target column"): choose any dataset column the filter applies to. The option was documented but never existed in the control panel.
 - **Filter formats for any column type**: new `filter_type_mode` value `auto` (one range when the days are contiguous, otherwise a list; default for new charts) and `in_value_format` (`date`, `datetime`, `epoch_ms`) so lists match date, timestamp, text-date or epoch columns.

@@ -1,6 +1,6 @@
 {
   "name": "superset-plugin-chart-calendar-filter",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "StratumCalendar: Calendar Filter Plugin for Apache Superset with interactive calendar heatmap and cross-filtering",
   "sideEffects": false,
   "main": "lib/index.js",
@@ -47,7 +47,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "npm run build-cjs && npm run build-esm && npm run copy-images && npm run ts-types",
+    "build": "npm run build-cjs && npm run build-esm && npm run copy-images && npm run ts-types && npm run build:esm",
+    "build:esm": "node scripts/build.mjs",
     "build-cjs": "node scripts/build.js --format=cjs --outdir=lib",
     "build-esm": "node scripts/build.js --format=esm --outdir=esm",
     "copy-images": "node -e \"const fs=require('fs');for(const d of ['lib','esm'])fs.cpSync('src/images',d+'/images',{recursive:true});\"",

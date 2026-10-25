@@ -132,6 +132,41 @@ export const HeaderRight = styled.div`
   gap: 8px;
 `;
 
+export const SlotSwitcher = styled.div`
+  display: inline-flex;
+  align-items: center;
+  background: ${tk('bgMuted')};
+  border: 1px solid ${tk('border')};
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+`;
+
+export const SlotButton = styled.button<{ $isActive: boolean; $slot: 'T1' | 'T2' }>`
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: ${({ $isActive }) => ($isActive ? 700 : 500)};
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  background: ${({ $isActive, $slot }) => {
+    if (!$isActive) return 'transparent';
+    return $slot === 'T1' ? '#0A224E' : '#E12B72';
+  }};
+  color: ${({ $isActive }) => ($isActive ? '#ffffff' : '#475569')};
+
+  &:hover {
+    background: ${({ $isActive, $slot }) => {
+      if ($isActive) return $slot === 'T1' ? '#0A224E' : '#E12B72';
+      return 'rgba(0, 0, 0, 0.05)';
+    }};
+  }
+`;
+
 export const NavButton = styled.button`
   ${controlBase}
   width: 32px;
@@ -266,6 +301,7 @@ export interface DayCellProps extends HeatProps {
   $isToday: boolean;
   baseColor: string;
   $cellHeight: number;
+  $selectionSlot?: 'T1' | 'T2' | 'BOTH' | 'STANDARD';
 }
 
 /** Marks used on day cells: holiday dot (top right) and today bar (bottom) */
@@ -327,14 +363,35 @@ export const DayCell = styled.div<DayCellProps>`
   color: ${({ $heat, theme }) => ($heat?.dark ? '#ffffff' : tokens(theme).text)};
   border: 1px solid ${({ $heat, theme }) => ($heat ? 'transparent' : tokens(theme).border)};
 
-  ${({ isSelected, theme }) =>
-    isSelected
-      ? `
+  ${({ isSelected, $selectionSlot, theme }) => {
+    if (!isSelected) return '';
+    if ($selectionSlot === 'T1') {
+      return `
+    box-shadow: inset 0 0 0 2px #0A224E, inset 0 0 0 3px rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+    z-index: 1;
+    `;
+    }
+    if ($selectionSlot === 'T2') {
+      return `
+    box-shadow: inset 0 0 0 2px #E12B72, inset 0 0 0 3px rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+    z-index: 1;
+    `;
+    }
+    if ($selectionSlot === 'BOTH') {
+      return `
+    box-shadow: inset 0 0 0 2px #0A224E, inset 0 0 0 4px #E12B72;
+    font-weight: 700;
+    z-index: 1;
+    `;
+    }
+    return `
     box-shadow: inset 0 0 0 2px ${tokens(theme).accent}, inset 0 0 0 3px rgba(255, 255, 255, 0.85);
     font-weight: 700;
     z-index: 1;
-    `
-      : ''}
+    `;
+  }}
 
   ${({ $isToday, $isHoliday }) => dayMarks($isToday, Boolean($isHoliday), 'normal')}
 

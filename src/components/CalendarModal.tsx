@@ -69,6 +69,8 @@ interface CalendarModalProps {
   baseColor: string;
   intensityScale: (val: number | null) => number;
   selectedDates: Set<string>;
+  selectedDatesT1?: Set<string>;
+  selectedDatesT2?: Set<string>;
   todayStr: string;
   onClose: () => void;
   onPrev: () => void;
@@ -120,6 +122,8 @@ export default function CalendarModal({
   baseColor,
   intensityScale,
   selectedDates,
+  selectedDatesT1,
+  selectedDatesT2,
   todayStr,
   onClose,
   onPrev,
@@ -250,6 +254,8 @@ export default function CalendarModal({
               baseColor={baseColor}
               intensityScale={intensityScale}
               selectedDates={selectedDates}
+              selectedDatesT1={selectedDatesT1}
+              selectedDatesT2={selectedDatesT2}
               todayStr={todayStr}
               keyPrefix="modal"
               style={{ flex: 1 }}
@@ -269,6 +275,8 @@ export default function CalendarModal({
               baseColor={baseColor}
               intensityScale={intensityScale}
               selectedDates={selectedDates}
+              selectedDatesT1={selectedDatesT1}
+              selectedDatesT2={selectedDatesT2}
               todayStr={todayStr}
               keyPrefix="modal"
               style={{ flex: 1, minHeight: '340px' }}
