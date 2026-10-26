@@ -28,13 +28,24 @@ const config: ControlPanelConfig = {
       label: t('Query'),
       expanded: true,
       controlSetRows: [
-        ['metric'],
+        [
+          {
+            name: 'metric',
+            config: {
+              ...sharedControls.metric,
+              label: t('Metrica Heatmap (Opzionale)'),
+              description: t('Metrica per visualizzare l\'intensita nel calendario. Opzionale se usato come filtro.'),
+              validators: [],
+              clearable: true,
+            },
+          },
+        ],
         [
           {
             name: 'groupby',
             config: {
               ...sharedControls.groupby,
-              label: t('Colonna Data Heatmap (Obbl. per Chart)'),
+              label: t('Colonna Data Heatmap (Opzionale)'),
               description: t('Optional date column if you want to display data aggregation heatmap'),
               multi: false,
               validators: [],
@@ -217,7 +228,7 @@ const config: ControlPanelConfig = {
     },
     groupby: {
       ...sharedControls.groupby,
-      label: t('Colonna Data Heatmap (Obbl. per Chart)'),
+      label: t('Colonna Data Heatmap (Opzionale)'),
       description: t('Optional date column if you want to display data aggregation heatmap'),
       multi: false,
       validators: [],

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.16] - 2026-10-26
+
+### Changed
+- **Controlli Non Bloccanti (Zero Parametri Obbligatori)**: Rimossi tutti i vincoli `validateNonEmpty` e impostato `clearable: true` e `validators: []` per garantire piena flessibilita operativa senza blocchi nell'Explore di Superset.
+
 ## [Unreleased]
 
 ### Changed
