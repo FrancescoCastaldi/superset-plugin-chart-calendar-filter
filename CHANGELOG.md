@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- **Control panel query controls**: rimosso il vincolo di metrica obbligatoria ereditato da sharedControls (`clearable: true, validators: []`), consentendo l'aggiornamento e il salvataggio del chart anche in modalita solo filtro o con selezione vuota.
+- **YearOverview component typings**: aggiunte le proprieta opzionali `selectedDatesT1` e `selectedDatesT2` nell'interfaccia `YearOverviewProps` per allineamento completo con il supporto temporale dual-slot.
+
 
 ## [0.1.16] - 2026-10-26
 ### Added

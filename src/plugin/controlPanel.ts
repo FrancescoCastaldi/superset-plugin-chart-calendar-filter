@@ -45,7 +45,16 @@ const config: ControlPanelConfig = {
       label: t('Query'),
       expanded: true,
       controlSetRows: [
-        ['metric'],
+        [
+          {
+            name: 'metric',
+            config: {
+              ...sharedControls.metric,
+              clearable: true,
+              validators: [],
+            },
+          },
+        ],
         [
           {
             name: 'groupby',

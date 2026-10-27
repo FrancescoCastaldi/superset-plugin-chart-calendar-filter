@@ -47,6 +47,8 @@ interface YearOverviewProps {
   baseColor: string;
   intensityScale: (val: number | null) => number;
   selectedDates: Set<string>;
+  selectedDatesT1?: Set<string>;
+  selectedDatesT2?: Set<string>;
   todayStr: string;
   keyPrefix: string;
   style?: React.CSSProperties;
